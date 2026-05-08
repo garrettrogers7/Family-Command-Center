@@ -88,8 +88,16 @@ export default function OnboardingPage() {
 
     const takenColors = (takenColorsData ?? []) as UserColor[]
 
-    if (takenColors.length >= 2) {
-      setError('This family already has two members.')
+    // Check if this user is already a member — if so, just let them through
+    const { data: existingMember } = await supabase
+      .from('family_members')
+      .select('id')
+      .eq('family_id', family.id)
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (existingMember) {
+      // Already a member, nothing to insert — FamilyContext will pick them up
       setLoading(false)
       return
     }
