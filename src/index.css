@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-gray-50 font-sans text-gray-900;
+  }
+}
+
+/* Coral color utilities (not built-in to Tailwind) */
+@layer utilities {
+  .bg-coral-50 { background-color: #fff4f2; }
+  .bg-coral-100 { background-color: #ffe4de; }
+  .bg-coral-200 { background-color: #ffc5b8; }
+  .bg-coral-400 { background-color: #ff7a61; }
+  .bg-coral-500 { background-color: #f95738; }
+  .text-coral-400 { color: #ff7a61; }
+  .text-coral-600 { color: #e03e1f; }
+  .border-coral-100 { border-color: #ffe4de; }
+  .ring-coral-200 { --tw-ring-color: #ffc5b8; }
+  .ring-coral-300 { --tw-ring-color: #ffaa96; }
+}

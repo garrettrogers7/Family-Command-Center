@@ -1,0 +1,225 @@
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  ReactNode,
+} from 'react'
+import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/contexts/AuthContext'
+import { useFamily } from '@/contexts/FamilyContext'
+import {
+  getGoogleAuthUrl,
+  fetchEvents,
+  refreshAccessToken,
+  revokeToken,
+  googleEventToStored,
+  storedEventStartTime,
+  StoredCalendarEvent,
+} from '@/lib/google-calendar'
+import { startOfWeek, endOfWeek, isSameDay } from 'date-fns'
+
+interface StoredTokenRow {
+  access_token: string
+  refresh_token: string
+  expires_at: string
+}
+
+interface GoogleCalendarContextValue {
+  connected: boolean
+  loading: boolean
+  todayEvents: StoredCalendarEvent[]
+  weekEvents: StoredCalendarEvent[]
+  connect: () => void
+  disconnect: () => void
+  refreshEvents: () => Promise<void>
+}
+
+const GoogleCalendarContext = createContext<GoogleCalendarContextValue | null>(null)
+
+export function GoogleCalendarProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth()
+  const { family } = useFamily()
+  const [connected, setConnected] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [todayEvents, setTodayEvents] = useState<StoredCalendarEvent[]>([])
+  const [weekEvents, setWeekEvents] = useState<StoredCalendarEvent[]>([])
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // ── Token helpers ────────────────────────────────────────────
+
+  async function getValidAccessToken(): Promise<string | null> {
+    if (!user) return null
+
+    const { data } = await supabase
+      .from('google_tokens')
+      .select('access_token, refresh_token, expires_at')
+      .eq('user_id', user.id)
+      .single()
+
+    if (!data) return null
+
+    const row = data as StoredTokenRow
+    const expiresAt = new Date(row.expires_at).getTime()
+    const isExpired = Date.now() >= expiresAt - 60_000
+
+    if (!isExpired) return row.access_token
+
+    try {
+      const refreshed = await refreshAccessToken(row.refresh_token)
+      const newExpiresAt = new Date(Date.now() + refreshed.expires_in * 1000).toISOString()
+      await supabase
+        .from('google_tokens')
+        .update({ access_token: refreshed.access_token, expires_at: newExpiresAt, updated_at: new Date().toISOString() })
+        .eq('user_id', user.id)
+      scheduleRefresh(refreshed.expires_in)
+      return refreshed.access_token
+    } catch {
+      await supabase.from('google_tokens').delete().eq('user_id', user.id)
+      setConnected(false)
+      return null
+    }
+  }
+
+  function scheduleRefresh(expiresIn: number) {
+    if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current)
+    const delay = Math.max((expiresIn - 120) * 1000, 5000)
+    refreshTimerRef.current = setTimeout(() => loadEvents(), delay)
+  }
+
+  // ── Event loading ────────────────────────────────────────────
+
+  const loadEvents = useCallback(async () => {
+    if (!user || !family) return
+
+    const token = await getValidAccessToken()
+    const now = new Date()
+    const weekStart = startOfWeek(now, { weekStartsOn: 1 })
+    const weekEnd = endOfWeek(now, { weekStartsOn: 1 })
+
+    // If connected, sync this user's Google events into Supabase
+    if (token) {
+      try {
+        const googleEvents = await fetchEvents(token, weekStart.toISOString(), weekEnd.toISOString())
+
+        // Replace this user's events for the week with fresh data
+        await supabase.from('calendar_events').delete().eq('user_id', user.id).eq('family_id', family.id)
+
+        if (googleEvents.length > 0) {
+          await supabase
+            .from('calendar_events')
+            .insert(googleEvents.map((e) => googleEventToStored(e, user.id, family.id)))
+        }
+      } catch (err) {
+        if (err instanceof Error && err.message === 'TOKEN_EXPIRED') {
+          loadEvents()
+          return
+        }
+      }
+    }
+
+    // Read ALL family members' events from Supabase for the week
+    const { data } = await supabase
+      .from('calendar_events')
+      .select('*')
+      .eq('family_id', family.id)
+
+    const all = (data as StoredCalendarEvent[]) ?? []
+    const sorted = [...all].sort(
+      (a, b) => storedEventStartTime(a).getTime() - storedEventStartTime(b).getTime()
+    )
+
+    setWeekEvents(sorted)
+    setTodayEvents(sorted.filter((e) => isSameDay(storedEventStartTime(e), now)))
+  }, [user, family])
+
+  // ── On mount / user change ───────────────────────────────────
+
+  useEffect(() => {
+    if (!user) {
+      setLoading(false)
+      return
+    }
+
+    async function init() {
+      // Reset for this user to prevent bleed-over between sessions
+      setConnected(false)
+      setTodayEvents([])
+      setWeekEvents([])
+
+      const { data } = await supabase
+        .from('google_tokens')
+        .select('expires_at')
+        .eq('user_id', user!.id)
+        .single()
+
+      if (data) {
+        setConnected(true)
+        const expiresIn = Math.floor(
+          (new Date((data as { expires_at: string }).expires_at).getTime() - Date.now()) / 1000
+        )
+        scheduleRefresh(expiresIn)
+      }
+
+      // Always load events (reads all family members' cached events from Supabase)
+      await loadEvents()
+      setLoading(false)
+
+      // Poll every 5 minutes to keep the current user's calendar fresh
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
+      pollIntervalRef.current = setInterval(() => loadEvents(), 5 * 60 * 1000)
+    }
+
+    init()
+
+    return () => {
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current)
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
+    }
+  }, [user, family])
+
+  // ── Public actions ───────────────────────────────────────────
+
+  function connect() {
+    window.location.href = getGoogleAuthUrl()
+  }
+
+  async function disconnect() {
+    if (!user) return
+    const token = await getValidAccessToken()
+    if (token) await revokeToken(token)
+    await supabase.from('google_tokens').delete().eq('user_id', user.id)
+    await supabase.from('calendar_events').delete().eq('user_id', user.id)
+    setConnected(false)
+
+    // Reload remaining family events (other member's events stay)
+    const { data } = await supabase
+      .from('calendar_events')
+      .select('*')
+      .eq('family_id', family?.id ?? '')
+
+    const all = (data as StoredCalendarEvent[]) ?? []
+    const now = new Date()
+    setWeekEvents(all)
+    setTodayEvents(all.filter((e) => isSameDay(storedEventStartTime(e), now)))
+
+    if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current)
+  }
+
+  return (
+    <GoogleCalendarContext.Provider
+      value={{ connected, loading, todayEvents, weekEvents, connect, disconnect, refreshEvents: loadEvents }}
+    >
+      {children}
+    </GoogleCalendarContext.Provider>
+  )
+}
+
+export function useGoogleCalendar() {
+  const ctx = useContext(GoogleCalendarContext)
+  if (!ctx) throw new Error('useGoogleCalendar must be used inside GoogleCalendarProvider')
+  return ctx
+}
