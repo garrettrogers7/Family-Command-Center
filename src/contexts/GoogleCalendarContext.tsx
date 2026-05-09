@@ -130,13 +130,16 @@ export function GoogleCalendarProvider({ children }: { children: ReactNode }) {
 
       for (const member of (otherMembers ?? [])) {
         try {
-          const { data: tokenRows } = await supabase
+          console.log('[CalSync] syncing member:', member.user_id)
+          const { data: tokenRows, error: rpcErr } = await supabase
             .rpc('get_family_member_google_token', { target_user_id: member.user_id })
 
-          if (!tokenRows || tokenRows.length === 0) continue
+          if (rpcErr) { console.warn('[CalSync] RPC error:', rpcErr); continue }
+          if (!tokenRows || tokenRows.length === 0) { console.log('[CalSync] no token for member — not connected'); continue }
 
           let memberToken: string = tokenRows[0].access_token
           const isExpired = Date.now() >= new Date(tokenRows[0].expires_at).getTime() - 60_000
+          console.log('[CalSync] token expired?', isExpired)
 
           if (isExpired) {
             const refreshed = await refreshAccessToken(tokenRows[0].refresh_token)
@@ -150,14 +153,15 @@ export function GoogleCalendarProvider({ children }: { children: ReactNode }) {
           }
 
           const memberEvents = await fetchEvents(memberToken, syncStart.toISOString(), syncEnd.toISOString())
+          console.log('[CalSync] fetched', memberEvents.length, 'events for member')
           await supabase.from('calendar_events').delete().eq('user_id', member.user_id).eq('family_id', family.id)
           if (memberEvents.length > 0) {
             await supabase
               .from('calendar_events')
               .insert(memberEvents.map((e) => googleEventToStored(e, member.user_id, family.id)))
           }
-        } catch {
-          // Member hasn't connected Google Calendar — skip silently
+        } catch (e) {
+          console.error('[CalSync] error syncing member:', e)
         }
       }
     } catch {
