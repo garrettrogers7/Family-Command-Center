@@ -2,22 +2,29 @@ import { format } from 'date-fns'
 import { storedEventStartTime } from './google-calendar'
 import type { StoredCalendarEvent } from './google-calendar'
 
-/**
- * Normalize a summary for fuzzy comparison so minor variations merge:
- * - Lowercase + trim
- * - Strip apostrophes entirely (“Annie’s” → “annies”, “Annies” → “annies”)
- * - Strip other punctuation that commonly varies (!, ., @, #, -)
- * - Collapse extra whitespace
- */
+/** Normalize event names for fuzzy comparison */
 function normalizeSummary(s: string): string {
-  return s
+  const result = s
     .toLowerCase()
     .trim()
-    .replace(/[‘’‚‛′‵ʼ’‘’]/g, ‘’)   // remove all apostrophe variants
-    .replace(/[“””„‟″‶“”]/g, ‘’)      // remove all quote variants
-    .replace(/[^\w\s]/g, ‘ ‘)                    // replace remaining punctuation with space
-    .replace(/\s+/g, ‘ ‘)                        // collapse multiple spaces
+    // Remove apostrophe/quote variants using explicit Unicode code points
+    .replace(/['‘’‚‛′‵ʼ＇]/g, '')
+    // Replace all remaining non-letter, non-digit, non-space chars with a space
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    // Collapse whitespace
+    .replace(/\s+/g, ' ')
     .trim()
+
+  // Temporary debug — log any event with "mills" in the name
+  if (s.toLowerCase().includes('mills')) {
+    console.log('[NormDebug]', JSON.stringify({
+      input: s,
+      chars: [...s].map(c => c.charCodeAt(0)),
+      output: result,
+    }))
+  }
+
+  return result
 }
 
 export interface DisplayEvent extends StoredCalendarEvent {
