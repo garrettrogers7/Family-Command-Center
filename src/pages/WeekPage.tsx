@@ -381,16 +381,32 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
   const funItems: FunItem[] = (plan?.content as WeeklyPlanContent)?.funItems ?? []
   const [newFunText, setNewFunText] = useState('')
 
+  // Always fetch fresh content from DB before writing to avoid overwriting
+  // concurrent changes (e.g. the other family member saving at the same time,
+  // or stale React state causing funItems to be silently dropped).
+  async function getFreshContent(): Promise<{ existingPlan: WeeklyPlan | null; content: WeeklyPlanContent }> {
+    const { data } = await supabase
+      .from('weekly_plans')
+      .select('*')
+      .eq('family_id', family!.id)
+      .eq('week_start', weekStartStr)
+      .maybeSingle()
+    const existingPlan = data as WeeklyPlan | null
+    const content = (existingPlan?.content as WeeklyPlanContent) ?? {}
+    return { existingPlan, content }
+  }
+
   async function addFunItem() {
     if (!newFunText.trim() || !family || !user) return
     const item: FunItem = { id: crypto.randomUUID(), text: newFunText.trim() }
-    const updatedContent: WeeklyPlanContent = {
-      ...(plan?.content ?? {}),
-      funItems: [...funItems, item],
-    }
     setNewFunText('')
-    if (plan) {
-      await supabase.from('weekly_plans').update({ content: updatedContent, updated_by: user.id }).eq('id', plan.id)
+    const { existingPlan, content } = await getFreshContent()
+    const updatedContent: WeeklyPlanContent = {
+      ...content,
+      funItems: [...(content.funItems ?? []), item],
+    }
+    if (existingPlan) {
+      await supabase.from('weekly_plans').update({ content: updatedContent, updated_by: user.id }).eq('id', existingPlan.id)
     } else {
       await supabase.from('weekly_plans').insert({ family_id: family.id, week_start: weekStartStr, content: updatedContent, updated_by: user.id })
     }
@@ -398,12 +414,14 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
   }
 
   async function removeFunItem(id: string) {
-    if (!family || !user || !plan) return
+    if (!family || !user) return
+    const { existingPlan, content } = await getFreshContent()
+    if (!existingPlan) return
     const updatedContent: WeeklyPlanContent = {
-      ...(plan.content ?? {}),
-      funItems: funItems.filter((fi) => fi.id !== id),
+      ...content,
+      funItems: (content.funItems ?? []).filter((fi) => fi.id !== id),
     }
-    await supabase.from('weekly_plans').update({ content: updatedContent, updated_by: user.id }).eq('id', plan.id)
+    await supabase.from('weekly_plans').update({ content: updatedContent, updated_by: user.id }).eq('id', existingPlan.id)
     fetchAll()
   }
 
@@ -449,16 +467,17 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
   async function saveSection(key: DayKey | 'notes') {
     if (!family || !user) return
 
+    const { existingPlan, content } = await getFreshContent()
     const updatedContent: WeeklyPlanContent = {
-      ...(plan?.content ?? {}),
+      ...content,
       [key]: editValue,
     }
 
-    if (plan) {
+    if (existingPlan) {
       await supabase
         .from('weekly_plans')
         .update({ content: updatedContent, updated_by: user.id })
-        .eq('id', plan.id)
+        .eq('id', existingPlan.id)
     } else {
       await supabase.from('weekly_plans').insert({
         family_id: family.id,
