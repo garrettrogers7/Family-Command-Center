@@ -6,7 +6,7 @@ import { useGoogleCalendar } from '@/contexts/GoogleCalendarContext'
 import { PageHeader } from '@/components/PageHeader'
 import { TaskItem } from '@/components/TaskItem'
 import { AddTaskForm } from '@/components/AddTaskForm'
-import type { Task, WeeklyPlan, WeeklyPlanContent } from '@/lib/database.types'
+import type { Task, WeeklyPlan, WeeklyPlanContent, FunItem } from '@/lib/database.types'
 import {
   formatStoredEventTime,
   storedEventStartTime,
@@ -375,18 +375,35 @@ export default function WeekPage() {
       .sort((a, b) => storedEventStartTime(a).getTime() - storedEventStartTime(b).getTime())
   }, [allFamilyEvents, selectedWeekStart])
 
-  // Upcoming events for Fun section (next 28 days from today)
-  const upcomingFunEvents = useMemo(() => {
-    const now = startOfToday()
-    const limit = addDays(now, 28)
-    return allFamilyEvents
-      .filter((e) => {
-        const t = storedEventStartTime(e)
-        return t >= now && t <= limit
-      })
-      .sort((a, b) => storedEventStartTime(a).getTime() - storedEventStartTime(b).getTime())
-      .slice(0, 15)
-  }, [allFamilyEvents])
+  // Fun items — manual entries stored in plan.content.funItems
+  const funItems: FunItem[] = (plan?.content as WeeklyPlanContent)?.funItems ?? []
+  const [newFunText, setNewFunText] = useState('')
+
+  async function addFunItem() {
+    if (!newFunText.trim() || !family || !user) return
+    const item: FunItem = { id: crypto.randomUUID(), text: newFunText.trim() }
+    const updatedContent: WeeklyPlanContent = {
+      ...(plan?.content ?? {}),
+      funItems: [...funItems, item],
+    }
+    setNewFunText('')
+    if (plan) {
+      await supabase.from('weekly_plans').update({ content: updatedContent, updated_by: user.id }).eq('id', plan.id)
+    } else {
+      await supabase.from('weekly_plans').insert({ family_id: family.id, week_start: weekStartStr, content: updatedContent, updated_by: user.id })
+    }
+    fetchAll()
+  }
+
+  async function removeFunItem(id: string) {
+    if (!family || !user || !plan) return
+    const updatedContent: WeeklyPlanContent = {
+      ...(plan.content ?? {}),
+      funItems: funItems.filter((fi) => fi.id !== id),
+    }
+    await supabase.from('weekly_plans').update({ content: updatedContent, updated_by: user.id }).eq('id', plan.id)
+    fetchAll()
+  }
 
   // Load tasks and plan for selected week
   const fetchAll = useCallback(async () => {
@@ -426,8 +443,8 @@ export default function WeekPage() {
     return () => { supabase.removeChannel(channel) }
   }, [family, fetchAll])
 
-  // Save a section note (day key, 'notes', or 'fun')
-  async function saveSection(key: DayKey | 'notes' | 'fun') {
+  // Save a section note (day key or 'notes')
+  async function saveSection(key: DayKey | 'notes') {
     if (!family || !user) return
 
     const updatedContent: WeeklyPlanContent = {
@@ -726,82 +743,40 @@ export default function WeekPage() {
               <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
                 Fun & Upcoming
               </h2>
-              <div className="rounded-lg border border-gray-100 bg-white p-5 space-y-4">
-                {/* Upcoming calendar events */}
-                {upcomingFunEvents.length > 0 && (
-                  <div>
-                    <p className="mb-2 text-xs font-medium text-gray-500">Coming up (next 28 days)</p>
-                    <div className="space-y-1.5">
-                      {upcomingFunEvents.map((event) => {
-                        const owner = memberByUserId[event.user_id]
-                        const isBlue = owner?.color === 'blue'
-                        const eventDate = storedEventStartTime(event)
-                        const daysAway = differenceInDays(eventDate, startOfToday())
-                        const dateLabel = daysAway === 0
-                          ? 'Today'
-                          : daysAway === 1
-                            ? 'Tomorrow'
-                            : format(eventDate, 'EEE, MMM d')
-
-                        return (
-                          <div key={event.id} className="flex items-start gap-3">
-                            <div className="min-w-[80px] text-right">
-                              <span className="text-xs text-gray-400">{dateLabel}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                              {event.shared ? (
-                                <>
-                                  <span className="h-2 w-2 rounded-full bg-blue-400 flex-shrink-0" />
-                                  <span className="h-2 w-2 -ml-1 rounded-full bg-coral-400 flex-shrink-0" />
-                                </>
-                              ) : (
-                                <span className={`h-2 w-2 rounded-full flex-shrink-0 ${isBlue ? 'bg-blue-400' : 'bg-coral-400'}`} />
-                              )}
-                              <span className="text-sm text-gray-700 truncate">{event.summary ?? '(No title)'}</span>
-                              {!event.is_all_day && (
-                                <span className="text-xs text-gray-400 flex-shrink-0">{formatStoredEventTime(event)}</span>
-                              )}
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {upcomingFunEvents.length === 0 && (
-                  <p className="text-sm text-gray-400">No upcoming events in the next 28 days. Sync your calendar to see events here.</p>
-                )}
-
-                {/* Fun notes */}
-                <div>
-                  <p className="mb-2 text-xs font-medium text-gray-500">Notes (birthdays, vacations, things to look forward to…)</p>
-                  {editingSection === 'fun' ? (
-                    <div>
-                      <textarea
-                        autoFocus
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        className="w-full resize-none rounded border border-gray-200 p-2 text-sm outline-none focus:border-gray-400"
-                        rows={4}
-                        placeholder="e.g. Dad's birthday on the 15th, camping trip weekend of the 22nd…"
-                      />
-                      <div className="mt-2 flex gap-2">
-                        <button onClick={() => saveSection('fun')} className="text-sm text-gray-700 hover:underline">Save</button>
-                        <button onClick={() => setEditingSection(null)} className="text-sm text-gray-400 hover:underline">Cancel</button>
-                      </div>
-                    </div>
-                  ) : (
+              <div className="space-y-2">
+                {funItems.map((item) => (
+                  <div key={item.id} className="flex items-center gap-3 rounded-lg border border-gray-100 bg-white px-4 py-3">
+                    <span className="flex-1 text-sm text-gray-700">{item.text}</span>
                     <button
-                      onClick={() => { setEditingSection('fun'); setEditValue((plan?.content as WeeklyPlanContent)?.fun ?? '') }}
-                      className="w-full text-left text-sm text-gray-600 hover:text-gray-800"
+                      onClick={() => removeFunItem(item.id)}
+                      className="text-gray-300 hover:text-red-400 transition-colors text-xs"
+                      title="Remove"
                     >
-                      {(plan?.content as WeeklyPlanContent)?.fun || (
-                        <span className="text-gray-300">Click to add notes…</span>
-                      )}
+                      ✕
+                    </button>
+                  </div>
+                ))}
+
+                {/* Add new fun item */}
+                <form
+                  onSubmit={(e) => { e.preventDefault(); addFunItem() }}
+                  className="flex items-center gap-2 rounded-lg border border-dashed border-gray-200 bg-white px-4 py-2.5"
+                >
+                  <input
+                    value={newFunText}
+                    onChange={(e) => setNewFunText(e.target.value)}
+                    placeholder="Add a birthday, vacation, holiday…"
+                    className="flex-1 bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-300"
+                  />
+                  {newFunText.trim() && (
+                    <button
+                      type="submit"
+                      className="text-xs font-medium text-gray-500 hover:text-gray-800 transition-colors"
+                    >
+                      Add
                     </button>
                   )}
-                </div>
+                </form>
               </div>
             </section>
 

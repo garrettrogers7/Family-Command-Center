@@ -100,6 +100,11 @@ export interface WeeklyPlan {
   updated_at: string
 }
 
+export interface FunItem {
+  id: string
+  text: string
+}
+
 export interface WeeklyPlanContent {
   monday?: string
   tuesday?: string
@@ -109,6 +114,6 @@ export interface WeeklyPlanContent {
   saturday?: string
   sunday?: string
   notes?: string
-  fun?: string
+  funItems?: FunItem[]
   goals?: string[]
 }
