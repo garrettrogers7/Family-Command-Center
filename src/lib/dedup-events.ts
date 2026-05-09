@@ -1,3 +1,5 @@
+import { format } from 'date-fns'
+import { storedEventStartTime } from './google-calendar'
 import type { StoredCalendarEvent } from './google-calendar'
 
 export interface DisplayEvent extends StoredCalendarEvent {
@@ -9,11 +11,14 @@ export interface DisplayEvent extends StoredCalendarEvent {
  * Collapses events that appear on multiple calendars into a single DisplayEvent
  * marked as shared. Two events are considered the same if they share:
  *   1. The same Google event ID (one person was invited to the other's event), OR
- *   2. The same summary (name) on the same calendar date (independently created
- *      events with matching titles — e.g. both added "Date Night" separately)
+ *   2. The same summary (name) on the same local calendar date (independently
+ *      created events with matching titles — e.g. both added "Date Night")
+ *
+ * Date comparison uses storedEventStartTime() so timezone handling is consistent
+ * with how events are filtered and displayed (avoids UTC-vs-local mismatches).
  */
 export function deduplicateEvents(events: StoredCalendarEvent[]): DisplayEvent[] {
-  // Step 1: group by google_event_id (handles shared invites)
+  // Step 1: group by google_event_id (handles shared invites / same event on both calendars)
   const byGoogleId = new Map<string, StoredCalendarEvent[]>()
   for (const event of events) {
     const key = event.google_event_id || event.id
@@ -22,16 +27,14 @@ export function deduplicateEvents(events: StoredCalendarEvent[]): DisplayEvent[]
     byGoogleId.set(key, group)
   }
 
-  // Step 2: further merge groups that share the same summary + date
-  // (catches separately-created events with matching names)
+  // Step 2: further merge groups that share the same summary + local date
+  // Use storedEventStartTime so the date is in local time, matching isSameDay()
   const merged = new Map<string, { events: StoredCalendarEvent[]; userIds: Set<string> }>()
 
   for (const group of byGoogleId.values()) {
     const rep = group[0]
     const summary = rep.summary?.toLowerCase().trim()
-    const dateKey = rep.is_all_day
-      ? (rep.start_date ?? '')
-      : (rep.start_at ?? '').slice(0, 10)
+    const dateKey = format(storedEventStartTime(rep), 'yyyy-MM-dd')
 
     // Events with no title fall back to a unique key so they're never merged by name
     const mergeKey = summary
