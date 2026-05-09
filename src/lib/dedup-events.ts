@@ -2,13 +2,22 @@ import { format } from 'date-fns'
 import { storedEventStartTime } from './google-calendar'
 import type { StoredCalendarEvent } from './google-calendar'
 
-/** Normalize smart quotes/apostrophes so "Annie’s" matches "Annie's" */
+/**
+ * Normalize a summary for fuzzy comparison so minor variations merge:
+ * - Lowercase + trim
+ * - Strip apostrophes entirely (“Annie’s” → “annies”, “Annies” → “annies”)
+ * - Strip other punctuation that commonly varies (!, ., @, #, -)
+ * - Collapse extra whitespace
+ */
 function normalizeSummary(s: string): string {
   return s
     .toLowerCase()
     .trim()
-    .replace(/[‘’‚‛′‵ʼ]/g, "'")
-    .replace(/[“”„‟″‶]/g, '"')
+    .replace(/[‘’‚‛′‵ʼ’‘’]/g, ‘’)   // remove all apostrophe variants
+    .replace(/[“””„‟″‶“”]/g, ‘’)      // remove all quote variants
+    .replace(/[^\w\s]/g, ‘ ‘)                    // replace remaining punctuation with space
+    .replace(/\s+/g, ‘ ‘)                        // collapse multiple spaces
+    .trim()
 }
 
 export interface DisplayEvent extends StoredCalendarEvent {
