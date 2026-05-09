@@ -15,15 +15,6 @@ function normalizeSummary(s: string): string {
     .replace(/\s+/g, ' ')
     .trim()
 
-  // Temporary debug — log any event with "mills" in the name
-  if (s.toLowerCase().includes('mills')) {
-    console.log('[NormDebug]', JSON.stringify({
-      input: s,
-      chars: [...s].map(c => c.charCodeAt(0)),
-      output: result,
-    }))
-  }
-
   return result
 }
 
