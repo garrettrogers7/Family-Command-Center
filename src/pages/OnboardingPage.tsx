@@ -97,8 +97,9 @@ export default function OnboardingPage() {
       .maybeSingle()
 
     if (existingMember) {
-      // Already a member, nothing to insert — FamilyContext will pick them up
-      setLoading(false)
+      // Already a member — refresh context and navigate home
+      await refetch()
+      navigate('/today')
       return
     }
 

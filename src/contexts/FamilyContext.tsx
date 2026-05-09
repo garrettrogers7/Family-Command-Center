@@ -42,7 +42,7 @@ export function FamilyProvider({ children }: { children: ReactNode }) {
       .select('*')
       .eq('user_id', user.id)
       .limit(1)
-      .single()
+      .maybeSingle()
 
     if (!memberRows) {
       setFamily(null)
@@ -54,7 +54,7 @@ export function FamilyProvider({ children }: { children: ReactNode }) {
     const familyId = memberRows.family_id
 
     const [{ data: familyRow }, { data: allMembers }] = await Promise.all([
-      supabase.from('families').select('*').eq('id', familyId).single(),
+      supabase.from('families').select('*').eq('id', familyId).maybeSingle(),
       supabase.from('family_members').select('*').eq('family_id', familyId),
     ])
 
