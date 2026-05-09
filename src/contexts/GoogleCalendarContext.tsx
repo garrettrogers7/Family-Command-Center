@@ -19,7 +19,7 @@ import {
   storedEventStartTime,
   StoredCalendarEvent,
 } from '@/lib/google-calendar'
-import { startOfWeek, endOfWeek, isSameDay } from 'date-fns'
+import { startOfWeek, addDays, subDays, isSameDay } from 'date-fns'
 
 interface StoredTokenRow {
   access_token: string
@@ -97,13 +97,14 @@ export function GoogleCalendarProvider({ children }: { children: ReactNode }) {
 
     const token = await getValidAccessToken()
     const now = new Date()
-    const weekStart = startOfWeek(now, { weekStartsOn: 1 })
-    const weekEnd = endOfWeek(now, { weekStartsOn: 1 })
+    // Sync a wide window: 1 week back through 8 weeks forward
+    const syncStart = startOfWeek(subDays(now, 7), { weekStartsOn: 0 })
+    const syncEnd = addDays(now, 56)
 
     // If connected, sync this user's Google events into Supabase
     if (token) {
       try {
-        const googleEvents = await fetchEvents(token, weekStart.toISOString(), weekEnd.toISOString())
+        const googleEvents = await fetchEvents(token, syncStart.toISOString(), syncEnd.toISOString())
 
         // Replace this user's events for the week with fresh data
         await supabase.from('calendar_events').delete().eq('user_id', user.id).eq('family_id', family.id)
@@ -121,7 +122,7 @@ export function GoogleCalendarProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    // Read ALL family members' events from Supabase for the week
+    // Read ALL family members' events from Supabase (full synced window)
     const { data } = await supabase
       .from('calendar_events')
       .select('*')
