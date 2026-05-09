@@ -124,7 +124,10 @@ export function googleEventToStored(
   familyId: string
 ): Omit<StoredCalendarEvent, 'id'> & { id: string } {
   return {
-    id: event.id,
+    // Prefix with userId so two users sharing the same Google event ID
+    // (e.g. auto-generated birthday events) don't conflict on the primary key.
+    // google_event_id still holds the original ID for deduplication.
+    id: `${userId}-${event.id}`,
     google_event_id: event.id,
     user_id: userId,
     family_id: familyId,
