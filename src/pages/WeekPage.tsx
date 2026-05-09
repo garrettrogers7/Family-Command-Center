@@ -36,6 +36,7 @@ import {
   ChevronUp,
   Send,
   Loader2,
+  Trash2,
 } from 'lucide-react'
 import type { MaintenanceItem, Equipment } from '@/lib/database.types'
 
@@ -321,8 +322,11 @@ export default function WeekPage() {
   // Events for the selected week (from Supabase for all weeks)
   const [allFamilyEvents, setAllFamilyEvents] = useState<StoredCalendarEvent[]>([])
 
+  // Fun item confirm-delete
+  const [confirmDeleteFunId, setConfirmDeleteFunId] = useState<string | null>(null)
+
   // AI assistant state
-  const [showAssistant, setShowAssistant] = useState(false)
+  const [showAssistant, setShowAssistant] = useState(true)
   const [aiCtx, setAiCtx] = useState<FamilyCtx | null>(null)
   const [insightText, setInsightText] = useState('')
   const [insightLoading, setInsightLoading] = useState(false)
@@ -745,15 +749,23 @@ export default function WeekPage() {
               </h2>
               <div className="space-y-2">
                 {funItems.map((item) => (
-                  <div key={item.id} className="flex items-center gap-3 rounded-lg border border-gray-100 bg-white px-4 py-3">
+                  <div key={item.id} className="flex items-center gap-3 rounded-lg border border-gray-100 bg-white px-4 py-3 group">
                     <span className="flex-1 text-sm text-gray-700">{item.text}</span>
-                    <button
-                      onClick={() => removeFunItem(item.id)}
-                      className="text-gray-300 hover:text-red-400 transition-colors text-xs"
-                      title="Remove"
-                    >
-                      ✕
-                    </button>
+                    {confirmDeleteFunId === item.id ? (
+                      <span className="flex items-center gap-1.5 text-xs">
+                        <span className="text-gray-500">Delete?</span>
+                        <button onClick={() => { removeFunItem(item.id); setConfirmDeleteFunId(null) }} className="font-medium text-red-500 hover:text-red-700">Yes</button>
+                        <button onClick={() => setConfirmDeleteFunId(null)} className="text-gray-400 hover:text-gray-600">No</button>
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmDeleteFunId(item.id)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-300 hover:text-red-400"
+                        title="Remove"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
                   </div>
                 ))}
 
@@ -780,57 +792,22 @@ export default function WeekPage() {
               </div>
             </section>
 
-            {/* ── Week Notes ───────────────────────────────────────────── */}
-            <section>
-              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                Week notes
-              </h2>
-              <div className="rounded-lg border border-gray-100 bg-white p-4">
-                {editingSection === 'notes' ? (
-                  <div>
-                    <textarea
-                      autoFocus
-                      value={editValue}
-                      onChange={(e) => setEditValue(e.target.value)}
-                      className="w-full resize-none rounded border border-gray-200 p-2 text-sm outline-none focus:border-gray-400"
-                      rows={4}
-                      placeholder="Anything important for the week…"
-                    />
-                    <div className="mt-2 flex gap-2">
-                      <button onClick={() => saveSection('notes')} className="text-sm text-gray-700 hover:underline">Save</button>
-                      <button onClick={() => setEditingSection(null)} className="text-sm text-gray-400 hover:underline">Cancel</button>
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => { setEditingSection('notes'); setEditValue((plan?.content as WeeklyPlanContent)?.notes ?? '') }}
-                    className="w-full text-left text-sm text-gray-600 hover:text-gray-800"
-                  >
-                    {(plan?.content as WeeklyPlanContent)?.notes || (
-                      <span className="text-gray-300">Click to add week notes…</span>
-                    )}
-                  </button>
-                )}
-              </div>
-            </section>
-
             {/* ── AI Assistant ─────────────────────────────────────────── */}
             <section>
               <button
                 onClick={() => setShowAssistant((v) => !v)}
-                className="mb-3 flex w-full items-center justify-between"
+                className="mb-3 flex w-full items-center justify-between rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100 px-4 py-3 hover:from-amber-100 hover:to-orange-100 transition-colors"
               >
-                <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                  AI Assistant
-                </h2>
                 <div className="flex items-center gap-2">
-                  <Sparkles size={13} className="text-amber-400" />
-                  {showAssistant ? (
-                    <ChevronUp size={14} className="text-gray-400" />
-                  ) : (
-                    <ChevronDown size={14} className="text-gray-400" />
-                  )}
+                  <Sparkles size={16} className="text-amber-500" />
+                  <span className="text-sm font-semibold text-amber-800">AI Assistant</span>
+                  <span className="text-xs text-amber-500">· Weekly meeting helper</span>
                 </div>
+                {showAssistant ? (
+                  <ChevronUp size={16} className="text-amber-400" />
+                ) : (
+                  <ChevronDown size={16} className="text-amber-400" />
+                )}
               </button>
 
               {showAssistant && (
