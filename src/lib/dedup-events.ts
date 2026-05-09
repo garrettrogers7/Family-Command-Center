@@ -41,6 +41,15 @@ export function deduplicateEvents(events: StoredCalendarEvent[]): DisplayEvent[]
       ? `name:${summary}|${dateKey}`
       : `id:${rep.google_event_id || rep.id}`
 
+    console.log('[Dedup]', JSON.stringify({
+      summary: rep.summary,
+      summaryChars: [...(rep.summary ?? '')].map(c => c.charCodeAt(0)),
+      dateKey,
+      mergeKey,
+      google_event_id: rep.google_event_id,
+      user_id: rep.user_id.slice(0, 8),
+    }))
+
     const existing = merged.get(mergeKey)
     if (existing) {
       group.forEach((e) => {
