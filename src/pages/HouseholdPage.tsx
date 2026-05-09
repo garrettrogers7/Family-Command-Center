@@ -828,7 +828,7 @@ export default function HouseholdPage() {
     <div>
       <PageHeader title="Household" subtitle="Maintenance log" />
 
-      <div className="mx-auto max-w-4xl px-8 py-6 space-y-8">
+      <div className="mx-auto max-w-4xl px-4 py-4 md:px-8 md:py-6 space-y-8">
         {/* Tab switcher */}
         <div className="flex gap-1 rounded-lg bg-gray-100 p-1 w-fit">
           {([['log', 'Maintenance'], ['history', 'History'], ['equipment', 'Equipment']] as [View, string][]).map(([v, label]) => (

@@ -179,7 +179,7 @@ export default function VaultPage() {
         }
       />
 
-      <div className="mx-auto max-w-3xl px-8 py-6">
+      <div className="mx-auto max-w-3xl px-4 py-4 md:px-8 md:py-6">
         {loading ? (
           <div className="py-12 text-center text-sm text-gray-400">Loading…</div>
         ) : entries.length === 0 ? (

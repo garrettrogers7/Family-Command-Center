@@ -57,7 +57,7 @@ export default function TodayPage() {
     <div>
       <PageHeader title="Today" subtitle={format(today, 'EEEE, MMMM d')} />
 
-      <div className="mx-auto max-w-2xl px-8 py-6">
+      <div className="mx-auto max-w-2xl px-4 py-4 md:px-8 md:py-6">
         {loading ? (
           <div className="py-12 text-center text-sm text-gray-400">Loading…</div>
         ) : (

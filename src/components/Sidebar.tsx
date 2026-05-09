@@ -17,10 +17,11 @@ const navItems = [
 ]
 
 export function Sidebar() {
+  // Hidden on mobile — BottomNav handles navigation there
   const { family, currentMember, otherMember } = useFamily()
 
   return (
-    <aside className="flex h-screen w-56 flex-col border-r border-gray-100 bg-white px-3 py-5">
+    <aside className="hidden md:flex h-screen w-56 flex-col border-r border-gray-100 bg-white px-3 py-5">
       {/* Wordmark */}
       <div className="mb-8 px-2">
         <span className="text-lg font-semibold tracking-tight text-gray-900">

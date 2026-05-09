@@ -609,7 +609,7 @@ export default function WeekPage() {
         }
       />
 
-      <div className="px-8 py-6 space-y-8">
+      <div className="px-4 py-4 md:px-8 md:py-6 space-y-8">
         {loading ? (
           <div className="py-12 text-center text-sm text-gray-400">Loading…</div>
         ) : (
@@ -619,7 +619,8 @@ export default function WeekPage() {
               <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
                 Day Planner
               </h2>
-              <div className="flex gap-3 items-start">
+              <div className="-mx-4 px-4 md:mx-0 md:px-0 overflow-x-auto pb-2">
+              <div className="flex gap-3 items-start" style={{ minWidth: 'max-content' }}>
                 {DAYS.map((day, i) => {
                   const date = addDays(selectedWeekStart, i)
                   const isToday = isSameDay(date, new Date())
@@ -631,7 +632,7 @@ export default function WeekPage() {
                   return (
                     <div
                       key={day}
-                      className={`flex-1 min-w-0 rounded-lg border bg-white p-4 ${
+                      className={`w-44 md:flex-1 md:w-auto min-w-0 rounded-lg border bg-white p-4 ${
                         isToday ? 'border-gray-400 shadow-sm' : 'border-gray-100'
                       }`}
                     >
@@ -718,6 +719,7 @@ export default function WeekPage() {
                     </div>
                   )
                 })}
+              </div>
               </div>
             </section>
 
