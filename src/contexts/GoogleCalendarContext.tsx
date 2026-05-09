@@ -101,14 +101,11 @@ export function GoogleCalendarProvider({ children }: { children: ReactNode }) {
     const syncStart = startOfWeek(subDays(now, 7), { weekStartsOn: 0 })
     const syncEnd = addDays(now, 56)
 
-    // If connected, sync this user's Google events into Supabase
+    // ── Sync current user's events ───────────────────────────────
     if (token) {
       try {
         const googleEvents = await fetchEvents(token, syncStart.toISOString(), syncEnd.toISOString())
-
-        // Replace this user's events for the week with fresh data
         await supabase.from('calendar_events').delete().eq('user_id', user.id).eq('family_id', family.id)
-
         if (googleEvents.length > 0) {
           await supabase
             .from('calendar_events')
@@ -120,6 +117,51 @@ export function GoogleCalendarProvider({ children }: { children: ReactNode }) {
           return
         }
       }
+    }
+
+    // ── Sync other family members' events using their stored tokens ──
+    // This keeps their calendar current even when they haven't opened the app.
+    try {
+      const { data: otherMembers } = await supabase
+        .from('family_members')
+        .select('user_id')
+        .eq('family_id', family.id)
+        .neq('user_id', user.id)
+
+      for (const member of (otherMembers ?? [])) {
+        try {
+          const { data: tokenRows } = await supabase
+            .rpc('get_family_member_google_token', { target_user_id: member.user_id })
+
+          if (!tokenRows || tokenRows.length === 0) continue
+
+          let memberToken: string = tokenRows[0].access_token
+          const isExpired = Date.now() >= new Date(tokenRows[0].expires_at).getTime() - 60_000
+
+          if (isExpired) {
+            const refreshed = await refreshAccessToken(tokenRows[0].refresh_token)
+            memberToken = refreshed.access_token
+            const newExpiresAt = new Date(Date.now() + refreshed.expires_in * 1000).toISOString()
+            await supabase.rpc('update_family_member_google_token', {
+              target_user_id: member.user_id,
+              new_access_token: refreshed.access_token,
+              new_expires_at: newExpiresAt,
+            })
+          }
+
+          const memberEvents = await fetchEvents(memberToken, syncStart.toISOString(), syncEnd.toISOString())
+          await supabase.from('calendar_events').delete().eq('user_id', member.user_id).eq('family_id', family.id)
+          if (memberEvents.length > 0) {
+            await supabase
+              .from('calendar_events')
+              .insert(memberEvents.map((e) => googleEventToStored(e, member.user_id, family.id)))
+          }
+        } catch {
+          // Member hasn't connected Google Calendar — skip silently
+        }
+      }
+    } catch {
+      // Non-fatal: couldn't sync other members
     }
 
     // Read ALL family members' events from Supabase (full synced window)
