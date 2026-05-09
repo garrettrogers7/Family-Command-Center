@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useFamily } from '@/contexts/FamilyContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -7,31 +7,391 @@ import { PageHeader } from '@/components/PageHeader'
 import { TaskItem } from '@/components/TaskItem'
 import { AddTaskForm } from '@/components/AddTaskForm'
 import type { Task, WeeklyPlan, WeeklyPlanContent } from '@/lib/database.types'
-import { formatStoredEventTime, storedEventStartTime } from '@/lib/google-calendar'
+import {
+  formatStoredEventTime,
+  storedEventStartTime,
+  StoredCalendarEvent,
+  refreshAccessToken,
+  fetchEvents,
+} from '@/lib/google-calendar'
 import { deduplicateEvents } from '@/lib/dedup-events'
-import { format, startOfWeek, addDays, isSameDay } from 'date-fns'
-import { RefreshCw } from 'lucide-react'
+import {
+  format,
+  startOfWeek,
+  addDays,
+  addWeeks,
+  isSameDay,
+  differenceInDays,
+  parseISO,
+  addMonths,
+  addYears,
+  startOfToday,
+} from 'date-fns'
+import {
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+  Send,
+  Loader2,
+} from 'lucide-react'
+import type { MaintenanceItem, Equipment } from '@/lib/database.types'
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+interface Message {
+  role: 'user' | 'assistant'
+  content: string
+  streaming?: boolean
+}
+
+interface StoredToken {
+  access_token: string
+  refresh_token: string
+  expires_at: string
+}
+
+interface FamilyCtx {
+  calendarSummary: string
+  taskSummary: string
+  maintenanceSummary: string
+  memberNames: string[]
+}
+
+// ── Constants ─────────────────────────────────────────────────────────────────
 
 const DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const
 type DayKey = (typeof DAYS)[number]
+
+// ── AI Helpers ────────────────────────────────────────────────────────────────
+
+function calcNextDue(lastDone: string | null, frequency: string): Date | null {
+  if (!lastDone) return null
+  const base = parseISO(lastDone)
+  switch (frequency) {
+    case 'Monthly':       return addMonths(base, 1)
+    case 'Quarterly':     return addMonths(base, 3)
+    case 'Semi-Annually': return addMonths(base, 6)
+    case 'Annually':      return addYears(base, 1)
+    default:              return null
+  }
+}
+
+async function getValidToken(userId: string): Promise<string | null> {
+  const { data } = await supabase
+    .from('google_tokens')
+    .select('access_token, refresh_token, expires_at')
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (!data) return null
+  const row = data as StoredToken
+  const isExpired = Date.now() >= new Date(row.expires_at).getTime() - 60_000
+  if (!isExpired) return row.access_token
+
+  try {
+    const refreshed = await refreshAccessToken(row.refresh_token)
+    const newExpiresAt = new Date(Date.now() + refreshed.expires_in * 1000).toISOString()
+    await supabase
+      .from('google_tokens')
+      .update({ access_token: refreshed.access_token, expires_at: newExpiresAt })
+      .eq('user_id', userId)
+    return refreshed.access_token
+  } catch {
+    return null
+  }
+}
+
+async function streamClaude(
+  systemPrompt: string,
+  messages: Message[],
+  onChunk: (chunk: string) => void,
+  onDone: () => void,
+  signal?: AbortSignal
+) {
+  const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY as string
+  if (!apiKey) {
+    onChunk('⚠️ No API key found. Add VITE_ANTHROPIC_API_KEY to your .env file.')
+    onDone()
+    return
+  }
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    signal,
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5',
+      max_tokens: 1500,
+      stream: true,
+      system: systemPrompt,
+      messages,
+    }),
+  })
+
+  if (!res.ok || !res.body) {
+    const err = await res.text()
+    onChunk(`⚠️ API error: ${err}`)
+    onDone()
+    return
+  }
+
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+
+    buffer += decoder.decode(value, { stream: true })
+    const lines = buffer.split('\n')
+    buffer = lines.pop() ?? ''
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue
+      const data = line.slice(6).trim()
+      if (data === '[DONE]') continue
+      try {
+        const parsed = JSON.parse(data)
+        if (parsed.type === 'content_block_delta' && parsed.delta?.type === 'text_delta') {
+          onChunk(parsed.delta.text)
+        }
+      } catch { /* skip */ }
+    }
+  }
+
+  onDone()
+}
+
+async function gatherFamilyContext(
+  userId: string,
+  familyId: string,
+  memberNames: string[]
+): Promise<FamilyCtx> {
+  const today = startOfToday()
+  const fourWeeksOut = addDays(today, 28)
+
+  const token = await getValidToken(userId)
+  let calendarLines: string[] = []
+
+  const { data: storedEvents } = await supabase
+    .from('calendar_events')
+    .select('*')
+    .eq('family_id', familyId)
+
+  if (storedEvents && storedEvents.length > 0) {
+    calendarLines = (storedEvents as StoredCalendarEvent[])
+      .filter((e) => e.summary)
+      .filter((e) => {
+        const t = storedEventStartTime(e)
+        return t >= today && t <= fourWeeksOut
+      })
+      .map((e) => {
+        const startDate = storedEventStartTime(e)
+        const daysAway = differenceInDays(startDate, today)
+        const dateStr = format(startDate, 'EEE MMM d')
+        return `- ${dateStr} (${daysAway === 0 ? 'today' : daysAway === 1 ? 'tomorrow' : `in ${daysAway} days`}): ${e.summary}`
+      })
+  }
+
+  if (calendarLines.length === 0 && token) {
+    try {
+      const events = await fetchEvents(token, today.toISOString(), fourWeeksOut.toISOString())
+      calendarLines = events
+        .filter((e) => e.summary)
+        .map((e) => {
+          const startDate = e.start.date
+            ? parseISO(e.start.date)
+            : new Date(e.start.dateTime!)
+          const daysAway = differenceInDays(startDate, today)
+          const dateStr = format(startDate, 'EEE MMM d')
+          return `- ${dateStr} (${daysAway === 0 ? 'today' : daysAway === 1 ? 'tomorrow' : `in ${daysAway} days`}): ${e.summary}`
+        })
+    } catch { /* ignore */ }
+  }
+
+  const calendarSummary = calendarLines.length > 0
+    ? calendarLines.join('\n')
+    : 'No upcoming calendar events found.'
+
+  const { data: tasks } = await supabase
+    .from('tasks')
+    .select('*')
+    .eq('family_id', familyId)
+    .eq('completed', false)
+    .order('created_at', { ascending: true })
+
+  const taskLines = (tasks as Task[] ?? []).map((t) => {
+    const due = t.due_date ? ` (due ${format(parseISO(t.due_date), 'MMM d')})` : ''
+    return `- [${t.module}] ${t.title}${due}`
+  })
+
+  const taskSummary = taskLines.length > 0 ? taskLines.join('\n') : 'No pending tasks.'
+
+  const { data: maintenance } = await supabase
+    .from('maintenance_items')
+    .select('*')
+    .eq('family_id', familyId)
+    .order('created_at', { ascending: true })
+
+  const { data: equipment } = await supabase
+    .from('equipment')
+    .select('*')
+    .eq('family_id', familyId)
+
+  const equipmentById = Object.fromEntries(
+    (equipment as Equipment[] ?? []).map((eq) => [eq.id, eq.name])
+  )
+
+  const maintenanceLines = (maintenance as MaintenanceItem[] ?? []).map((item) => {
+    const nextDue = calcNextDue(item.last_done, item.frequency)
+    const daysUntil = nextDue ? differenceInDays(nextDue, today) : null
+    const statusStr = daysUntil === null
+      ? 'never done'
+      : daysUntil < 0
+        ? `OVERDUE by ${Math.abs(daysUntil)} days`
+        : daysUntil === 0 ? 'due today' : `due in ${daysUntil} days`
+    const eqName = item.equipment_id ? ` [${equipmentById[item.equipment_id] ?? ''}]` : ''
+    return `- ${item.task}${eqName} (${item.frequency}): ${statusStr}`
+  })
+
+  const maintenanceSummary = maintenanceLines.length > 0
+    ? maintenanceLines.join('\n')
+    : 'No maintenance items found.'
+
+  return { calendarSummary, taskSummary, maintenanceSummary, memberNames }
+}
+
+function buildSystemPrompt(ctx: FamilyCtx, todayStr: string): string {
+  const names = ctx.memberNames.join(' and ')
+  return `You are a friendly, proactive family assistant for ${names}. Today is ${todayStr}.
+
+Your job is to help the family plan ahead by noticing things they might be forgetting or should prepare for. You have access to their calendar, tasks, and home maintenance schedule.
+
+CALENDAR (next 4 weeks):
+${ctx.calendarSummary}
+
+PENDING TASKS:
+${ctx.taskSummary}
+
+HOME MAINTENANCE:
+${ctx.maintenanceSummary}
+
+INSTRUCTIONS:
+- Be warm, conversational, and genuinely helpful — like a smart friend who knows the household
+- Notice upcoming events that might require prep (gifts, travel packing, RSVPs, etc.)
+- Flag overdue or soon-due maintenance that could cause problems if ignored
+- Point out tasks that have been sitting for a while
+- Keep insights concise — bullet points work well
+- Use first names when addressing family members`
+}
+
+// ── Main Component ────────────────────────────────────────────────────────────
 
 export default function WeekPage() {
   const { user } = useAuth()
   const { family, members } = useFamily()
   const { weekEvents, refreshEvents } = useGoogleCalendar()
-  const [calRefreshing, setCalRefreshing] = useState(false)
+
+  // Week navigation
+  const [weekOffset, setWeekOffset] = useState(0)
+  const today = useMemo(() => new Date(), [])
+  const selectedWeekStart = startOfWeek(addWeeks(today, weekOffset), { weekStartsOn: 0 })
+  const weekStartStr = format(selectedWeekStart, 'yyyy-MM-dd')
+  const isCurrentWeek = weekOffset === 0
+
   const memberByUserId = Object.fromEntries(members.map((m) => [m.user_id, m]))
 
+  // Data state
   const [tasks, setTasks] = useState<Task[]>([])
   const [plan, setPlan] = useState<WeeklyPlan | null>(null)
-  const [editingDay, setEditingDay] = useState<DayKey | 'notes' | null>(null)
+  const [editingSection, setEditingSection] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
   const [loading, setLoading] = useState(true)
+  const [calRefreshing, setCalRefreshing] = useState(false)
 
-  const weekStart = format(startOfWeek(new Date(), { weekStartsOn: 0 }), 'yyyy-MM-dd')
+  // Events for the selected week (from Supabase for all weeks)
+  const [allFamilyEvents, setAllFamilyEvents] = useState<StoredCalendarEvent[]>([])
 
+  // AI assistant state
+  const [showAssistant, setShowAssistant] = useState(false)
+  const [aiCtx, setAiCtx] = useState<FamilyCtx | null>(null)
+  const [insightText, setInsightText] = useState('')
+  const [insightLoading, setInsightLoading] = useState(false)
+  const [messages, setMessages] = useState<Message[]>([])
+  const [chatInput, setChatInput] = useState('')
+  const [chatLoading, setChatLoading] = useState(false)
+  const abortRef = useRef<AbortController | null>(null)
+  const bottomRef = useRef<HTMLDivElement>(null)
+  const chatInputRef = useRef<HTMLTextAreaElement>(null)
+  const hasLoadedInsights = useRef(false)
+
+  const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
+  const todayStr = useMemo(() => format(new Date(), 'EEEE, MMMM d, yyyy'), [])
+
+  // Auto-scroll chat
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  // Load all family calendar events from Supabase
+  const loadAllEvents = useCallback(async () => {
+    if (!family) return
+    const { data } = await supabase
+      .from('calendar_events')
+      .select('*')
+      .eq('family_id', family.id)
+    setAllFamilyEvents((data as StoredCalendarEvent[]) ?? [])
+  }, [family])
+
+  useEffect(() => { loadAllEvents() }, [loadAllEvents])
+
+  // Keep allFamilyEvents up-to-date when context weekEvents sync
+  useEffect(() => {
+    if (weekEvents.length === 0) return
+    setAllFamilyEvents((prev) => {
+      const nonContextIds = new Set(weekEvents.map((e) => e.id))
+      const others = prev.filter((e) => !nonContextIds.has(e.id))
+      return [...others, ...weekEvents]
+    })
+  }, [weekEvents])
+
+  // Events for selected week
+  const displayEvents = useMemo(() => {
+    const weekEnd = addDays(selectedWeekStart, 7)
+    return allFamilyEvents
+      .filter((e) => {
+        const t = storedEventStartTime(e)
+        return t >= selectedWeekStart && t < weekEnd
+      })
+      .sort((a, b) => storedEventStartTime(a).getTime() - storedEventStartTime(b).getTime())
+  }, [allFamilyEvents, selectedWeekStart])
+
+  // Upcoming events for Fun section (next 28 days from today)
+  const upcomingFunEvents = useMemo(() => {
+    const now = startOfToday()
+    const limit = addDays(now, 28)
+    return allFamilyEvents
+      .filter((e) => {
+        const t = storedEventStartTime(e)
+        return t >= now && t <= limit
+      })
+      .sort((a, b) => storedEventStartTime(a).getTime() - storedEventStartTime(b).getTime())
+      .slice(0, 15)
+  }, [allFamilyEvents])
+
+  // Load tasks and plan for selected week
   const fetchAll = useCallback(async () => {
     if (!family) return
+    setLoading(true)
 
     const [{ data: taskData }, { data: planData }] = await Promise.all([
       supabase
@@ -44,14 +404,14 @@ export default function WeekPage() {
         .from('weekly_plans')
         .select('*')
         .eq('family_id', family.id)
-        .eq('week_start', weekStart)
-        .single(),
+        .eq('week_start', weekStartStr)
+        .maybeSingle(),
     ])
 
     setTasks((taskData as Task[]) ?? [])
     setPlan(planData as WeeklyPlan | null)
     setLoading(false)
-  }, [family, weekStart])
+  }, [family, weekStartStr])
 
   useEffect(() => { fetchAll() }, [fetchAll])
 
@@ -66,7 +426,8 @@ export default function WeekPage() {
     return () => { supabase.removeChannel(channel) }
   }, [family, fetchAll])
 
-  async function saveDayNote(key: DayKey | 'notes') {
+  // Save a section note (day key, 'notes', or 'fun')
+  async function saveSection(key: DayKey | 'notes' | 'fun') {
     if (!family || !user) return
 
     const updatedContent: WeeklyPlanContent = {
@@ -82,32 +443,148 @@ export default function WeekPage() {
     } else {
       await supabase.from('weekly_plans').insert({
         family_id: family.id,
-        week_start: weekStart,
+        week_start: weekStartStr,
         content: updatedContent,
         updated_by: user.id,
       })
     }
 
-    setEditingDay(null)
+    setEditingSection(null)
     fetchAll()
   }
 
-  const startDay = startOfWeek(new Date(), { weekStartsOn: 0 })
+  // AI: load insights
+  const loadInsights = useCallback(async () => {
+    if (!user || !family) return
+    setInsightText('')
+    setInsightLoading(true)
+
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+
+    const ctx = await gatherFamilyContext(user.id, family.id, memberNames)
+    setAiCtx(ctx)
+
+    const systemPrompt = buildSystemPrompt(ctx, todayStr)
+    const initMessages: Message[] = [{
+      role: 'user',
+      content: 'Please look over our calendar, tasks, and home maintenance and give me your top proactive observations and suggestions for the coming weeks. Focus on things that might slip through the cracks or need advance preparation.',
+    }]
+
+    await streamClaude(
+      systemPrompt,
+      initMessages,
+      (chunk) => setInsightText((prev) => prev + chunk),
+      () => setInsightLoading(false),
+      controller.signal
+    )
+  }, [user, family, memberNames, todayStr])
+
+  // Load insights when assistant is first opened
+  useEffect(() => {
+    if (showAssistant && !hasLoadedInsights.current) {
+      hasLoadedInsights.current = true
+      loadInsights()
+    }
+  }, [showAssistant, loadInsights])
+
+  // AI: send chat message
+  async function sendMessage() {
+    if (!chatInput.trim() || chatLoading || !aiCtx) return
+
+    const userMsg: Message = { role: 'user', content: chatInput.trim() }
+    setChatInput('')
+    setChatLoading(true)
+
+    const newMessages: Message[] = [...messages, userMsg]
+    setMessages([...newMessages, { role: 'assistant', content: '', streaming: true }])
+
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+
+    const systemPrompt = buildSystemPrompt(aiCtx, todayStr)
+    const history: Message[] = [
+      { role: 'user', content: 'Please look over our calendar, tasks, and home maintenance and give me your top proactive observations and suggestions for the coming weeks.' },
+      { role: 'assistant', content: insightText },
+      ...newMessages,
+    ]
+
+    let assistantText = ''
+    await streamClaude(
+      systemPrompt,
+      history,
+      (chunk) => {
+        assistantText += chunk
+        setMessages([...newMessages, { role: 'assistant', content: assistantText, streaming: true }])
+      },
+      () => {
+        setChatLoading(false)
+        setMessages([...newMessages, { role: 'assistant', content: assistantText, streaming: false }])
+      },
+      controller.signal
+    )
+  }
+
+  // ── Render ───────────────────────────────────────────────────────────────────
+
+  const weekLabel = isCurrentWeek
+    ? `Week of ${format(selectedWeekStart, 'MMMM d')}`
+    : weekOffset === 1
+      ? `Next week · ${format(selectedWeekStart, 'MMM d')}`
+      : weekOffset === -1
+        ? `Last week · ${format(selectedWeekStart, 'MMM d')}`
+        : `${format(selectedWeekStart, 'MMM d')} – ${format(addDays(selectedWeekStart, 6), 'MMM d, yyyy')}`
 
   return (
     <div>
       <PageHeader
         title="This Week"
-        subtitle={`Week of ${format(startDay, 'MMMM d')}`}
+        subtitle={weekLabel}
         action={
-          <button
-            onClick={async () => { setCalRefreshing(true); await refreshEvents(); setCalRefreshing(false) }}
-            disabled={calRefreshing}
-            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors"
-          >
-            <RefreshCw size={12} className={calRefreshing ? 'animate-spin' : ''} />
-            Sync calendars
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Week navigation */}
+            <div className="flex items-center gap-1 rounded-lg border border-gray-200 bg-white p-0.5">
+              <button
+                onClick={() => setWeekOffset((o) => o - 1)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors"
+                title="Previous week"
+              >
+                <ChevronLeft size={14} />
+              </button>
+              {!isCurrentWeek && (
+                <button
+                  onClick={() => setWeekOffset(0)}
+                  className="px-2 text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Today
+                </button>
+              )}
+              <button
+                onClick={() => setWeekOffset((o) => o + 1)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors"
+                title="Next week"
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
+
+            {/* Sync button */}
+            <button
+              onClick={async () => {
+                setCalRefreshing(true)
+                await refreshEvents()
+                await loadAllEvents()
+                setCalRefreshing(false)
+              }}
+              disabled={calRefreshing}
+              className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+            >
+              <RefreshCw size={12} className={calRefreshing ? 'animate-spin' : ''} />
+              Sync calendars
+            </button>
+          </div>
         }
       />
 
@@ -116,146 +593,225 @@ export default function WeekPage() {
           <div className="py-12 text-center text-sm text-gray-400">Loading…</div>
         ) : (
           <>
-            {/* Weekly tasks */}
+            {/* ── Day Planner ──────────────────────────────────────────── */}
+            <section>
+              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                Day Planner
+              </h2>
+              <div className="flex gap-3 items-start">
+                {DAYS.map((day, i) => {
+                  const date = addDays(selectedWeekStart, i)
+                  const isToday = isSameDay(date, new Date())
+                  const note = (plan?.content as WeeklyPlanContent)?.[day] ?? ''
+                  const rawDayEvents = displayEvents
+                    .filter((e) => isSameDay(storedEventStartTime(e), date))
+                  const dayEvents = deduplicateEvents(rawDayEvents)
+
+                  return (
+                    <div
+                      key={day}
+                      className={`flex-1 min-w-0 rounded-lg border bg-white p-4 ${
+                        isToday ? 'border-gray-400 shadow-sm' : 'border-gray-100'
+                      }`}
+                    >
+                      {/* Day header */}
+                      <p className={`mb-3 text-sm font-semibold capitalize ${isToday ? 'text-gray-900' : 'text-gray-500'}`}>
+                        {day.slice(0, 3)}
+                        <span className={`ml-1.5 inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium ${
+                          isToday ? 'bg-gray-900 text-white' : 'text-gray-400 font-normal'
+                        }`}>
+                          {format(date, 'd')}
+                        </span>
+                      </p>
+
+                      {/* Calendar events */}
+                      {dayEvents.length > 0 && (
+                        <div className="mb-3 space-y-1.5">
+                          {dayEvents.map((event) => {
+                            const owner = memberByUserId[event.user_id]
+                            const isBlue = owner?.color === 'blue'
+
+                            if (event.shared) {
+                              return (
+                                <div
+                                  key={event.id}
+                                  className="rounded-md px-2 py-1.5 border border-gray-200"
+                                  style={{ background: 'linear-gradient(to right, #eff6ff, #fff4f2)' }}
+                                >
+                                  <div className="flex items-center gap-1 mb-0.5">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-blue-400 flex-shrink-0" />
+                                    <span className="h-1.5 w-1.5 rounded-full bg-coral-400 flex-shrink-0" />
+                                    <p className="text-xs font-medium leading-snug text-gray-700 truncate">
+                                      {event.summary ?? '(No title)'}
+                                    </p>
+                                  </div>
+                                  <p className="text-xs text-gray-400">{formatStoredEventTime(event)}</p>
+                                </div>
+                              )
+                            }
+
+                            return (
+                              <div
+                                key={event.id}
+                                className={`rounded-md px-2 py-1.5 border ${
+                                  isBlue ? 'bg-blue-50 border-blue-100' : 'bg-coral-50 border-coral-100'
+                                }`}
+                              >
+                                <p className={`text-xs font-medium leading-snug ${
+                                  isBlue ? 'text-blue-800' : 'text-coral-600'
+                                }`}>
+                                  {event.summary ?? '(No title)'}
+                                </p>
+                                <p className={`text-xs mt-0.5 ${isBlue ? 'text-blue-400' : 'text-coral-400'}`}>
+                                  {formatStoredEventTime(event)}
+                                </p>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+
+                      {/* Day note */}
+                      {editingSection === day ? (
+                        <div>
+                          <textarea
+                            autoFocus
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            className="w-full resize-none rounded border border-gray-200 p-2 text-sm outline-none focus:border-gray-400"
+                            rows={3}
+                          />
+                          <div className="mt-1.5 flex gap-2">
+                            <button onClick={() => saveSection(day as DayKey)} className="text-xs font-medium text-gray-700 hover:underline">Save</button>
+                            <button onClick={() => setEditingSection(null)} className="text-xs text-gray-400 hover:underline">Cancel</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => { setEditingSection(day); setEditValue(note) }}
+                          className="w-full text-left text-sm text-gray-500 hover:text-gray-700"
+                        >
+                          {note || <span className="text-gray-300 text-xs">Add note…</span>}
+                        </button>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </section>
+
+            {/* ── Tasks ────────────────────────────────────────────────── */}
             <section>
               <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
                 Tasks this week
               </h2>
               <div className="space-y-2">
-                {tasks.filter(t => !t.completed).map((task) => (
+                {tasks.filter((t) => !t.completed).map((task) => (
                   <TaskItem key={task.id} task={task} onUpdate={fetchAll} />
                 ))}
                 <AddTaskForm module="weekly" onAdd={fetchAll} />
               </div>
-              {tasks.filter(t => t.completed).length > 0 && (
+              {tasks.filter((t) => t.completed).length > 0 && (
                 <div className="mt-4 space-y-2">
                   <p className="text-xs text-gray-400">Done</p>
-                  {tasks.filter(t => t.completed).map((task) => (
+                  {tasks.filter((t) => t.completed).map((task) => (
                     <TaskItem key={task.id} task={task} onUpdate={fetchAll} />
                   ))}
                 </div>
               )}
             </section>
 
-            {/* Day planner */}
+            {/* ── Fun & Upcoming ───────────────────────────────────────── */}
             <section>
               <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                Day planner
+                Fun & Upcoming
               </h2>
-              <div className="flex gap-3 items-start">
-                  {DAYS.map((day, i) => {
-                    const date = addDays(startDay, i)
-                    const isToday = format(new Date(), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
-                    const note = (plan?.content as WeeklyPlanContent)?.[day] ?? ''
-                    const rawDayEvents = weekEvents
-                      .filter((e) => isSameDay(storedEventStartTime(e), date))
-                      .sort((a, b) => storedEventStartTime(a).getTime() - storedEventStartTime(b).getTime())
-                    const dayEvents = deduplicateEvents(rawDayEvents)
+              <div className="rounded-lg border border-gray-100 bg-white p-5 space-y-4">
+                {/* Upcoming calendar events */}
+                {upcomingFunEvents.length > 0 && (
+                  <div>
+                    <p className="mb-2 text-xs font-medium text-gray-500">Coming up (next 28 days)</p>
+                    <div className="space-y-1.5">
+                      {upcomingFunEvents.map((event) => {
+                        const owner = memberByUserId[event.user_id]
+                        const isBlue = owner?.color === 'blue'
+                        const eventDate = storedEventStartTime(event)
+                        const daysAway = differenceInDays(eventDate, startOfToday())
+                        const dateLabel = daysAway === 0
+                          ? 'Today'
+                          : daysAway === 1
+                            ? 'Tomorrow'
+                            : format(eventDate, 'EEE, MMM d')
 
-                    return (
-                      <div
-                        key={day}
-                        className={`flex-1 min-w-0 rounded-lg border bg-white p-4 ${
-                          isToday ? 'border-gray-400 shadow-sm' : 'border-gray-100'
-                        }`}
-                      >
-                        {/* Day header */}
-                        <p className={`mb-3 text-sm font-semibold capitalize ${isToday ? 'text-gray-900' : 'text-gray-500'}`}>
-                          {day.slice(0, 3)}
-                          <span className={`ml-1.5 inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium ${
-                            isToday ? 'bg-gray-900 text-white' : 'text-gray-400 font-normal'
-                          }`}>
-                            {format(date, 'd')}
-                          </span>
-                        </p>
-
-                        {/* Calendar events */}
-                        {dayEvents.length > 0 && (
-                          <div className="mb-3 space-y-1.5">
-                            {dayEvents.map((event) => {
-                              const owner = memberByUserId[event.user_id]
-                              const isBlue = owner?.color === 'blue'
-
-                              if (event.shared) {
-                                return (
-                                  <div
-                                    key={event.id}
-                                    className="rounded-md px-2 py-1.5 border border-gray-200"
-                                    style={{ background: 'linear-gradient(to right, #eff6ff, #fff4f2)' }}
-                                  >
-                                    <div className="flex items-center gap-1 mb-0.5">
-                                      <span className="h-1.5 w-1.5 rounded-full bg-blue-400 flex-shrink-0" />
-                                      <span className="h-1.5 w-1.5 rounded-full bg-coral-400 flex-shrink-0" />
-                                      <p className="text-xs font-medium leading-snug text-gray-700 truncate">
-                                        {event.summary ?? '(No title)'}
-                                      </p>
-                                    </div>
-                                    <p className="text-xs text-gray-400">{formatStoredEventTime(event)}</p>
-                                  </div>
-                                )
-                              }
-
-                              return (
-                                <div
-                                  key={event.id}
-                                  className={`rounded-md px-2 py-1.5 border ${
-                                    isBlue
-                                      ? 'bg-blue-50 border-blue-100'
-                                      : 'bg-coral-50 border-coral-100'
-                                  }`}
-                                >
-                                  <p className={`text-xs font-medium leading-snug ${
-                                    isBlue ? 'text-blue-800' : 'text-coral-600'
-                                  }`}>
-                                    {event.summary ?? '(No title)'}
-                                  </p>
-                                  <p className={`text-xs mt-0.5 ${
-                                    isBlue ? 'text-blue-400' : 'text-coral-400'
-                                  }`}>
-                                    {formatStoredEventTime(event)}
-                                  </p>
-                                </div>
-                              )
-                            })}
-                          </div>
-                        )}
-
-                        {/* Notes */}
-                        {editingDay === day ? (
-                          <div>
-                            <textarea
-                              autoFocus
-                              value={editValue}
-                              onChange={(e) => setEditValue(e.target.value)}
-                              className="w-full resize-none rounded border border-gray-200 p-2 text-sm outline-none focus:border-gray-400"
-                              rows={3}
-                            />
-                            <div className="mt-1.5 flex gap-2">
-                              <button onClick={() => saveDayNote(day)} className="text-xs font-medium text-gray-700 hover:underline">Save</button>
-                              <button onClick={() => setEditingDay(null)} className="text-xs text-gray-400 hover:underline">Cancel</button>
+                        return (
+                          <div key={event.id} className="flex items-start gap-3">
+                            <div className="min-w-[80px] text-right">
+                              <span className="text-xs text-gray-400">{dateLabel}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                              {event.shared ? (
+                                <>
+                                  <span className="h-2 w-2 rounded-full bg-blue-400 flex-shrink-0" />
+                                  <span className="h-2 w-2 -ml-1 rounded-full bg-coral-400 flex-shrink-0" />
+                                </>
+                              ) : (
+                                <span className={`h-2 w-2 rounded-full flex-shrink-0 ${isBlue ? 'bg-blue-400' : 'bg-coral-400'}`} />
+                              )}
+                              <span className="text-sm text-gray-700 truncate">{event.summary ?? '(No title)'}</span>
+                              {!event.is_all_day && (
+                                <span className="text-xs text-gray-400 flex-shrink-0">{formatStoredEventTime(event)}</span>
+                              )}
                             </div>
                           </div>
-                        ) : (
-                          <button
-                            onClick={() => { setEditingDay(day); setEditValue(note) }}
-                            className="w-full text-left text-sm text-gray-500 hover:text-gray-700"
-                          >
-                            {note || <span className="text-gray-300 text-xs">Add note…</span>}
-                          </button>
-                        )}
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {upcomingFunEvents.length === 0 && (
+                  <p className="text-sm text-gray-400">No upcoming events in the next 28 days. Sync your calendar to see events here.</p>
+                )}
+
+                {/* Fun notes */}
+                <div>
+                  <p className="mb-2 text-xs font-medium text-gray-500">Notes (birthdays, vacations, things to look forward to…)</p>
+                  {editingSection === 'fun' ? (
+                    <div>
+                      <textarea
+                        autoFocus
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        className="w-full resize-none rounded border border-gray-200 p-2 text-sm outline-none focus:border-gray-400"
+                        rows={4}
+                        placeholder="e.g. Dad's birthday on the 15th, camping trip weekend of the 22nd…"
+                      />
+                      <div className="mt-2 flex gap-2">
+                        <button onClick={() => saveSection('fun')} className="text-sm text-gray-700 hover:underline">Save</button>
+                        <button onClick={() => setEditingSection(null)} className="text-sm text-gray-400 hover:underline">Cancel</button>
                       </div>
-                    )
-                  })}
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => { setEditingSection('fun'); setEditValue((plan?.content as WeeklyPlanContent)?.fun ?? '') }}
+                      className="w-full text-left text-sm text-gray-600 hover:text-gray-800"
+                    >
+                      {(plan?.content as WeeklyPlanContent)?.fun || (
+                        <span className="text-gray-300">Click to add notes…</span>
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
             </section>
 
-            {/* Notes */}
+            {/* ── Week Notes ───────────────────────────────────────────── */}
             <section>
               <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
                 Week notes
               </h2>
               <div className="rounded-lg border border-gray-100 bg-white p-4">
-                {editingDay === 'notes' ? (
+                {editingSection === 'notes' ? (
                   <div>
                     <textarea
                       autoFocus
@@ -266,13 +822,13 @@ export default function WeekPage() {
                       placeholder="Anything important for the week…"
                     />
                     <div className="mt-2 flex gap-2">
-                      <button onClick={() => saveDayNote('notes')} className="text-sm text-gray-700 hover:underline">Save</button>
-                      <button onClick={() => setEditingDay(null)} className="text-sm text-gray-400 hover:underline">Cancel</button>
+                      <button onClick={() => saveSection('notes')} className="text-sm text-gray-700 hover:underline">Save</button>
+                      <button onClick={() => setEditingSection(null)} className="text-sm text-gray-400 hover:underline">Cancel</button>
                     </div>
                   </div>
                 ) : (
                   <button
-                    onClick={() => { setEditingDay('notes'); setEditValue((plan?.content as WeeklyPlanContent)?.notes ?? '') }}
+                    onClick={() => { setEditingSection('notes'); setEditValue((plan?.content as WeeklyPlanContent)?.notes ?? '') }}
                     className="w-full text-left text-sm text-gray-600 hover:text-gray-800"
                   >
                     {(plan?.content as WeeklyPlanContent)?.notes || (
@@ -281,6 +837,149 @@ export default function WeekPage() {
                   </button>
                 )}
               </div>
+            </section>
+
+            {/* ── AI Assistant ─────────────────────────────────────────── */}
+            <section>
+              <button
+                onClick={() => setShowAssistant((v) => !v)}
+                className="mb-3 flex w-full items-center justify-between"
+              >
+                <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                  AI Assistant
+                </h2>
+                <div className="flex items-center gap-2">
+                  <Sparkles size={13} className="text-amber-400" />
+                  {showAssistant ? (
+                    <ChevronUp size={14} className="text-gray-400" />
+                  ) : (
+                    <ChevronDown size={14} className="text-gray-400" />
+                  )}
+                </div>
+              </button>
+
+              {showAssistant && (
+                <div className="rounded-xl border border-amber-100 bg-gradient-to-br from-amber-50 to-orange-50 p-5 space-y-4">
+                  {/* Insights */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Sparkles size={14} className="text-amber-500" />
+                        <span className="text-sm font-semibold text-amber-700">Proactive Insights</span>
+                      </div>
+                      <button
+                        onClick={() => { hasLoadedInsights.current = true; loadInsights() }}
+                        disabled={insightLoading}
+                        className="flex items-center gap-1 text-xs text-amber-600 hover:text-amber-800 disabled:opacity-50 transition-colors"
+                      >
+                        <RefreshCw size={11} className={insightLoading ? 'animate-spin' : ''} />
+                        Refresh
+                      </button>
+                    </div>
+
+                    <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                      {insightLoading && !insightText ? (
+                        <div className="flex items-center gap-2 text-amber-500">
+                          <Loader2 size={14} className="animate-spin" />
+                          <span>Reviewing your schedule and home…</span>
+                        </div>
+                      ) : (
+                        <>
+                          {insightText}
+                          {insightLoading && (
+                            <span className="inline-block w-1.5 h-4 bg-amber-400 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Chat messages */}
+                  {messages.length > 0 && (
+                    <div className="space-y-3 pt-2 border-t border-amber-100">
+                      {messages.map((msg, i) => {
+                        const isUser = msg.role === 'user'
+                        return (
+                          <div key={i} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+                            <div
+                              className={`max-w-[85%] rounded-xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
+                                isUser
+                                  ? 'bg-gray-900 text-white rounded-br-sm'
+                                  : 'bg-white border border-amber-100 text-gray-700 rounded-bl-sm shadow-sm'
+                              }`}
+                            >
+                              {msg.content}
+                              {msg.streaming && (
+                                <span className="inline-block w-1.5 h-4 bg-gray-400 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })}
+                      <div ref={bottomRef} />
+                    </div>
+                  )}
+
+                  {/* Suggested prompts */}
+                  {messages.length === 0 && !insightLoading && insightText && (
+                    <div className="pt-2 border-t border-amber-100">
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          'What should we focus on this week?',
+                          'Any maintenance we should tackle this weekend?',
+                          'What upcoming events need prep?',
+                          'Are we forgetting anything?',
+                        ].map((prompt) => (
+                          <button
+                            key={prompt}
+                            onClick={() => { setChatInput(prompt); chatInputRef.current?.focus() }}
+                            className="rounded-full border border-amber-200 bg-white px-3 py-1.5 text-xs text-gray-600 hover:bg-amber-50 hover:border-amber-300 transition-colors"
+                          >
+                            {prompt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Chat input */}
+                  {insightText && !insightLoading && (
+                    <div className="flex items-end gap-2 pt-1">
+                      <textarea
+                        ref={chatInputRef}
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault()
+                            sendMessage()
+                          }
+                        }}
+                        placeholder="Ask a follow-up question…"
+                        rows={1}
+                        className="flex-1 resize-none rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm outline-none focus:border-amber-400 transition-colors placeholder:text-gray-400"
+                        style={{ minHeight: '36px', maxHeight: '100px' }}
+                        onInput={(e) => {
+                          const el = e.currentTarget
+                          el.style.height = 'auto'
+                          el.style.height = `${Math.min(el.scrollHeight, 100)}px`
+                        }}
+                      />
+                      <button
+                        onClick={sendMessage}
+                        disabled={!chatInput.trim() || chatLoading || !aiCtx}
+                        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-40 transition-colors"
+                      >
+                        {chatLoading ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <Send size={14} />
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </section>
           </>
         )}

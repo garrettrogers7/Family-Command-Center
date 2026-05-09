@@ -10,7 +10,6 @@ import WeekPage from '@/pages/WeekPage'
 import HouseholdPage from '@/pages/HouseholdPage'
 import VaultPage from '@/pages/VaultPage'
 import SettingsPage from '@/pages/SettingsPage'
-import AssistantPage from '@/pages/AssistantPage'
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -76,7 +75,7 @@ export default function App() {
         <Route path="household" element={<HouseholdPage />} />
         <Route path="vault" element={<VaultPage />} />
         <Route path="settings" element={<SettingsPage />} />
-        <Route path="assistant" element={<AssistantPage />} />
+        <Route path="assistant" element={<Navigate to="/week" replace />} />
       </Route>
 
       {/* Fallback */}

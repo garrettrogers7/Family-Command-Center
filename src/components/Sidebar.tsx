@@ -5,7 +5,6 @@ import {
   Home,
   Lock,
   Settings,
-  Sparkles,
 } from 'lucide-react'
 import { useFamily } from '@/contexts/FamilyContext'
 import { UserAvatar } from '@/components/UserAvatar'
@@ -15,7 +14,6 @@ const navItems = [
   { to: '/week', label: 'This Week', icon: CalendarDays },
   { to: '/household', label: 'Household', icon: Home },
   { to: '/vault', label: 'Vault', icon: Lock },
-  { to: '/assistant', label: 'Assistant', icon: Sparkles },
 ]
 
 export function Sidebar() {

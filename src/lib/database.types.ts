@@ -109,5 +109,6 @@ export interface WeeklyPlanContent {
   saturday?: string
   sunday?: string
   notes?: string
+  fun?: string
   goals?: string[]
 }
