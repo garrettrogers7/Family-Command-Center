@@ -336,9 +336,7 @@ export default function WeekPage() {
   const abortRef = useRef<AbortController | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const chatInputRef = useRef<HTMLTextAreaElement>(null)
-  const hasLoadedInsights = useRef(false)
-
-  const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
+const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
   const todayStr = useMemo(() => format(new Date(), 'EEEE, MMMM d, yyyy'), [])
 
   // Auto-scroll chat
@@ -502,13 +500,7 @@ export default function WeekPage() {
     )
   }, [user, family, memberNames, todayStr])
 
-  // Load insights when assistant is first opened
-  useEffect(() => {
-    if (showAssistant && !hasLoadedInsights.current) {
-      hasLoadedInsights.current = true
-      loadInsights()
-    }
-  }, [showAssistant, loadInsights])
+  // No auto-load — user triggers insights manually
 
   // AI: send chat message
   async function sendMessage() {
@@ -821,18 +813,28 @@ export default function WeekPage() {
                         <Sparkles size={14} className="text-amber-500" />
                         <span className="text-sm font-semibold text-amber-700">Proactive Insights</span>
                       </div>
-                      <button
-                        onClick={() => { hasLoadedInsights.current = true; loadInsights() }}
-                        disabled={insightLoading}
-                        className="flex items-center gap-1 text-xs text-amber-600 hover:text-amber-800 disabled:opacity-50 transition-colors"
-                      >
-                        <RefreshCw size={11} className={insightLoading ? 'animate-spin' : ''} />
-                        Refresh
-                      </button>
+                      {insightText && (
+                        <button
+                          onClick={loadInsights}
+                          disabled={insightLoading}
+                          className="flex items-center gap-1 text-xs text-amber-600 hover:text-amber-800 disabled:opacity-50 transition-colors"
+                        >
+                          <RefreshCw size={11} className={insightLoading ? 'animate-spin' : ''} />
+                          Refresh
+                        </button>
+                      )}
                     </div>
 
                     <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-                      {insightLoading && !insightText ? (
+                      {!insightText && !insightLoading ? (
+                        <button
+                          onClick={loadInsights}
+                          className="flex items-center gap-2 rounded-lg border border-amber-200 bg-white px-4 py-3 text-sm text-amber-700 hover:bg-amber-50 transition-colors w-full justify-center"
+                        >
+                          <Sparkles size={14} className="text-amber-400" />
+                          Generate insights for this week
+                        </button>
+                      ) : insightLoading && !insightText ? (
                         <div className="flex items-center gap-2 text-amber-500">
                           <Loader2 size={14} className="animate-spin" />
                           <span>Reviewing your schedule and home…</span>
