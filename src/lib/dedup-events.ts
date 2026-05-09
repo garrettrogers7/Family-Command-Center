@@ -2,6 +2,15 @@ import { format } from 'date-fns'
 import { storedEventStartTime } from './google-calendar'
 import type { StoredCalendarEvent } from './google-calendar'
 
+/** Normalize smart quotes/apostrophes so "Annie’s" matches "Annie's" */
+function normalizeSummary(s: string): string {
+  return s
+    .toLowerCase()
+    .trim()
+    .replace(/[‘’‚‛′‵ʼ]/g, "'")
+    .replace(/[“”„‟″‶]/g, '"')
+}
+
 export interface DisplayEvent extends StoredCalendarEvent {
   shared: boolean
   sharedUserIds: string[]
@@ -33,22 +42,13 @@ export function deduplicateEvents(events: StoredCalendarEvent[]): DisplayEvent[]
 
   for (const group of byGoogleId.values()) {
     const rep = group[0]
-    const summary = rep.summary?.toLowerCase().trim()
+    const summary = normalizeSummary(rep.summary ?? '')
     const dateKey = format(storedEventStartTime(rep), 'yyyy-MM-dd')
 
     // Events with no title fall back to a unique key so they're never merged by name
     const mergeKey = summary
       ? `name:${summary}|${dateKey}`
       : `id:${rep.google_event_id || rep.id}`
-
-    console.log('[Dedup]', JSON.stringify({
-      summary: rep.summary,
-      summaryChars: [...(rep.summary ?? '')].map(c => c.charCodeAt(0)),
-      dateKey,
-      mergeKey,
-      google_event_id: rep.google_event_id,
-      user_id: rep.user_id.slice(0, 8),
-    }))
 
     const existing = merged.get(mergeKey)
     if (existing) {
