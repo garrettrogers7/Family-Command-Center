@@ -25,6 +25,7 @@ export interface Task {
   assigned_to: string | null
   created_by: string
   due_date: string | null
+  notes: string | null
   completed: boolean
   module: TaskModule
   created_at: string
