@@ -313,6 +313,7 @@ export default function WeekPage() {
 
   // Data state
   const [tasks, setTasks] = useState<Task[]>([])
+  const [showCompleted, setShowCompleted] = useState(false)
   const [plan, setPlan] = useState<WeeklyPlan | null>(null)
   const [editingSection, setEditingSection] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
@@ -746,11 +747,21 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                 <AddTaskForm module="weekly" onAdd={fetchAll} />
               </div>
               {tasks.filter((t) => t.completed).length > 0 && (
-                <div className="mt-4 space-y-2">
-                  <p className="text-xs text-gray-400">Done</p>
-                  {tasks.filter((t) => t.completed).map((task) => (
-                    <TaskItem key={task.id} task={task} onUpdate={fetchAll} />
-                  ))}
+                <div className="mt-4">
+                  <button
+                    onClick={() => setShowCompleted((v) => !v)}
+                    className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <span className={`transition-transform ${showCompleted ? 'rotate-90' : ''}`}>▶</span>
+                    Done ({tasks.filter((t) => t.completed).length})
+                  </button>
+                  {showCompleted && (
+                    <div className="mt-2 space-y-2">
+                      {tasks.filter((t) => t.completed).map((task) => (
+                        <TaskItem key={task.id} task={task} onUpdate={fetchAll} />
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </section>
