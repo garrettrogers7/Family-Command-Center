@@ -283,12 +283,38 @@ function HistoryEntryRow({ entry, familyId, equipment, items, onUpdate }: { entr
     }
   }, [entry, editing])
   const [uploading, setUploading] = useState(false)
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const catDef = CATEGORIES.find(c => c.key === entry.category)
   const Icon = catDef?.Icon ?? Home
   const color = catDef?.color ?? 'text-gray-400'
   const receipts: string[] = entry.receipt_urls ?? []
+
+  // Extract the bare storage path from either a full URL or a stored path
+  function getStoragePath(urlOrPath: string): string {
+    if (urlOrPath.includes('/object/public/receipts/')) return urlOrPath.split('/object/public/receipts/')[1]
+    if (urlOrPath.includes('/receipts/')) return urlOrPath.split('/receipts/')[1]
+    return urlOrPath
+  }
+
+  // Generate signed URLs whenever the expanded panel opens or receipts change
+  useEffect(() => {
+    if (!expanded || receipts.length === 0) return
+    let cancelled = false
+    async function generateSignedUrls() {
+      const pairs = await Promise.all(
+        receipts.map(async (r) => {
+          const path = getStoragePath(r)
+          const { data } = await supabase.storage.from('receipts').createSignedUrl(path, 3600)
+          return [r, data?.signedUrl ?? r] as [string, string]
+        })
+      )
+      if (!cancelled) setSignedUrls(Object.fromEntries(pairs))
+    }
+    generateSignedUrls()
+    return () => { cancelled = true }
+  }, [expanded, receipts])
   // Resolve equipment: prefer stored equipment_id, fall back to looking up via item_id
   const equipmentId = entry.equipment_id ?? (entry.item_id ? items.find(i => i.id === entry.item_id)?.equipment_id : null) ?? null
   const eq = equipment.find(e => e.id === equipmentId)
@@ -337,8 +363,8 @@ function HistoryEntryRow({ entry, familyId, equipment, items, onUpdate }: { entr
     const path = `${familyId}/${entry.id}/${Date.now()}-${file.name}`
     const { error } = await supabase.storage.from('receipts').upload(path, file)
     if (!error) {
-      const { data: urlData } = supabase.storage.from('receipts').getPublicUrl(path)
-      const newUrls = [...receipts, urlData.publicUrl]
+      // Store the bare path (not a public URL) so signed URLs always work
+      const newUrls = [...receipts, path]
       await supabase.from('maintenance_history').update({ receipt_urls: newUrls }).eq('id', entry.id)
       onUpdate()
     }
@@ -347,7 +373,7 @@ function HistoryEntryRow({ entry, familyId, equipment, items, onUpdate }: { entr
   }
 
   async function deleteReceipt(url: string) {
-    const path = url.split('/receipts/')[1]
+    const path = getStoragePath(url)
     await supabase.storage.from('receipts').remove([path])
     const newUrls = receipts.filter(u => u !== url)
     await supabase.from('maintenance_history').update({ receipt_urls: newUrls }).eq('id', entry.id)
@@ -357,7 +383,7 @@ function HistoryEntryRow({ entry, familyId, equipment, items, onUpdate }: { entr
   async function deleteEntry() {
     // Clean up any receipts from storage
     if (receipts.length > 0) {
-      const paths = receipts.map(url => url.split('/receipts/')[1]).filter(Boolean)
+      const paths = receipts.map(url => getStoragePath(url)).filter(Boolean)
       await supabase.storage.from('receipts').remove(paths)
     }
     await supabase.from('maintenance_history').delete().eq('id', entry.id)
@@ -444,9 +470,10 @@ function HistoryEntryRow({ entry, familyId, equipment, items, onUpdate }: { entr
               <div className="mb-2 space-y-1">
                 {receipts.map((url) => {
                   const fileName = decodeURIComponent(url.split('/').pop() ?? 'Receipt').replace(/^\d+-/, '')
+                  const href = signedUrls[url] ?? url
                   return (
                     <div key={url} className="flex items-center gap-2">
-                      <a href={url} target="_blank" rel="noopener noreferrer"
+                      <a href={href} target="_blank" rel="noopener noreferrer"
                         className="flex flex-1 min-w-0 items-center gap-1.5 rounded bg-gray-50 px-2 py-1.5 text-xs text-blue-600 hover:bg-gray-100 transition-colors">
                         <Paperclip size={11} className="flex-shrink-0" />
                         <span className="truncate">{fileName}</span>
