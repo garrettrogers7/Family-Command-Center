@@ -54,6 +54,7 @@ import {
   Loader2,
   Trash2,
   GripVertical,
+  Pencil,
 } from 'lucide-react'
 import type { MaintenanceItem, Equipment } from '@/lib/database.types'
 
@@ -344,45 +345,113 @@ function SortableFunRow({
   onDelete,
   onConfirmDelete,
   onCancelDelete,
+  onSave,
 }: {
   item: FunItem
   confirmDeleteId: string | null
   onDelete: (id: string) => void
   onConfirmDelete: (id: string) => void
   onCancelDelete: () => void
+  onSave: (updated: FunItem) => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id })
+  const [editing, setEditing] = useState(false)
+  const [editText, setEditText] = useState(item.text)
+  const [editNotes, setEditNotes] = useState(item.notes ?? '')
+
+  function openEdit() {
+    setEditText(item.text)
+    setEditNotes(item.notes ?? '')
+    setEditing(true)
+  }
+
+  function handleSave() {
+    if (!editText.trim()) return
+    onSave({ ...item, text: editText.trim(), notes: editNotes.trim() || null })
+    setEditing(false)
+  }
+
+  if (editing) {
+    return (
+      <div
+        ref={setNodeRef}
+        style={{ transform: CSS.Transform.toString(transform), transition }}
+        className="flex items-start gap-1"
+      >
+        <div className="w-6 flex-shrink-0" /> {/* spacer for grip alignment */}
+        <div className="flex-1 rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-3">
+          <input
+            autoFocus
+            value={editText}
+            onChange={(e) => setEditText(e.target.value)}
+            className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400"
+            placeholder="Event title"
+          />
+          <textarea
+            value={editNotes}
+            onChange={(e) => setEditNotes(e.target.value)}
+            placeholder="Add notes…"
+            rows={2}
+            className="w-full resize-none rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400 placeholder:text-gray-300"
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={handleSave}
+              disabled={!editText.trim()}
+              className="rounded-md bg-gray-900 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40"
+            >
+              Save
+            </button>
+            <button onClick={() => setEditing(false)} className="rounded-md px-3 py-1.5 text-xs text-gray-500 hover:text-gray-700">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}
-      className="flex items-center gap-1 group/funrow"
+      className="flex items-start gap-1 group/funrow"
     >
       <button
         {...attributes}
         {...listeners}
-        className="flex-shrink-0 cursor-grab active:cursor-grabbing touch-none text-gray-200 hover:text-gray-400 transition-colors p-1"
+        className="flex-shrink-0 cursor-grab active:cursor-grabbing touch-none text-gray-200 hover:text-gray-400 transition-colors p-1 mt-2.5"
         tabIndex={-1}
         aria-label="Drag to reorder"
       >
         <GripVertical size={14} />
       </button>
-      <div className="flex flex-1 min-w-0 items-center gap-3 rounded-lg border border-gray-100 bg-white px-4 py-3 group">
-        <span className="flex-1 text-sm text-gray-700">{item.text}</span>
-        {confirmDeleteId === item.id ? (
-          <span className="flex items-center gap-1.5 text-xs">
-            <span className="text-gray-500">Delete?</span>
-            <button onClick={() => onDelete(item.id)} className="font-medium text-red-500 hover:text-red-700">Yes</button>
-            <button onClick={onCancelDelete} className="text-gray-400 hover:text-gray-600">No</button>
-          </span>
-        ) : (
-          <button
-            onClick={() => onConfirmDelete(item.id)}
-            className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-300 hover:text-red-400"
-            title="Remove"
-          >
-            <Trash2 size={14} />
-          </button>
+      <div className="flex-1 min-w-0 rounded-lg border border-gray-100 bg-white group">
+        <div className="flex items-center gap-3 px-4 py-3">
+          <span className="flex-1 text-sm text-gray-700">{item.text}</span>
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            {confirmDeleteId === item.id ? (
+              <span className="flex items-center gap-1.5 text-xs">
+                <span className="text-gray-500">Delete?</span>
+                <button onClick={() => onDelete(item.id)} className="font-medium text-red-500 hover:text-red-700">Yes</button>
+                <button onClick={onCancelDelete} className="text-gray-400 hover:text-gray-600">No</button>
+              </span>
+            ) : (
+              <>
+                <button onClick={openEdit} className="text-gray-300 hover:text-gray-500 p-0.5" title="Edit">
+                  <Pencil size={13} />
+                </button>
+                <button onClick={() => onConfirmDelete(item.id)} className="text-gray-300 hover:text-red-400 p-0.5" title="Delete">
+                  <Trash2 size={13} />
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+        {item.notes && (
+          <div className="border-t border-gray-50 px-4 py-2">
+            <p className="text-xs text-gray-400 leading-relaxed">{item.notes}</p>
+          </div>
         )}
       </div>
     </div>
@@ -521,6 +590,18 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
     const updatedContent: WeeklyPlanContent = {
       ...content,
       funItems: (content.funItems ?? []).filter((fi) => fi.id !== id),
+    }
+    await supabase.from('weekly_plans').update({ content: updatedContent, updated_by: user.id }).eq('id', existingPlan.id)
+    fetchAll()
+  }
+
+  async function updateFunItem(updated: FunItem) {
+    if (!family || !user) return
+    const { existingPlan, content } = await getFreshContent()
+    if (!existingPlan) return
+    const updatedContent: WeeklyPlanContent = {
+      ...content,
+      funItems: (content.funItems ?? []).map((fi) => fi.id === updated.id ? updated : fi),
     }
     await supabase.from('weekly_plans').update({ content: updatedContent, updated_by: user.id }).eq('id', existingPlan.id)
     fetchAll()
@@ -927,6 +1008,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                         onDelete={(id) => { removeFunItem(id); setConfirmDeleteFunId(null) }}
                         onConfirmDelete={setConfirmDeleteFunId}
                         onCancelDelete={() => setConfirmDeleteFunId(null)}
+                        onSave={updateFunItem}
                       />
                     ))}
                   </div>

@@ -104,6 +104,7 @@ export interface WeeklyPlan {
 export interface FunItem {
   id: string
   text: string
+  notes?: string | null
 }
 
 export interface WeeklyPlanContent {
