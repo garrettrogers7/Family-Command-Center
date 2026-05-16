@@ -1,4 +1,20 @@
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { supabase } from '@/lib/supabase'
 import { useFamily } from '@/contexts/FamilyContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -37,6 +53,7 @@ import {
   Send,
   Loader2,
   Trash2,
+  GripVertical,
 } from 'lucide-react'
 import type { MaintenanceItem, Equipment } from '@/lib/database.types'
 
@@ -295,6 +312,83 @@ INSTRUCTIONS:
 - Use first names when addressing family members`
 }
 
+// ── Sortable wrappers ─────────────────────────────────────────────────────────
+
+function SortableTaskRow({ task, onUpdate }: { task: Task; onUpdate: () => void }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id })
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}
+      className="flex items-center gap-1 group/row"
+    >
+      <button
+        {...attributes}
+        {...listeners}
+        className="flex-shrink-0 cursor-grab active:cursor-grabbing touch-none text-gray-200 hover:text-gray-400 transition-colors p-1"
+        tabIndex={-1}
+        aria-label="Drag to reorder"
+      >
+        <GripVertical size={14} />
+      </button>
+      <div className="flex-1 min-w-0">
+        <TaskItem task={task} onUpdate={onUpdate} />
+      </div>
+    </div>
+  )
+}
+
+function SortableFunRow({
+  item,
+  confirmDeleteId,
+  onDelete,
+  onConfirmDelete,
+  onCancelDelete,
+}: {
+  item: FunItem
+  confirmDeleteId: string | null
+  onDelete: (id: string) => void
+  onConfirmDelete: (id: string) => void
+  onCancelDelete: () => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id })
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}
+      className="flex items-center gap-1 group/funrow"
+    >
+      <button
+        {...attributes}
+        {...listeners}
+        className="flex-shrink-0 cursor-grab active:cursor-grabbing touch-none text-gray-200 hover:text-gray-400 transition-colors p-1"
+        tabIndex={-1}
+        aria-label="Drag to reorder"
+      >
+        <GripVertical size={14} />
+      </button>
+      <div className="flex flex-1 min-w-0 items-center gap-3 rounded-lg border border-gray-100 bg-white px-4 py-3 group">
+        <span className="flex-1 text-sm text-gray-700">{item.text}</span>
+        {confirmDeleteId === item.id ? (
+          <span className="flex items-center gap-1.5 text-xs">
+            <span className="text-gray-500">Delete?</span>
+            <button onClick={() => onDelete(item.id)} className="font-medium text-red-500 hover:text-red-700">Yes</button>
+            <button onClick={onCancelDelete} className="text-gray-400 hover:text-gray-600">No</button>
+          </span>
+        ) : (
+          <button
+            onClick={() => onConfirmDelete(item.id)}
+            className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-300 hover:text-red-400"
+            title="Remove"
+          >
+            <Trash2 size={14} />
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function WeekPage() {
@@ -325,6 +419,12 @@ export default function WeekPage() {
 
   // Fun item confirm-delete
   const [confirmDeleteFunId, setConfirmDeleteFunId] = useState<string | null>(null)
+
+  // DnD sensors (pointer for mouse, touch for mobile)
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
+  )
 
   // AI assistant state
   const [showAssistant, setShowAssistant] = useState(true)
@@ -422,6 +522,45 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
       ...content,
       funItems: (content.funItems ?? []).filter((fi) => fi.id !== id),
     }
+    await supabase.from('weekly_plans').update({ content: updatedContent, updated_by: user.id }).eq('id', existingPlan.id)
+    fetchAll()
+  }
+
+  // Compute ordered task list (incomplete tasks only, respecting saved order)
+  const taskOrder: string[] = (plan?.content as WeeklyPlanContent)?.taskOrder ?? []
+  const incompleteTasks = tasks.filter((t) => !t.completed)
+  const orderedTasks = taskOrder.length > 0
+    ? [
+        ...taskOrder.map((id) => incompleteTasks.find((t) => t.id === id)).filter(Boolean) as Task[],
+        ...incompleteTasks.filter((t) => !taskOrder.includes(t.id)),
+      ]
+    : incompleteTasks
+
+  async function handleTaskDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id || !family || !user) return
+    const oldIndex = orderedTasks.findIndex((t) => t.id === active.id)
+    const newIndex = orderedTasks.findIndex((t) => t.id === over.id)
+    const reordered = arrayMove(orderedTasks, oldIndex, newIndex)
+    const { existingPlan, content } = await getFreshContent()
+    const updatedContent: WeeklyPlanContent = { ...content, taskOrder: reordered.map((t) => t.id) }
+    if (existingPlan) {
+      await supabase.from('weekly_plans').update({ content: updatedContent, updated_by: user.id }).eq('id', existingPlan.id)
+    } else {
+      await supabase.from('weekly_plans').insert({ family_id: family.id, week_start: weekStartStr, content: updatedContent, updated_by: user.id })
+    }
+    fetchAll()
+  }
+
+  async function handleFunDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id || !family || !user) return
+    const oldIndex = funItems.findIndex((fi) => fi.id === active.id)
+    const newIndex = funItems.findIndex((fi) => fi.id === over.id)
+    const reordered = arrayMove(funItems, oldIndex, newIndex)
+    const { existingPlan, content } = await getFreshContent()
+    if (!existingPlan) return
+    const updatedContent: WeeklyPlanContent = { ...content, funItems: reordered }
     await supabase.from('weekly_plans').update({ content: updatedContent, updated_by: user.id }).eq('id', existingPlan.id)
     fetchAll()
   }
@@ -740,10 +879,16 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
               <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
                 Tasks this week
               </h2>
-              <div className="space-y-2">
-                {tasks.filter((t) => !t.completed).map((task) => (
-                  <TaskItem key={task.id} task={task} onUpdate={fetchAll} />
-                ))}
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleTaskDragEnd}>
+                <SortableContext items={orderedTasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+                  <div className="space-y-2">
+                    {orderedTasks.map((task) => (
+                      <SortableTaskRow key={task.id} task={task} onUpdate={fetchAll} />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+              <div className="mt-2">
                 <AddTaskForm module="weekly" onAdd={fetchAll} />
               </div>
               {tasks.filter((t) => t.completed).length > 0 && (
@@ -771,49 +916,43 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
               <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
                 Fun & Upcoming
               </h2>
-              <div className="space-y-2">
-                {funItems.map((item) => (
-                  <div key={item.id} className="flex items-center gap-3 rounded-lg border border-gray-100 bg-white px-4 py-3 group">
-                    <span className="flex-1 text-sm text-gray-700">{item.text}</span>
-                    {confirmDeleteFunId === item.id ? (
-                      <span className="flex items-center gap-1.5 text-xs">
-                        <span className="text-gray-500">Delete?</span>
-                        <button onClick={() => { removeFunItem(item.id); setConfirmDeleteFunId(null) }} className="font-medium text-red-500 hover:text-red-700">Yes</button>
-                        <button onClick={() => setConfirmDeleteFunId(null)} className="text-gray-400 hover:text-gray-600">No</button>
-                      </span>
-                    ) : (
-                      <button
-                        onClick={() => setConfirmDeleteFunId(item.id)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-300 hover:text-red-400"
-                        title="Remove"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    )}
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleFunDragEnd}>
+                <SortableContext items={funItems.map((fi) => fi.id)} strategy={verticalListSortingStrategy}>
+                  <div className="space-y-2">
+                    {funItems.map((item) => (
+                      <SortableFunRow
+                        key={item.id}
+                        item={item}
+                        confirmDeleteId={confirmDeleteFunId}
+                        onDelete={(id) => { removeFunItem(id); setConfirmDeleteFunId(null) }}
+                        onConfirmDelete={setConfirmDeleteFunId}
+                        onCancelDelete={() => setConfirmDeleteFunId(null)}
+                      />
+                    ))}
                   </div>
-                ))}
+                </SortableContext>
+              </DndContext>
 
-                {/* Add new fun item */}
-                <form
-                  onSubmit={(e) => { e.preventDefault(); addFunItem() }}
-                  className="flex items-center gap-2 rounded-lg border border-dashed border-gray-200 bg-white px-4 py-2.5"
-                >
-                  <input
-                    value={newFunText}
-                    onChange={(e) => setNewFunText(e.target.value)}
-                    placeholder="Add a birthday, vacation, holiday…"
-                    className="flex-1 bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-300"
-                  />
-                  {newFunText.trim() && (
-                    <button
-                      type="submit"
-                      className="text-xs font-medium text-gray-500 hover:text-gray-800 transition-colors"
-                    >
-                      Add
-                    </button>
-                  )}
-                </form>
-              </div>
+              {/* Add new fun item */}
+              <form
+                onSubmit={(e) => { e.preventDefault(); addFunItem() }}
+                className="mt-2 flex items-center gap-2 rounded-lg border border-dashed border-gray-200 bg-white px-4 py-2.5"
+              >
+                <input
+                  value={newFunText}
+                  onChange={(e) => setNewFunText(e.target.value)}
+                  placeholder="Add a birthday, vacation, holiday…"
+                  className="flex-1 bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-300"
+                />
+                {newFunText.trim() && (
+                  <button
+                    type="submit"
+                    className="text-xs font-medium text-gray-500 hover:text-gray-800 transition-colors"
+                  >
+                    Add
+                  </button>
+                )}
+              </form>
             </section>
 
             {/* ── AI Assistant ─────────────────────────────────────────── */}

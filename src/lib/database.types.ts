@@ -117,4 +117,5 @@ export interface WeeklyPlanContent {
   notes?: string
   funItems?: FunItem[]
   goals?: string[]
+  taskOrder?: string[]  // ordered list of task IDs for the weekly module
 }
