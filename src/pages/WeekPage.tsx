@@ -646,10 +646,14 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
     fetchAll()
   }
 
-  // Load tasks and plan for selected week
+  // Show loading spinner only when the week changes — not on every background refresh
+  useEffect(() => {
+    setLoading(true)
+  }, [weekStartStr])
+
+  // Load tasks and plan for selected week — silently refreshes without showing spinner
   const fetchAll = useCallback(async () => {
     if (!family) return
-    setLoading(true)
 
     const [{ data: taskData }, { data: planData }] = await Promise.all([
       supabase
