@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react'
-import { Copy, Check, LogOut, Calendar, Unlink, Loader2 } from 'lucide-react'
+import { Copy, Check, LogOut, Calendar, Unlink, Loader2, Download } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { useFamily } from '@/contexts/FamilyContext'
@@ -23,6 +23,61 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [backingUp, setBackingUp] = useState(false)
+  const [backupDone, setBackupDone] = useState(false)
+
+  async function downloadBackup() {
+    if (!family) return
+    setBackingUp(true)
+    try {
+      const fid = family.id
+      const [
+        { data: tasks },
+        { data: maintenanceItems },
+        { data: maintenanceHistory },
+        { data: equipment },
+        { data: weeklyPlans },
+        { data: vaultEntries },
+        { data: familyMembers },
+      ] = await Promise.all([
+        supabase.from('tasks').select('*').eq('family_id', fid),
+        supabase.from('maintenance_items').select('*').eq('family_id', fid),
+        supabase.from('maintenance_history').select('*').eq('family_id', fid),
+        supabase.from('equipment').select('*').eq('family_id', fid),
+        supabase.from('weekly_plans').select('*').eq('family_id', fid),
+        supabase.from('vault_entries').select('*').eq('family_id', fid),
+        supabase.from('family_members').select('*').eq('family_id', fid),
+      ])
+
+      const backup = {
+        exportedAt: new Date().toISOString(),
+        familyName: family.name,
+        familyId: fid,
+        data: {
+          familyMembers: familyMembers ?? [],
+          tasks: tasks ?? [],
+          maintenanceItems: maintenanceItems ?? [],
+          maintenanceHistory: maintenanceHistory ?? [],
+          equipment: equipment ?? [],
+          weeklyPlans: weeklyPlans ?? [],
+          vaultEntries: vaultEntries ?? [],
+        },
+      }
+
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `home-base-backup-${new Date().toISOString().slice(0, 10)}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+
+      setBackupDone(true)
+      setTimeout(() => setBackupDone(false), 3000)
+    } finally {
+      setBackingUp(false)
+    }
+  }
 
   async function handleProfileSave(e: FormEvent) {
     e.preventDefault()
@@ -225,6 +280,31 @@ export default function SettingsPage() {
                 ✓ Your Google Calendar is connected. Events refresh automatically each session.
               </p>
             )}
+          </div>
+        </section>
+
+        {/* Data backup */}
+        <section>
+          <h2 className="mb-4 text-sm font-semibold text-gray-700">Data backup</h2>
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+            <p className="mb-1 text-sm font-medium text-gray-900">Download a full backup</p>
+            <p className="mb-4 text-xs text-gray-400 leading-relaxed">
+              Exports all your data — tasks, maintenance log, history, equipment, vault, and weekly plans — as a JSON file.
+              Save it to iCloud Drive or Google Drive. We recommend doing this weekly.
+            </p>
+            <button
+              onClick={downloadBackup}
+              disabled={backingUp}
+              className="flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 transition-colors"
+            >
+              {backingUp ? (
+                <><Loader2 size={14} className="animate-spin" /> Preparing…</>
+              ) : backupDone ? (
+                <><Check size={14} /> Downloaded!</>
+              ) : (
+                <><Download size={14} /> Download backup</>
+              )}
+            </button>
           </div>
         </section>
 
