@@ -1050,36 +1050,30 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
 
             {/* ── AI Assistant ─────────────────────────────────────────── */}
             <section>
-              <button
-                onClick={() => setShowAssistant((v) => !v)}
-                className="mb-3 flex w-full items-center justify-between rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100 px-4 py-3 hover:from-amber-100 hover:to-orange-100 transition-colors"
-              >
-                <div className="flex items-center gap-2">
-                  <Sparkles size={16} className="text-amber-500" />
-                  <span className="text-sm font-semibold text-amber-800">AI Assistant</span>
-                  <span className="text-xs text-amber-500">· Weekly meeting helper</span>
-                </div>
-                {showAssistant ? (
-                  <ChevronUp size={16} className="text-amber-400" />
-                ) : (
-                  <ChevronDown size={16} className="text-amber-400" />
-                )}
-              </button>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-400 flex items-center gap-1.5">
+                  <Sparkles size={12} className="text-gray-400" />
+                  AI Assistant
+                </h2>
+                <button
+                  onClick={() => setShowAssistant((v) => !v)}
+                  className="text-xs text-gray-400 hover:text-gray-600 transition-colors flex items-center gap-1"
+                >
+                  {showAssistant ? <><ChevronUp size={13} /> Hide</> : <><ChevronDown size={13} /> Show</>}
+                </button>
+              </div>
 
               {showAssistant && (
-                <div className="rounded-xl border border-amber-100 bg-gradient-to-br from-amber-50 to-orange-50 p-5 space-y-4">
+                <div className="rounded-lg border border-gray-100 bg-white shadow-sm divide-y divide-gray-50">
                   {/* Insights */}
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <Sparkles size={14} className="text-amber-500" />
-                        <span className="text-sm font-semibold text-amber-700">Proactive Insights</span>
-                      </div>
+                  <div className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-xs font-medium text-gray-500">Proactive insights</p>
                       {insightText && (
                         <button
                           onClick={loadInsights}
                           disabled={insightLoading}
-                          className="flex items-center gap-1 text-xs text-amber-600 hover:text-amber-800 disabled:opacity-50 transition-colors"
+                          className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 disabled:opacity-50 transition-colors"
                         >
                           <RefreshCw size={11} className={insightLoading ? 'animate-spin' : ''} />
                           Refresh
@@ -1091,13 +1085,13 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                       {!insightText && !insightLoading ? (
                         <button
                           onClick={loadInsights}
-                          className="flex items-center gap-2 rounded-lg border border-amber-200 bg-white px-4 py-3 text-sm text-amber-700 hover:bg-amber-50 transition-colors w-full justify-center"
+                          className="flex items-center gap-2 rounded-lg border border-dashed border-gray-200 px-4 py-3 text-sm text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors w-full justify-center"
                         >
-                          <Sparkles size={14} className="text-amber-400" />
+                          <Sparkles size={13} />
                           Generate insights for this week
                         </button>
                       ) : insightLoading && !insightText ? (
-                        <div className="flex items-center gap-2 text-amber-500">
+                        <div className="flex items-center gap-2 text-gray-400">
                           <Loader2 size={14} className="animate-spin" />
                           <span>Reviewing your schedule and home…</span>
                         </div>
@@ -1105,7 +1099,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                         <>
                           {insightText}
                           {insightLoading && (
-                            <span className="inline-block w-1.5 h-4 bg-amber-400 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
+                            <span className="inline-block w-1.5 h-4 bg-gray-300 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
                           )}
                         </>
                       )}
@@ -1114,7 +1108,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
 
                   {/* Chat messages */}
                   {messages.length > 0 && (
-                    <div className="space-y-3 pt-2 border-t border-amber-100">
+                    <div className="px-4 py-3 space-y-3">
                       {messages.map((msg, i) => {
                         const isUser = msg.role === 'user'
                         return (
@@ -1123,7 +1117,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                               className={`max-w-[85%] rounded-xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
                                 isUser
                                   ? 'bg-gray-900 text-white rounded-br-sm'
-                                  : 'bg-white border border-amber-100 text-gray-700 rounded-bl-sm shadow-sm'
+                                  : 'bg-gray-50 border border-gray-100 text-gray-700 rounded-bl-sm'
                               }`}
                             >
                               {msg.content}
@@ -1140,7 +1134,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
 
                   {/* Suggested prompts */}
                   {messages.length === 0 && !insightLoading && insightText && (
-                    <div className="pt-2 border-t border-amber-100">
+                    <div className="px-4 py-3">
                       <div className="flex flex-wrap gap-2">
                         {[
                           'What should we focus on this week?',
@@ -1151,7 +1145,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                           <button
                             key={prompt}
                             onClick={() => { setChatInput(prompt); chatInputRef.current?.focus() }}
-                            className="rounded-full border border-amber-200 bg-white px-3 py-1.5 text-xs text-gray-600 hover:bg-amber-50 hover:border-amber-300 transition-colors"
+                            className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 hover:border-gray-300 transition-colors"
                           >
                             {prompt}
                           </button>
@@ -1162,7 +1156,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
 
                   {/* Chat input */}
                   {insightText && !insightLoading && (
-                    <div className="flex items-end gap-2 pt-1">
+                    <div className="flex items-end gap-2 p-4">
                       <textarea
                         ref={chatInputRef}
                         value={chatInput}
@@ -1175,7 +1169,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                         }}
                         placeholder="Ask a follow-up question…"
                         rows={1}
-                        className="flex-1 resize-none rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm outline-none focus:border-amber-400 transition-colors placeholder:text-gray-400"
+                        className="flex-1 resize-none rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none focus:border-gray-400 focus:bg-white transition-colors placeholder:text-gray-300"
                         style={{ minHeight: '36px', maxHeight: '100px' }}
                         onInput={(e) => {
                           const el = e.currentTarget
@@ -1186,7 +1180,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                       <button
                         onClick={sendMessage}
                         disabled={!chatInput.trim() || chatLoading || !aiCtx}
-                        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-40 transition-colors"
+                        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-gray-900 text-white hover:bg-gray-700 disabled:opacity-40 transition-colors"
                       >
                         {chatLoading ? (
                           <Loader2 size={14} className="animate-spin" />
