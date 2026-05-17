@@ -875,7 +875,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                   return (
                     <div
                       key={day}
-                      className={`w-44 md:flex-1 md:w-auto min-w-0 rounded-lg border bg-white p-4 ${
+                      className={`w-52 md:flex-1 md:w-auto min-w-0 rounded-lg border bg-white p-4 ${
                         isToday ? 'border-gray-400 shadow-sm' : 'border-gray-100'
                       }`}
                     >
@@ -903,10 +903,10 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                                   className="rounded-md px-2 py-1.5 border border-gray-200"
                                   style={{ background: 'linear-gradient(to right, #eff6ff, #fff4f2)' }}
                                 >
-                                  <div className="flex items-center gap-1 mb-0.5">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-blue-400 flex-shrink-0" />
-                                    <span className="h-1.5 w-1.5 rounded-full bg-coral-400 flex-shrink-0" />
-                                    <p className="text-xs font-medium leading-snug text-gray-700 truncate">
+                                  <div className="flex items-start gap-1 mb-0.5">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-blue-400 flex-shrink-0 mt-1" />
+                                    <span className="h-1.5 w-1.5 rounded-full bg-coral-400 flex-shrink-0 mt-1" />
+                                    <p className="text-xs font-medium leading-snug text-gray-700 break-words min-w-0">
                                       {event.summary ?? '(No title)'}
                                     </p>
                                   </div>
@@ -922,7 +922,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                                   isBlue ? 'bg-blue-50 border-blue-100' : 'bg-coral-50 border-coral-100'
                                 }`}
                               >
-                                <p className={`text-xs font-medium leading-snug ${
+                                <p className={`text-xs font-medium leading-snug break-words ${
                                   isBlue ? 'text-blue-800' : 'text-coral-600'
                                 }`}>
                                   {event.summary ?? '(No title)'}
