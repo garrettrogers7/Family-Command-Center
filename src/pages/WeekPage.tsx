@@ -620,11 +620,14 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
   async function handleTaskDragEnd(event: DragEndEvent) {
     const { active, over } = event
     if (!over || active.id === over.id || !family || !user) return
-    const oldIndex = orderedTasks.findIndex((t) => t.id === active.id)
-    const newIndex = orderedTasks.findIndex((t) => t.id === over.id)
-    const reordered = arrayMove(orderedTasks, oldIndex, newIndex)
+    // Fetch fresh content first, then reorder from DB state to avoid stale overwrites
     const { existingPlan, content } = await getFreshContent()
-    const updatedContent: WeeklyPlanContent = { ...content, taskOrder: reordered.map((t) => t.id) }
+    const freshTaskOrder: string[] = content.taskOrder ?? orderedTasks.map((t) => t.id)
+    const oldIndex = freshTaskOrder.indexOf(active.id as string)
+    const newIndex = freshTaskOrder.indexOf(over.id as string)
+    if (oldIndex === -1 || newIndex === -1) return
+    const reordered = arrayMove(freshTaskOrder, oldIndex, newIndex)
+    const updatedContent: WeeklyPlanContent = { ...content, taskOrder: reordered }
     if (existingPlan) {
       await supabase.from('weekly_plans').update({ content: updatedContent, updated_by: user.id }).eq('id', existingPlan.id)
     } else {
@@ -636,11 +639,15 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
   async function handleFunDragEnd(event: DragEndEvent) {
     const { active, over } = event
     if (!over || active.id === over.id || !family || !user) return
-    const oldIndex = funItems.findIndex((fi) => fi.id === active.id)
-    const newIndex = funItems.findIndex((fi) => fi.id === over.id)
-    const reordered = arrayMove(funItems, oldIndex, newIndex)
+    // Fetch fresh content first, then reorder from DB state to avoid stale overwrites
     const { existingPlan, content } = await getFreshContent()
     if (!existingPlan) return
+    const freshFunItems = content.funItems ?? []
+    if (freshFunItems.length === 0) return  // nothing to reorder — bail out safely
+    const oldIndex = freshFunItems.findIndex((fi) => fi.id === active.id)
+    const newIndex = freshFunItems.findIndex((fi) => fi.id === over.id)
+    if (oldIndex === -1 || newIndex === -1) return
+    const reordered = arrayMove(freshFunItems, oldIndex, newIndex)
     const updatedContent: WeeklyPlanContent = { ...content, funItems: reordered }
     await supabase.from('weekly_plans').update({ content: updatedContent, updated_by: user.id }).eq('id', existingPlan.id)
     fetchAll()
