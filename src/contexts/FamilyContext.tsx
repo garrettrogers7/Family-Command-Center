@@ -9,6 +9,8 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import type { Family, FamilyMember } from '@/lib/database.types'
 
+// Re-export AuthContext loading so FamilyContext can wait for auth
+
 interface FamilyContextValue {
   family: Family | null
   members: FamilyMember[]
@@ -21,12 +23,16 @@ interface FamilyContextValue {
 const FamilyContext = createContext<FamilyContextValue | null>(null)
 
 export function FamilyProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const [family, setFamily] = useState<Family | null>(null)
   const [members, setMembers] = useState<FamilyMember[]>([])
   const [loading, setLoading] = useState(true)
 
   const fetchFamily = async () => {
+    // Don't resolve until auth itself has finished loading — otherwise we'd
+    // briefly see user=null, set family=null+loading=false, and redirect to onboarding.
+    if (authLoading) return
+
     if (!user) {
       setFamily(null)
       setMembers([])
@@ -65,7 +71,7 @@ export function FamilyProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetchFamily()
-  }, [user])
+  }, [user, authLoading])
 
   const currentMember = members.find((m) => m.user_id === user?.id) ?? null
   const otherMember = members.find((m) => m.user_id !== user?.id) ?? null

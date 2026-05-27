@@ -489,6 +489,7 @@ export default function WeekPage() {
   // Fun items — permanent, stored in their own table
   const [funItems, setFunItems] = useState<FunItem[]>([])
   const [confirmDeleteFunId, setConfirmDeleteFunId] = useState<string | null>(null)
+  const funItemsMigratingRef = useRef(false)
 
   // DnD sensors (pointer for mouse, touch for mobile)
   const sensors = useSensors(
@@ -574,45 +575,63 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true })
 
-    const existing = (data as FunItem[]) ?? []
+    let existing = (data as FunItem[]) ?? []
 
-    // One-time migration: if the new table is empty, check all weekly_plans
-    // for items stored in the old location (weekly_plans.content.funItems)
-    // and move them into the permanent fun_items table.
-    if (existing.length === 0) {
-      const { data: allPlans } = await supabase
-        .from('weekly_plans')
-        .select('content')
-        .eq('family_id', family.id)
+    // Remove duplicates that may exist in the table (same text, keep earliest created_at)
+    const seen = new Set<string>()
+    const duplicateIds: string[] = []
+    for (const fi of existing) {
+      if (seen.has(fi.text)) {
+        duplicateIds.push(fi.id)
+      } else {
+        seen.add(fi.text)
+      }
+    }
+    if (duplicateIds.length > 0) {
+      await supabase.from('fun_items').delete().in('id', duplicateIds)
+      existing = existing.filter((fi) => !duplicateIds.includes(fi.id))
+    }
 
-      const legacyItems: { text: string; notes?: string | null }[] = []
-      const seen = new Set<string>()
-      for (const plan of (allPlans ?? []) as { content: WeeklyPlanContent }[]) {
-        for (const fi of (plan.content?.funItems ?? [])) {
-          if (!seen.has(fi.text)) {
-            seen.add(fi.text)
-            legacyItems.push({ text: fi.text, notes: fi.notes ?? null })
+    // One-time migration: if table is empty, pull items from old weekly_plans location.
+    // Guard with a ref so concurrent calls don't each run the migration simultaneously.
+    if (existing.length === 0 && !funItemsMigratingRef.current) {
+      funItemsMigratingRef.current = true
+      try {
+        const { data: allPlans } = await supabase
+          .from('weekly_plans')
+          .select('content')
+          .eq('family_id', family.id)
+
+        const legacyItems: { text: string; notes?: string | null }[] = []
+        const legacySeen = new Set<string>()
+        for (const plan of (allPlans ?? []) as { content: WeeklyPlanContent }[]) {
+          for (const fi of (plan.content?.funItems ?? [])) {
+            if (!legacySeen.has(fi.text)) {
+              legacySeen.add(fi.text)
+              legacyItems.push({ text: fi.text, notes: fi.notes ?? null })
+            }
           }
         }
-      }
 
-      if (legacyItems.length > 0) {
-        await supabase.from('fun_items').insert(
-          legacyItems.map((fi, i) => ({
-            family_id: family.id,
-            text: fi.text,
-            notes: fi.notes,
-            sort_order: i,
-          }))
-        )
-        // Reload after migration
-        const { data: migrated } = await supabase
-          .from('fun_items')
-          .select('*')
-          .eq('family_id', family.id)
-          .order('sort_order', { ascending: true })
-        setFunItems((migrated as FunItem[]) ?? [])
-        return
+        if (legacyItems.length > 0) {
+          await supabase.from('fun_items').insert(
+            legacyItems.map((fi, i) => ({
+              family_id: family.id,
+              text: fi.text,
+              notes: fi.notes,
+              sort_order: i,
+            }))
+          )
+          const { data: migrated } = await supabase
+            .from('fun_items')
+            .select('*')
+            .eq('family_id', family.id)
+            .order('sort_order', { ascending: true })
+          setFunItems((migrated as FunItem[]) ?? [])
+          return
+        }
+      } finally {
+        funItemsMigratingRef.current = false
       }
     }
 
