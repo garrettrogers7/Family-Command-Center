@@ -566,13 +566,57 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
   // Load fun items from their own permanent table
   const loadFunItems = useCallback(async () => {
     if (!family) return
+
     const { data } = await supabase
       .from('fun_items')
       .select('*')
       .eq('family_id', family.id)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true })
-    setFunItems((data as FunItem[]) ?? [])
+
+    const existing = (data as FunItem[]) ?? []
+
+    // One-time migration: if the new table is empty, check all weekly_plans
+    // for items stored in the old location (weekly_plans.content.funItems)
+    // and move them into the permanent fun_items table.
+    if (existing.length === 0) {
+      const { data: allPlans } = await supabase
+        .from('weekly_plans')
+        .select('content')
+        .eq('family_id', family.id)
+
+      const legacyItems: { text: string; notes?: string | null }[] = []
+      const seen = new Set<string>()
+      for (const plan of (allPlans ?? []) as { content: WeeklyPlanContent }[]) {
+        for (const fi of (plan.content?.funItems ?? [])) {
+          if (!seen.has(fi.text)) {
+            seen.add(fi.text)
+            legacyItems.push({ text: fi.text, notes: fi.notes ?? null })
+          }
+        }
+      }
+
+      if (legacyItems.length > 0) {
+        await supabase.from('fun_items').insert(
+          legacyItems.map((fi, i) => ({
+            family_id: family.id,
+            text: fi.text,
+            notes: fi.notes,
+            sort_order: i,
+          }))
+        )
+        // Reload after migration
+        const { data: migrated } = await supabase
+          .from('fun_items')
+          .select('*')
+          .eq('family_id', family.id)
+          .order('sort_order', { ascending: true })
+        setFunItems((migrated as FunItem[]) ?? [])
+        return
+      }
+    }
+
+    setFunItems(existing)
   }, [family])
 
   async function addFunItem() {
