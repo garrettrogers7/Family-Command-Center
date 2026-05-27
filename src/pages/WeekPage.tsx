@@ -678,7 +678,42 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
     ])
 
     setTasks((taskData as Task[]) ?? [])
-    setPlan(planData as WeeklyPlan | null)
+
+    let plan = planData as WeeklyPlan | null
+    const content = (plan?.content as WeeklyPlanContent) ?? {}
+
+    // If this week has no fun items yet, carry them forward from the most recent
+    // previous week that had some — so they don't vanish when the week rolls over.
+    if (!content.funItems?.length) {
+      const { data: prevPlans } = await supabase
+        .from('weekly_plans')
+        .select('*')
+        .eq('family_id', family.id)
+        .lt('week_start', weekStartStr)
+        .order('week_start', { ascending: false })
+        .limit(8)
+
+      const prevWithItems = (prevPlans as WeeklyPlan[] ?? [])
+        .find((p) => ((p.content as WeeklyPlanContent)?.funItems?.length ?? 0) > 0)
+
+      if (prevWithItems) {
+        const carriedItems = (prevWithItems.content as WeeklyPlanContent).funItems!
+        const mergedContent: WeeklyPlanContent = { ...content, funItems: carriedItems }
+        if (plan) {
+          await supabase.from('weekly_plans').update({ content: mergedContent }).eq('id', plan.id)
+          plan = { ...plan, content: mergedContent }
+        } else {
+          const { data: inserted } = await supabase
+            .from('weekly_plans')
+            .insert({ family_id: family.id, week_start: weekStartStr, content: mergedContent, updated_by: null })
+            .select()
+            .single()
+          plan = inserted as WeeklyPlan | null
+        }
+      }
+    }
+
+    setPlan(plan)
     setLoading(false)
   }, [family, weekStartStr])
 
