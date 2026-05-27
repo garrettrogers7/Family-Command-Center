@@ -104,6 +104,8 @@ export function GoogleCalendarProvider({ children }: { children: ReactNode }) {
     // ── Sync current user's events ───────────────────────────────
     if (token) {
       try {
+        // Fetch FIRST — only replace stored events if the fetch succeeds.
+        // Deleting before fetching would wipe events if the API call fails.
         const googleEvents = await fetchEvents(token, syncStart.toISOString(), syncEnd.toISOString())
         await supabase.from('calendar_events').delete().eq('user_id', user.id).eq('family_id', family.id)
         if (googleEvents.length > 0) {
@@ -113,9 +115,22 @@ export function GoogleCalendarProvider({ children }: { children: ReactNode }) {
         }
       } catch (err) {
         if (err instanceof Error && err.message === 'TOKEN_EXPIRED') {
-          loadEvents()
+          // Token was just refreshed — retry once, don't loop
+          const retryToken = await getValidAccessToken()
+          if (retryToken) {
+            try {
+              const googleEvents = await fetchEvents(retryToken, syncStart.toISOString(), syncEnd.toISOString())
+              await supabase.from('calendar_events').delete().eq('user_id', user.id).eq('family_id', family.id)
+              if (googleEvents.length > 0) {
+                await supabase
+                  .from('calendar_events')
+                  .insert(googleEvents.map((e) => googleEventToStored(e, user.id, family.id)))
+              }
+            } catch { /* give up — keep existing cached events */ }
+          }
           return
         }
+        // Any other error: keep existing cached events, don't wipe them
       }
     }
 
@@ -152,8 +167,8 @@ export function GoogleCalendarProvider({ children }: { children: ReactNode }) {
             })
           }
 
+          // Fetch first, then replace — same safe pattern as the current user sync
           const memberEvents = await fetchEvents(memberToken, syncStart.toISOString(), syncEnd.toISOString())
-          console.log('[CalSync] fetched', memberEvents.length, 'events for member')
           await supabase.from('calendar_events').delete().eq('user_id', member.user_id).eq('family_id', family.id)
           if (memberEvents.length > 0) {
             await supabase

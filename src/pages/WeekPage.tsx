@@ -486,7 +486,8 @@ export default function WeekPage() {
   // Events for the selected week (from Supabase for all weeks)
   const [allFamilyEvents, setAllFamilyEvents] = useState<StoredCalendarEvent[]>([])
 
-  // Fun item confirm-delete
+  // Fun items — permanent, stored in their own table
+  const [funItems, setFunItems] = useState<FunItem[]>([])
   const [confirmDeleteFunId, setConfirmDeleteFunId] = useState<string | null>(null)
 
   // DnD sensors (pointer for mouse, touch for mobile)
@@ -547,13 +548,9 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
       .sort((a, b) => storedEventStartTime(a).getTime() - storedEventStartTime(b).getTime())
   }, [allFamilyEvents, selectedWeekStart])
 
-  // Fun items — manual entries stored in plan.content.funItems
-  const funItems: FunItem[] = (plan?.content as WeeklyPlanContent)?.funItems ?? []
   const [newFunText, setNewFunText] = useState('')
 
-  // Always fetch fresh content from DB before writing to avoid overwriting
-  // concurrent changes (e.g. the other family member saving at the same time,
-  // or stale React state causing funItems to be silently dropped).
+  // Always fetch fresh content from DB before writing to avoid overwriting concurrent changes
   async function getFreshContent(): Promise<{ existingPlan: WeeklyPlan | null; content: WeeklyPlanContent }> {
     const { data } = await supabase
       .from('weekly_plans')
@@ -566,45 +563,38 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
     return { existingPlan, content }
   }
 
+  // Load fun items from their own permanent table
+  const loadFunItems = useCallback(async () => {
+    if (!family) return
+    const { data } = await supabase
+      .from('fun_items')
+      .select('*')
+      .eq('family_id', family.id)
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: true })
+    setFunItems((data as FunItem[]) ?? [])
+  }, [family])
+
   async function addFunItem() {
-    if (!newFunText.trim() || !family || !user) return
-    const item: FunItem = { id: crypto.randomUUID(), text: newFunText.trim() }
+    if (!newFunText.trim() || !family) return
+    const maxOrder = funItems.length > 0 ? Math.max(...funItems.map((fi) => fi.sort_order)) : -1
     setNewFunText('')
-    const { existingPlan, content } = await getFreshContent()
-    const updatedContent: WeeklyPlanContent = {
-      ...content,
-      funItems: [...(content.funItems ?? []), item],
-    }
-    if (existingPlan) {
-      await supabase.from('weekly_plans').update({ content: updatedContent, updated_by: user.id }).eq('id', existingPlan.id)
-    } else {
-      await supabase.from('weekly_plans').insert({ family_id: family.id, week_start: weekStartStr, content: updatedContent, updated_by: user.id })
-    }
-    fetchAll()
+    await supabase.from('fun_items').insert({
+      family_id: family.id,
+      text: newFunText.trim(),
+      sort_order: maxOrder + 1,
+    })
+    loadFunItems()
   }
 
   async function removeFunItem(id: string) {
-    if (!family || !user) return
-    const { existingPlan, content } = await getFreshContent()
-    if (!existingPlan) return
-    const updatedContent: WeeklyPlanContent = {
-      ...content,
-      funItems: (content.funItems ?? []).filter((fi) => fi.id !== id),
-    }
-    await supabase.from('weekly_plans').update({ content: updatedContent, updated_by: user.id }).eq('id', existingPlan.id)
-    fetchAll()
+    await supabase.from('fun_items').delete().eq('id', id)
+    loadFunItems()
   }
 
   async function updateFunItem(updated: FunItem) {
-    if (!family || !user) return
-    const { existingPlan, content } = await getFreshContent()
-    if (!existingPlan) return
-    const updatedContent: WeeklyPlanContent = {
-      ...content,
-      funItems: (content.funItems ?? []).map((fi) => fi.id === updated.id ? updated : fi),
-    }
-    await supabase.from('weekly_plans').update({ content: updatedContent, updated_by: user.id }).eq('id', existingPlan.id)
-    fetchAll()
+    await supabase.from('fun_items').update({ text: updated.text, notes: updated.notes ?? null }).eq('id', updated.id)
+    loadFunItems()
   }
 
   // Compute ordered task list (incomplete tasks only, respecting saved order)
@@ -638,19 +628,19 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
 
   async function handleFunDragEnd(event: DragEndEvent) {
     const { active, over } = event
-    if (!over || active.id === over.id || !family || !user) return
-    // Fetch fresh content first, then reorder from DB state to avoid stale overwrites
-    const { existingPlan, content } = await getFreshContent()
-    if (!existingPlan) return
-    const freshFunItems = content.funItems ?? []
-    if (freshFunItems.length === 0) return  // nothing to reorder — bail out safely
-    const oldIndex = freshFunItems.findIndex((fi) => fi.id === active.id)
-    const newIndex = freshFunItems.findIndex((fi) => fi.id === over.id)
+    if (!over || active.id === over.id) return
+    const oldIndex = funItems.findIndex((fi) => fi.id === active.id)
+    const newIndex = funItems.findIndex((fi) => fi.id === over.id)
     if (oldIndex === -1 || newIndex === -1) return
-    const reordered = arrayMove(freshFunItems, oldIndex, newIndex)
-    const updatedContent: WeeklyPlanContent = { ...content, funItems: reordered }
-    await supabase.from('weekly_plans').update({ content: updatedContent, updated_by: user.id }).eq('id', existingPlan.id)
-    fetchAll()
+    const reordered = arrayMove(funItems, oldIndex, newIndex)
+    // Optimistically update UI
+    setFunItems(reordered)
+    // Persist new sort_order values for all items
+    await Promise.all(
+      reordered.map((fi, i) =>
+        supabase.from('fun_items').update({ sort_order: i }).eq('id', fi.id)
+      )
+    )
   }
 
   // Show loading spinner only when the week changes — not on every background refresh
@@ -661,7 +651,6 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
   // Load tasks and plan for selected week — silently refreshes without showing spinner
   const fetchAll = useCallback(async () => {
     if (!family) return
-
     const [{ data: taskData }, { data: planData }] = await Promise.all([
       supabase
         .from('tasks')
@@ -676,48 +665,13 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
         .eq('week_start', weekStartStr)
         .maybeSingle(),
     ])
-
     setTasks((taskData as Task[]) ?? [])
-
-    let plan = planData as WeeklyPlan | null
-    const content = (plan?.content as WeeklyPlanContent) ?? {}
-
-    // If this week has no fun items yet, carry them forward from the most recent
-    // previous week that had some — so they don't vanish when the week rolls over.
-    if (!content.funItems?.length) {
-      const { data: prevPlans } = await supabase
-        .from('weekly_plans')
-        .select('*')
-        .eq('family_id', family.id)
-        .lt('week_start', weekStartStr)
-        .order('week_start', { ascending: false })
-        .limit(8)
-
-      const prevWithItems = (prevPlans as WeeklyPlan[] ?? [])
-        .find((p) => ((p.content as WeeklyPlanContent)?.funItems?.length ?? 0) > 0)
-
-      if (prevWithItems) {
-        const carriedItems = (prevWithItems.content as WeeklyPlanContent).funItems!
-        const mergedContent: WeeklyPlanContent = { ...content, funItems: carriedItems }
-        if (plan) {
-          await supabase.from('weekly_plans').update({ content: mergedContent }).eq('id', plan.id)
-          plan = { ...plan, content: mergedContent }
-        } else {
-          const { data: inserted } = await supabase
-            .from('weekly_plans')
-            .insert({ family_id: family.id, week_start: weekStartStr, content: mergedContent, updated_by: null })
-            .select()
-            .single()
-          plan = inserted as WeeklyPlan | null
-        }
-      }
-    }
-
-    setPlan(plan)
+    setPlan(planData as WeeklyPlan | null)
     setLoading(false)
   }, [family, weekStartStr])
 
   useEffect(() => { fetchAll() }, [fetchAll])
+  useEffect(() => { loadFunItems() }, [loadFunItems])
 
   // Real-time subscription
   useEffect(() => {
@@ -726,9 +680,10 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
       .channel('week-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks', filter: `family_id=eq.${family.id}` }, () => fetchAll())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'weekly_plans', filter: `family_id=eq.${family.id}` }, () => fetchAll())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'fun_items', filter: `family_id=eq.${family.id}` }, () => loadFunItems())
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [family, fetchAll])
+  }, [family, fetchAll, loadFunItems])
 
   // Save a section note (day key or 'notes')
   async function saveSection(key: DayKey | 'notes') {

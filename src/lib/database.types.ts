@@ -103,8 +103,11 @@ export interface WeeklyPlan {
 
 export interface FunItem {
   id: string
+  family_id: string
   text: string
   notes?: string | null
+  sort_order: number
+  created_at: string
 }
 
 export interface WeeklyPlanContent {
@@ -116,7 +119,6 @@ export interface WeeklyPlanContent {
   saturday?: string
   sunday?: string
   notes?: string
-  funItems?: FunItem[]
   goals?: string[]
   taskOrder?: string[]  // ordered list of task IDs for the weekly module
 }
