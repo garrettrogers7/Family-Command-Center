@@ -1,5 +1,5 @@
-import { useState, FormEvent } from 'react'
-import { Copy, Check, LogOut, Calendar, Unlink, Loader2, Download } from 'lucide-react'
+import { useState, useEffect, FormEvent } from 'react'
+import { Copy, Check, LogOut, Calendar, Unlink, Loader2, Download, RefreshCw } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { useFamily } from '@/contexts/FamilyContext'
@@ -25,6 +25,33 @@ export default function SettingsPage() {
   const [copied, setCopied] = useState(false)
   const [backingUp, setBackingUp] = useState(false)
   const [backupDone, setBackupDone] = useState(false)
+  const [autoBackups, setAutoBackups] = useState<{ name: string; created_at: string }[]>([])
+  const [backupsLoading, setBackupsLoading] = useState(true)
+
+  async function loadAutoBackups() {
+    if (!family) return
+    setBackupsLoading(true)
+    const { data } = await supabase.storage
+      .from('backups')
+      .list(family.id, { sortBy: { column: 'name', order: 'desc' } })
+    setAutoBackups((data ?? []).filter(f => f.name.endsWith('.json')))
+    setBackupsLoading(false)
+  }
+
+  useEffect(() => { loadAutoBackups() }, [family])
+
+  async function downloadAutoBackup(fileName: string) {
+    if (!family) return
+    const { data } = await supabase.storage
+      .from('backups')
+      .createSignedUrl(`${family.id}/${fileName}`, 60)
+    if (data?.signedUrl) {
+      const a = document.createElement('a')
+      a.href = data.signedUrl
+      a.download = `home-base-backup-${fileName}`
+      a.click()
+    }
+  }
 
   async function downloadBackup() {
     if (!family) return
@@ -286,25 +313,67 @@ export default function SettingsPage() {
         {/* Data backup */}
         <section>
           <h2 className="mb-4 text-sm font-semibold text-gray-700">Data backup</h2>
-          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-            <p className="mb-1 text-sm font-medium text-gray-900">Download a full backup</p>
-            <p className="mb-4 text-xs text-gray-400 leading-relaxed">
-              Exports all your data — tasks, maintenance log, history, equipment, vault, and weekly plans — as a JSON file.
-              Save it to iCloud Drive or Google Drive. We recommend doing this weekly.
-            </p>
-            <button
-              onClick={downloadBackup}
-              disabled={backingUp}
-              className="flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 transition-colors"
-            >
-              {backingUp ? (
-                <><Loader2 size={14} className="animate-spin" /> Preparing…</>
-              ) : backupDone ? (
-                <><Check size={14} /> Downloaded!</>
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm space-y-5">
+
+            {/* Automated backups */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-sm font-medium text-gray-900">Automatic backups</p>
+                <button onClick={loadAutoBackups} className="text-gray-300 hover:text-gray-500 transition-colors" title="Refresh">
+                  <RefreshCw size={13} />
+                </button>
+              </div>
+              <p className="mb-3 text-xs text-gray-400 leading-relaxed">
+                Your data is automatically backed up every Sunday. The 8 most recent backups are kept (~2 months).
+              </p>
+              {backupsLoading ? (
+                <p className="text-xs text-gray-400">Loading backups…</p>
+              ) : autoBackups.length === 0 ? (
+                <p className="text-xs text-gray-400 italic">No automatic backups yet — the first one will run this Sunday.</p>
               ) : (
-                <><Download size={14} /> Download backup</>
+                <div className="divide-y divide-gray-50 rounded-lg border border-gray-100 overflow-hidden">
+                  {autoBackups.map((file) => {
+                    const dateStr = file.name.replace('.json', '') // YYYY-MM-DD
+                    const label = new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
+                    return (
+                      <div key={file.name} className="flex items-center justify-between px-3 py-2.5 bg-white hover:bg-gray-50 transition-colors">
+                        <span className="text-xs text-gray-600">{label}</span>
+                        <button
+                          onClick={() => downloadAutoBackup(file.name)}
+                          className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-700 transition-colors"
+                        >
+                          <Download size={12} /> Download
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
               )}
-            </button>
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-gray-100" />
+
+            {/* Manual download */}
+            <div>
+              <p className="mb-1 text-sm font-medium text-gray-900">Download now</p>
+              <p className="mb-3 text-xs text-gray-400 leading-relaxed">
+                Manually download a backup at any time.
+              </p>
+              <button
+                onClick={downloadBackup}
+                disabled={backingUp}
+                className="flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 transition-colors"
+              >
+                {backingUp ? (
+                  <><Loader2 size={14} className="animate-spin" /> Preparing…</>
+                ) : backupDone ? (
+                  <><Check size={14} /> Downloaded!</>
+                ) : (
+                  <><Download size={14} /> Download backup</>
+                )}
+              </button>
+            </div>
           </div>
         </section>
 
