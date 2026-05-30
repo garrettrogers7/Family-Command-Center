@@ -116,7 +116,8 @@ export default function BudgetPage() {
   const [importing, setImporting]     = useState(false)
   const [importResult, setImportResult] = useState<{ imported: number; skipped: number; error?: string } | null>(null)
   const [filterCategory, setFilterCategory] = useState<string>('all')
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const fileInputRef        = useRef<HTMLInputElement>(null)
+  const replaceFileInputRef = useRef<HTMLInputElement>(null)
 
   const fetchAll = useCallback(async () => {
     if (!family) return
@@ -167,7 +168,7 @@ export default function BudgetPage() {
     setCategories(prev => prev.map(c => c.id === id ? { ...c, monthly_budget: budget } : c))
   }
 
-  async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleImport(e: React.ChangeEvent<HTMLInputElement>, replace = false) {
     const file = e.target.files?.[0]
     if (!file || !family) return
     setImporting(true)
@@ -212,6 +213,11 @@ export default function BudgetPage() {
           subcategory,
           import_hash: hash,
         })
+      }
+
+      // Replace mode: wipe all existing transactions first
+      if (replace) {
+        await supabase.from('budget_transactions').delete().eq('family_id', family.id)
       }
 
       let imported = 0
@@ -273,7 +279,10 @@ export default function BudgetPage() {
                   : `✓ ${importResult.imported} imported, ${importResult.skipped} already existed`}
               </span>
             )}
-            <input ref={fileInputRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={handleImport} />
+            <input ref={fileInputRef} type="file" accept=".xlsx,.xls" className="hidden"
+              onChange={e => handleImport(e, false)} />
+            <input ref={replaceFileInputRef} type="file" accept=".xlsx,.xls" className="hidden"
+              onChange={e => handleImport(e, true)} />
             <button
               onClick={() => { setImportResult(null); fileInputRef.current?.click() }}
               disabled={importing}
@@ -281,6 +290,15 @@ export default function BudgetPage() {
             >
               <Upload size={13} />
               {importing ? 'Importing…' : 'Import Excel'}
+            </button>
+            <button
+              onClick={() => { setImportResult(null); replaceFileInputRef.current?.click() }}
+              disabled={importing}
+              className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-red-400 hover:bg-red-50 hover:border-red-200 transition-colors disabled:opacity-50"
+              title="Delete all existing transactions and re-import from this file"
+            >
+              <Upload size={13} />
+              Replace all
             </button>
           </div>
         </div>
