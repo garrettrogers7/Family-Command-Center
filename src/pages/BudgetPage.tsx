@@ -1,120 +1,98 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { ChevronLeft, ChevronRight, Upload, Pencil, Check, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Upload, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import * as XLSX from 'xlsx'
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, Legend,
+} from 'recharts'
 import { supabase } from '@/lib/supabase'
 import { useFamily } from '@/contexts/FamilyContext'
 import { PageHeader } from '@/components/PageHeader'
-import { format, startOfMonth, endOfMonth, addMonths, subMonths, parseISO } from 'date-fns'
+import {
+  format, startOfMonth, endOfMonth, addMonths, subMonths,
+  parseISO, subYears,
+} from 'date-fns'
 import type { BudgetCategory, BudgetTransaction } from '@/lib/database.types'
 
-type BudgetView = 'overview' | 'transactions'
+// ── Category colours ──────────────────────────────────────────────
+const CAT_COLORS: Record<string, string> = {
+  'Dining Out':      '#f97316',
+  'Entertainment':   '#a855f7',
+  'Giving':          '#ec4899',
+  'Groceries':       '#22c55e',
+  'Health & Fitness':'#14b8a6',
+  'Housing':         '#3b82f6',
+  'Kids':            '#eab308',
+  'Loan Payment':    '#6b7280',
+  'Miscellaneous':   '#94a3b8',
+  'Personal':        '#6366f1',
+  'Pets':            '#f59e0b',
+  'Tithe':           '#f43f5e',
+  'Transportation':  '#06b6d4',
+}
+const DEFAULT_COLOR = '#9ca3af'
 
 const DEFAULT_CATEGORIES = [
-  { name: 'Dining Out',      monthly_budget: 700,  sort_order: 0  },
-  { name: 'Entertainment',   monthly_budget: 500,  sort_order: 1  },
-  { name: 'Giving',          monthly_budget: 200,  sort_order: 2  },
-  { name: 'Groceries',       monthly_budget: 1200, sort_order: 3  },
-  { name: 'Health & Fitness',monthly_budget: 300,  sort_order: 4  },
-  { name: 'Housing',         monthly_budget: 5000, sort_order: 5  },
-  { name: 'Kids',            monthly_budget: 2300, sort_order: 6  },
-  { name: 'Loan Payment',    monthly_budget: 500,  sort_order: 7  },
-  { name: 'Miscellaneous',   monthly_budget: 300,  sort_order: 8  },
-  { name: 'Personal',        monthly_budget: 500,  sort_order: 9  },
-  { name: 'Pets',            monthly_budget: 150,  sort_order: 10 },
-  { name: 'Tithe',           monthly_budget: 750,  sort_order: 11 },
-  { name: 'Transportation',  monthly_budget: 1200, sort_order: 12 },
+  { name: 'Dining Out',       monthly_budget: 700,  sort_order: 0  },
+  { name: 'Entertainment',    monthly_budget: 500,  sort_order: 1  },
+  { name: 'Giving',           monthly_budget: 200,  sort_order: 2  },
+  { name: 'Groceries',        monthly_budget: 1200, sort_order: 3  },
+  { name: 'Health & Fitness', monthly_budget: 300,  sort_order: 4  },
+  { name: 'Housing',          monthly_budget: 5000, sort_order: 5  },
+  { name: 'Kids',             monthly_budget: 2300, sort_order: 6  },
+  { name: 'Loan Payment',     monthly_budget: 500,  sort_order: 7  },
+  { name: 'Miscellaneous',    monthly_budget: 300,  sort_order: 8  },
+  { name: 'Personal',         monthly_budget: 500,  sort_order: 9  },
+  { name: 'Pets',             monthly_budget: 150,  sort_order: 10 },
+  { name: 'Tithe',            monthly_budget: 750,  sort_order: 11 },
+  { name: 'Transportation',   monthly_budget: 1200, sort_order: 12 },
 ]
 
-function fmt(n: number) {
+function usd(n: number) {
   return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
 }
 
-// ── Category row with inline budget editing ──────────────────────
-function CategoryRow({
-  cat, spent, onBudgetSave,
-}: {
-  cat: BudgetCategory
-  spent: number
-  onBudgetSave: (id: string, budget: number) => Promise<void>
-}) {
-  const [editing, setEditing] = useState(false)
-  const [budgetInput, setBudgetInput] = useState(cat.monthly_budget.toString())
-  const [saving, setSaving] = useState(false)
+function catColor(name: string) {
+  return CAT_COLORS[name] ?? DEFAULT_COLOR
+}
 
-  const pct = cat.monthly_budget > 0 ? Math.min((spent / cat.monthly_budget) * 100, 100) : 0
-  const over = spent > cat.monthly_budget && cat.monthly_budget > 0
-  const remaining = cat.monthly_budget - spent
-
-  async function save() {
-    setSaving(true)
-    await onBudgetSave(cat.id, parseFloat(budgetInput) || 0)
-    setSaving(false)
-    setEditing(false)
-  }
-
+// ── Custom tooltip for bar chart ──────────────────────────────────
+function MonthTooltip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null
   return (
-    <div className="rounded-lg border border-gray-100 bg-white px-4 py-3">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-gray-900">{cat.name}</span>
-        <div className="flex items-center gap-2">
-          {editing ? (
-            <>
-              <span className="text-xs text-gray-400">$/mo</span>
-              <input
-                type="number"
-                value={budgetInput}
-                onChange={e => setBudgetInput(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') setEditing(false) }}
-                className="w-20 rounded border border-gray-200 px-2 py-0.5 text-xs text-right outline-none focus:border-gray-400"
-                autoFocus
-              />
-              <button onClick={save} disabled={saving} className="text-gray-400 hover:text-gray-700 transition-colors">
-                <Check size={13} />
-              </button>
-              <button onClick={() => { setEditing(false); setBudgetInput(cat.monthly_budget.toString()) }}
-                className="text-gray-300 hover:text-gray-500 transition-colors">
-                <X size={13} />
-              </button>
-            </>
-          ) : (
-            <>
-              <span className={`text-xs font-medium tabular-nums ${over ? 'text-red-500' : 'text-gray-400'}`}>
-                {fmt(spent)} / {fmt(cat.monthly_budget)}
-              </span>
-              <button onClick={() => setEditing(true)} className="text-gray-200 hover:text-gray-400 transition-colors">
-                <Pencil size={11} />
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-      <div className="h-1.5 w-full rounded-full bg-gray-100">
-        <div
-          className={`h-1.5 rounded-full transition-all ${over ? 'bg-red-400' : pct > 80 ? 'bg-amber-400' : 'bg-gray-400'}`}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-      <p className={`mt-1 text-xs ${over ? 'text-red-500' : 'text-gray-400'}`}>
-        {cat.monthly_budget === 0
-          ? `${fmt(spent)} spent · no budget set`
-          : over
-          ? `${fmt(Math.abs(remaining))} over budget`
-          : `${fmt(remaining)} remaining`}
-      </p>
+    <div className="rounded-lg border border-gray-100 bg-white px-3 py-2 shadow-lg text-xs">
+      <p className="font-medium text-gray-700 mb-1">{label}</p>
+      <p className="text-gray-900 font-semibold">{usd(payload[0].value)}</p>
     </div>
   )
 }
 
-// ── Page ─────────────────────────────────────────────────────────
+// ── Delta badge ───────────────────────────────────────────────────
+function Delta({ current, previous, label }: { current: number; previous: number; label: string }) {
+  if (previous === 0) return null
+  const diff = current - previous
+  const pct  = Math.round(Math.abs(diff / previous) * 100)
+  const up   = diff > 0
+  const same = Math.abs(diff) < 5
+
+  return (
+    <div className={`flex items-center gap-1 text-xs font-medium ${same ? 'text-gray-400' : up ? 'text-red-500' : 'text-green-600'}`}>
+      {same ? <Minus size={12} /> : up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+      <span>{same ? 'Same as' : `${pct}% ${up ? 'more' : 'less'} than`} {label}</span>
+    </div>
+  )
+}
+
+// ── Page ──────────────────────────────────────────────────────────
 export default function BudgetPage() {
   const { family } = useFamily()
-  const [view, setView]               = useState<BudgetView>('overview')
-  const [selectedMonth, setSelectedMonth] = useState(startOfMonth(new Date()))
-  const [categories, setCategories]   = useState<BudgetCategory[]>([])
-  const [transactions, setTransactions] = useState<BudgetTransaction[]>([])
-  const [loading, setLoading]         = useState(true)
-  const [importing, setImporting]     = useState(false)
-  const [importResult, setImportResult] = useState<{ imported: number; skipped: number; error?: string } | null>(null)
+  const [selectedMonth, setSelectedMonth]   = useState(startOfMonth(new Date()))
+  const [categories, setCategories]         = useState<BudgetCategory[]>([])
+  const [transactions, setTransactions]     = useState<BudgetTransaction[]>([])
+  const [loading, setLoading]               = useState(true)
+  const [importing, setImporting]           = useState(false)
+  const [importResult, setImportResult]     = useState<{ imported: number; skipped: number; error?: string } | null>(null)
+  const [showBudget, setShowBudget]         = useState(false)
   const [filterCategory, setFilterCategory] = useState<string>('all')
   const fileInputRef        = useRef<HTMLInputElement>(null)
   const replaceFileInputRef = useRef<HTMLInputElement>(null)
@@ -127,8 +105,6 @@ export default function BudgetPage() {
     ])
 
     let catList = (cats as BudgetCategory[]) ?? []
-
-    // Seed default categories on first use
     if (catList.length === 0) {
       const { data: seeded } = await supabase
         .from('budget_categories')
@@ -144,29 +120,50 @@ export default function BudgetPage() {
 
   useEffect(() => { fetchAll() }, [fetchAll])
 
-  // Month-filtered transactions
-  const monthStart = startOfMonth(selectedMonth)
-  const monthEnd   = endOfMonth(selectedMonth)
-  const monthTransactions = transactions.filter(t => {
-    const d = parseISO(t.date)
-    return d >= monthStart && d <= monthEnd
+  // ── Derived data ────────────────────────────────────────────────
+
+  function txnsForMonth(month: Date) {
+    const s = startOfMonth(month), e = endOfMonth(month)
+    return transactions.filter(t => {
+      const d = parseISO(t.date)
+      return d >= s && d <= e && t.amount < 0
+    })
+  }
+
+  const monthTxns     = txnsForMonth(selectedMonth)
+  const lastMonthTxns = txnsForMonth(subMonths(selectedMonth, 1))
+  const lastYearTxns  = txnsForMonth(subYears(selectedMonth, 1))
+
+  const totalSpent       = monthTxns.reduce((s, t) => s + Math.abs(t.amount), 0)
+  const lastMonthTotal   = lastMonthTxns.reduce((s, t) => s + Math.abs(t.amount), 0)
+  const lastYearTotal    = lastYearTxns.reduce((s, t) => s + Math.abs(t.amount), 0)
+  const totalBudget      = categories.reduce((s, c) => s + c.monthly_budget, 0)
+
+  // Category breakdown for selected month (sorted by spend desc)
+  const catBreakdown = categories.map(c => ({
+    name:    c.name,
+    amount:  monthTxns.filter(t => t.category === c.name).reduce((s, t) => s + Math.abs(t.amount), 0),
+    budget:  c.monthly_budget,
+    color:   catColor(c.name),
+  })).filter(c => c.amount > 0).sort((a, b) => b.amount - a.amount)
+
+  // Last 12 months bar chart data
+  const last12 = Array.from({ length: 12 }, (_, i) => {
+    const m     = subMonths(selectedMonth, 11 - i)
+    const total = txnsForMonth(m).reduce((s, t) => s + Math.abs(t.amount), 0)
+    return { month: format(m, 'MMM yy'), total, isSelected: i === 11 }
   })
 
-  function spentFor(catName: string) {
-    return monthTransactions
-      .filter(t => t.category === catName && t.amount < 0)
-      .reduce((sum, t) => sum + Math.abs(t.amount), 0)
-  }
+  // Top 10 transactions this month
+  const topTxns = [...monthTxns]
+    .sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))
+    .slice(0, 10)
 
-  const totalBudget = categories.reduce((s, c) => s + c.monthly_budget, 0)
-  const totalSpent  = monthTransactions.filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0)
-  const totalPct    = totalBudget > 0 ? Math.min((totalSpent / totalBudget) * 100, 100) : 0
-  const totalOver   = totalSpent > totalBudget && totalBudget > 0
+  // Filtered transaction list
+  const filteredTxns = (filterCategory === 'all' ? monthTxns : monthTxns.filter(t => t.category === filterCategory))
+    .sort((a, b) => b.date.localeCompare(a.date))
 
-  async function updateBudget(id: string, budget: number) {
-    await supabase.from('budget_categories').update({ monthly_budget: budget }).eq('id', id)
-    setCategories(prev => prev.map(c => c.id === id ? { ...c, monthly_budget: budget } : c))
-  }
+  // ── Import ──────────────────────────────────────────────────────
 
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>, replace = false) {
     const file = e.target.files?.[0]
@@ -180,59 +177,40 @@ export default function BudgetPage() {
       const ws = wb.Sheets['Transactions']
       if (!ws) throw new Error('No "Transactions" sheet found.')
 
-      const rows = XLSX.utils.sheet_to_json<any[]>(ws, { header: 1 })
-      const dataRows = rows.slice(1) // skip header row
-
+      const rows     = XLSX.utils.sheet_to_json<any[]>(ws, { header: 1 })
+      const dataRows = rows.slice(1)
       const toInsert: object[] = []
+
       for (const row of dataRows) {
-        const dateRaw        = row[0]
-        const description    = row[1]?.toString().trim()
-        const amount         = typeof row[2] === 'number' ? row[2] : parseFloat(row[2])
-        const account        = row[3]?.toString().trim() || null
-        const txnType        = row[4]?.toString().trim()
-        const subcategory    = row[6]?.toString().trim() || null
-        const grCategory     = row[8]?.toString().trim()
+        const dateRaw     = row[0]
+        const description = row[1]?.toString().trim()
+        const amount      = typeof row[2] === 'number' ? row[2] : parseFloat(row[2])
+        const account     = row[3]?.toString().trim() || null
+        const txnType     = row[4]?.toString().trim()
+        const subcategory = row[6]?.toString().trim() || null
+        const grCategory  = row[8]?.toString().trim()
 
         if (!description || isNaN(amount) || txnType !== 'Expenses' || !grCategory) continue
 
-        let dateStr: string
-        if (dateRaw instanceof Date) {
-          dateStr = format(dateRaw, 'yyyy-MM-dd')
-        } else {
-          dateStr = format(new Date(dateRaw), 'yyyy-MM-dd')
-        }
+        const dateStr = dateRaw instanceof Date
+          ? format(dateRaw, 'yyyy-MM-dd')
+          : format(new Date(dateRaw), 'yyyy-MM-dd')
 
         const hash = `${dateStr}|${description}|${amount}`
-        toInsert.push({
-          family_id: family.id,
-          date: dateStr,
-          description,
-          amount,
-          account,
-          category: grCategory,
-          subcategory,
-          import_hash: hash,
-        })
+        toInsert.push({ family_id: family.id, date: dateStr, description, amount, account, category: grCategory, subcategory, import_hash: hash })
       }
 
-      // Replace mode: wipe all existing transactions first
-      if (replace) {
-        await supabase.from('budget_transactions').delete().eq('family_id', family.id)
-      }
+      if (replace) await supabase.from('budget_transactions').delete().eq('family_id', family.id)
 
-      let imported = 0
-      let skipped  = 0
-      const BATCH  = 200
+      let imported = 0, skipped = 0
+      const BATCH = 200
       for (let i = 0; i < toInsert.length; i += BATCH) {
         const batch = toInsert.slice(i, i + BATCH)
         const { data, error } = await supabase
           .from('budget_transactions')
           .upsert(batch, { onConflict: 'family_id,import_hash', ignoreDuplicates: true })
           .select('id')
-        if (!error) {
-          imported += data?.length ?? 0
-          skipped  += batch.length - (data?.length ?? 0)
-        }
+        if (!error) { imported += data?.length ?? 0; skipped += batch.length - (data?.length ?? 0) }
       }
 
       setImportResult({ imported, skipped })
@@ -243,20 +221,20 @@ export default function BudgetPage() {
 
     setImporting(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
+    if (replaceFileInputRef.current) replaceFileInputRef.current.value = ''
   }
 
-  const filteredTxns = filterCategory === 'all'
-    ? monthTransactions
-    : monthTransactions.filter(t => t.category === filterCategory)
+  // ── Render ──────────────────────────────────────────────────────
 
   return (
     <div>
-      <PageHeader title="Budget" subtitle={format(selectedMonth, 'MMMM yyyy')} />
+      <PageHeader title="Budget" subtitle="Spending analytics" />
 
-      <div className="mx-auto max-w-4xl px-4 py-4 md:px-8 md:py-6 space-y-6">
+      <div className="mx-auto max-w-5xl px-4 py-4 md:px-8 md:py-6 space-y-6">
 
-        {/* Month nav + import */}
+        {/* Controls row */}
         <div className="flex items-center justify-between flex-wrap gap-3">
+          {/* Month nav */}
           <div className="flex items-center gap-2">
             <button onClick={() => setSelectedMonth(m => subMonths(m, 1))}
               className="rounded-lg border border-gray-200 p-1.5 text-gray-400 hover:text-gray-700 transition-colors">
@@ -271,131 +249,217 @@ export default function BudgetPage() {
             </button>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Actions */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <button onClick={() => setShowBudget(b => !b)}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${showBudget ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
+              {showBudget ? 'Hide budget' : 'Show budget'}
+            </button>
             {importResult && (
               <span className={`text-xs ${importResult.error ? 'text-red-500' : 'text-gray-400'}`}>
-                {importResult.error
-                  ? `Import failed: ${importResult.error}`
-                  : `✓ ${importResult.imported} imported, ${importResult.skipped} already existed`}
+                {importResult.error ? `Import failed: ${importResult.error}` : `✓ ${importResult.imported} imported, ${importResult.skipped} skipped`}
               </span>
             )}
-            <input ref={fileInputRef} type="file" accept=".xlsx,.xls" className="hidden"
-              onChange={e => handleImport(e, false)} />
-            <input ref={replaceFileInputRef} type="file" accept=".xlsx,.xls" className="hidden"
-              onChange={e => handleImport(e, true)} />
-            <button
-              onClick={() => { setImportResult(null); fileInputRef.current?.click() }}
-              disabled={importing}
-              className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-50"
-            >
-              <Upload size={13} />
-              {importing ? 'Importing…' : 'Import Excel'}
+            <input ref={fileInputRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={e => handleImport(e, false)} />
+            <input ref={replaceFileInputRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={e => handleImport(e, true)} />
+            <button onClick={() => { setImportResult(null); fileInputRef.current?.click() }} disabled={importing}
+              className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-50">
+              <Upload size={12} />{importing ? 'Importing…' : 'Import Excel'}
             </button>
-            <button
-              onClick={() => { setImportResult(null); replaceFileInputRef.current?.click() }}
-              disabled={importing}
-              className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-red-400 hover:bg-red-50 hover:border-red-200 transition-colors disabled:opacity-50"
-              title="Delete all existing transactions and re-import from this file"
-            >
-              <Upload size={13} />
-              Replace all
+            <button onClick={() => { setImportResult(null); replaceFileInputRef.current?.click() }} disabled={importing}
+              className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-red-400 hover:bg-red-50 hover:border-red-200 transition-colors disabled:opacity-50">
+              <Upload size={12} />Replace all
             </button>
           </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="flex gap-1 rounded-lg bg-gray-100 p-1 w-fit">
-          {(['overview', 'transactions'] as BudgetView[]).map(v => (
-            <button key={v} onClick={() => setView(v)}
-              className={`rounded-md px-4 py-1.5 text-sm font-medium capitalize transition-colors ${view === v ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-              {v}
-            </button>
-          ))}
         </div>
 
         {loading ? (
-          <div className="py-12 text-center text-sm text-gray-400">Loading…</div>
-        ) : view === 'overview' ? (
-          <div className="space-y-3">
-
-            {/* Total summary */}
-            <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-              <div className="flex items-end justify-between mb-3">
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Total spending</p>
-                  <p className="mt-0.5 text-2xl font-semibold text-gray-900">{fmt(totalSpent)}</p>
-                </div>
-                <p className={`text-sm font-medium ${totalOver ? 'text-red-500' : 'text-gray-400'}`}>
-                  of {fmt(totalBudget)} budget
-                </p>
-              </div>
-              <div className="h-2 w-full rounded-full bg-gray-100">
-                <div
-                  className={`h-2 rounded-full transition-all ${totalOver ? 'bg-red-400' : totalPct > 80 ? 'bg-amber-400' : 'bg-gray-400'}`}
-                  style={{ width: `${totalPct}%` }}
-                />
-              </div>
-              <p className={`mt-1.5 text-xs ${totalOver ? 'text-red-500' : 'text-gray-400'}`}>
-                {totalBudget === 0
-                  ? 'Set budgets on each category below'
-                  : totalOver
-                  ? `${fmt(totalSpent - totalBudget)} over budget`
-                  : `${fmt(totalBudget - totalSpent)} remaining`}
-              </p>
-            </div>
-
-            {/* Per-category rows */}
-            {categories.map(cat => (
-              <CategoryRow
-                key={cat.id}
-                cat={cat}
-                spent={spentFor(cat.name)}
-                onBudgetSave={updateBudget}
-              />
-            ))}
+          <div className="py-16 text-center text-sm text-gray-400">Loading…</div>
+        ) : transactions.length === 0 ? (
+          <div className="py-16 text-center text-sm text-gray-400">
+            No transactions yet — import your Excel file to get started.
           </div>
         ) : (
-          <div className="space-y-4">
-
-            {/* Category filter chips */}
-            <div className="flex gap-2 flex-wrap">
-              <button onClick={() => setFilterCategory('all')}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${filterCategory === 'all' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
-                All
-              </button>
-              {categories.map(c => (
-                <button key={c.id} onClick={() => setFilterCategory(c.name)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${filterCategory === c.name ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
-                  {c.name}
-                </button>
-              ))}
+          <>
+            {/* ── Summary cards ── */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm col-span-2 md:col-span-1">
+                <p className="text-xs font-medium uppercase tracking-wide text-gray-400">This month</p>
+                <p className="mt-1 text-2xl font-bold text-gray-900">{usd(totalSpent)}</p>
+                <div className="mt-1 space-y-0.5">
+                  <Delta current={totalSpent} previous={lastMonthTotal} label="last month" />
+                  <Delta current={totalSpent} previous={lastYearTotal} label="last year" />
+                </div>
+              </div>
+              <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Transactions</p>
+                <p className="mt-1 text-2xl font-bold text-gray-900">{monthTxns.length}</p>
+                <p className="mt-1 text-xs text-gray-400">avg {usd(totalSpent / (monthTxns.length || 1))}</p>
+              </div>
+              <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Top category</p>
+                {catBreakdown[0] ? (
+                  <>
+                    <p className="mt-1 text-lg font-bold text-gray-900">{catBreakdown[0].name}</p>
+                    <p className="mt-0.5 text-xs text-gray-400">{usd(catBreakdown[0].amount)} · {Math.round(catBreakdown[0].amount / totalSpent * 100)}% of total</p>
+                  </>
+                ) : <p className="mt-1 text-sm text-gray-400">—</p>}
+              </div>
+              <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Biggest purchase</p>
+                {topTxns[0] ? (
+                  <>
+                    <p className="mt-1 text-lg font-bold text-gray-900">{usd(Math.abs(topTxns[0].amount))}</p>
+                    <p className="mt-0.5 text-xs text-gray-400 truncate">{topTxns[0].description}</p>
+                  </>
+                ) : <p className="mt-1 text-sm text-gray-400">—</p>}
+              </div>
             </div>
 
-            {/* Transaction list */}
-            {filteredTxns.length === 0 ? (
-              <div className="py-12 text-center text-sm text-gray-400">
-                No transactions for {format(selectedMonth, 'MMMM yyyy')}.
-                {transactions.length === 0 && ' Import your Excel file to get started.'}
+            {/* ── Charts row ── */}
+            <div className="grid md:grid-cols-5 gap-4">
+              {/* Monthly trend bar chart */}
+              <div className="md:col-span-3 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+                <p className="mb-4 text-sm font-semibold text-gray-700">Monthly spending — last 12 months</p>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={last12} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                    <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false}
+                      tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
+                    <Tooltip content={<MonthTooltip />} cursor={{ fill: '#f9fafb' }} />
+                    <Bar dataKey="total" radius={[4, 4, 0, 0]}>
+                      {last12.map((entry, i) => (
+                        <Cell key={i} fill={entry.isSelected ? '#1f2937' : '#e5e7eb'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
-            ) : (
-              <div className="divide-y divide-gray-50 rounded-xl border border-gray-100 bg-white overflow-hidden">
-                {filteredTxns.map(t => (
-                  <div key={t.id} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-800 truncate">{t.description}</p>
-                      <p className="text-xs text-gray-400">
-                        {format(parseISO(t.date), 'MMM d')}
-                        {t.category && <> · {t.category}</>}
-                      </p>
+
+              {/* Category donut */}
+              <div className="md:col-span-2 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+                <p className="mb-2 text-sm font-semibold text-gray-700">By category</p>
+                {catBreakdown.length === 0 ? (
+                  <div className="flex h-48 items-center justify-center text-xs text-gray-400">No data for this month</div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={200}>
+                    <PieChart>
+                      <Pie data={catBreakdown} dataKey="amount" nameKey="name"
+                        cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={2}>
+                        {catBreakdown.map((entry, i) => (
+                          <Cell key={i} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(v: number) => usd(v)} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </div>
+
+            {/* ── Category breakdown list ── */}
+            <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+              <p className="mb-4 text-sm font-semibold text-gray-700">Category breakdown</p>
+              {catBreakdown.length === 0 ? (
+                <p className="text-sm text-gray-400 italic">No transactions this month.</p>
+              ) : (
+                <div className="space-y-3">
+                  {catBreakdown.map(cat => {
+                    const pct = totalSpent > 0 ? (cat.amount / totalSpent) * 100 : 0
+                    const overBudget = showBudget && cat.budget > 0 && cat.amount > cat.budget
+                    return (
+                      <div key={cat.name}>
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                            <span className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
+                            <span className="text-sm text-gray-700">{cat.name}</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="text-xs text-gray-400">{Math.round(pct)}% of total</span>
+                            {showBudget && cat.budget > 0 && (
+                              <span className={`text-xs font-medium ${overBudget ? 'text-red-500' : 'text-gray-400'}`}>
+                                / {usd(cat.budget)}
+                              </span>
+                            )}
+                            <span className="text-sm font-semibold text-gray-900 w-16 text-right tabular-nums">
+                              {usd(cat.amount)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="h-1.5 w-full rounded-full bg-gray-100">
+                          <div className="h-1.5 rounded-full transition-all"
+                            style={{
+                              width: `${pct}%`,
+                              backgroundColor: overBudget ? '#f87171' : cat.color,
+                              opacity: 0.7,
+                            }} />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* ── Top transactions ── */}
+            {topTxns.length > 0 && (
+              <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+                <p className="mb-4 text-sm font-semibold text-gray-700">Top transactions this month</p>
+                <div className="divide-y divide-gray-50">
+                  {topTxns.map(t => (
+                    <div key={t.id} className="flex items-center gap-3 py-2.5">
+                      <span className="h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: catColor(t.category ?? '') }} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-800 truncate">{t.description}</p>
+                        <p className="text-xs text-gray-400">{format(parseISO(t.date), 'MMM d')} · {t.category}</p>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-900 tabular-nums flex-shrink-0">
+                        {usd(Math.abs(t.amount))}
+                      </span>
                     </div>
-                    <span className={`text-sm font-medium tabular-nums flex-shrink-0 ${t.amount > 0 ? 'text-green-600' : 'text-gray-900'}`}>
-                      {t.amount > 0 ? '+' : ''}{fmt(Math.abs(t.amount))}
-                    </span>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             )}
-          </div>
+
+            {/* ── Full transaction list ── */}
+            <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+              <div className="mb-4 flex items-center justify-between flex-wrap gap-2">
+                <p className="text-sm font-semibold text-gray-700">All transactions</p>
+                <div className="flex gap-1.5 flex-wrap">
+                  <button onClick={() => setFilterCategory('all')}
+                    className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${filterCategory === 'all' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
+                    All
+                  </button>
+                  {catBreakdown.map(c => (
+                    <button key={c.name} onClick={() => setFilterCategory(c.name)}
+                      className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${filterCategory === c.name ? 'text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                      style={filterCategory === c.name ? { backgroundColor: c.color } : {}}>
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {filteredTxns.length === 0 ? (
+                <p className="py-8 text-center text-sm text-gray-400">No transactions this month.</p>
+              ) : (
+                <div className="divide-y divide-gray-50">
+                  {filteredTxns.map(t => (
+                    <div key={t.id} className="flex items-center gap-3 py-2.5 hover:bg-gray-50 -mx-2 px-2 rounded transition-colors">
+                      <span className="h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: catColor(t.category ?? '') }} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-800 truncate">{t.description}</p>
+                        <p className="text-xs text-gray-400">{format(parseISO(t.date), 'MMM d')} · {t.category}</p>
+                      </div>
+                      <span className="text-sm font-medium text-gray-900 tabular-nums flex-shrink-0">
+                        {usd(Math.abs(t.amount))}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
     </div>
