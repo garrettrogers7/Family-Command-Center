@@ -10,7 +10,7 @@ import { useFamily } from '@/contexts/FamilyContext'
 import { PageHeader } from '@/components/PageHeader'
 import {
   format, startOfMonth, endOfMonth, addMonths, subMonths,
-  parseISO, subYears,
+  parseISO, subYears, min,
 } from 'date-fns'
 import type { BudgetCategory, BudgetTransaction } from '@/lib/database.types'
 
@@ -147,12 +147,22 @@ export default function BudgetPage() {
     color:   catColor(c.name),
   })).filter(c => c.amount > 0).sort((a, b) => b.amount - a.amount)
 
-  // Last 12 months bar chart data
-  const last12 = Array.from({ length: 12 }, (_, i) => {
-    const m     = subMonths(selectedMonth, 11 - i)
-    const total = txnsForMonth(m).reduce((s, t) => s + Math.abs(t.amount), 0)
-    return { month: format(m, 'MMM yy'), total, isSelected: i === 11 }
-  })
+  // Bar chart: from earliest transaction month through selected month
+  const allMonthsChart = (() => {
+    if (transactions.length === 0) return []
+    const earliest = startOfMonth(
+      min(transactions.filter(t => t.amount < 0).map(t => parseISO(t.date)))
+    )
+    const months: { month: string; total: number; isSelected: boolean }[] = []
+    let cursor = earliest
+    while (cursor <= selectedMonth) {
+      const isSelected = format(cursor, 'yyyy-MM') === format(selectedMonth, 'yyyy-MM')
+      const total = txnsForMonth(cursor).reduce((s, t) => s + Math.abs(t.amount), 0)
+      months.push({ month: format(cursor, 'MMM yy'), total, isSelected })
+      cursor = addMonths(cursor, 1)
+    }
+    return months
+  })()
 
   // Top 10 transactions this month
   const topTxns = [...monthTxns]
@@ -320,15 +330,15 @@ export default function BudgetPage() {
             <div className="grid md:grid-cols-5 gap-4">
               {/* Monthly trend bar chart */}
               <div className="md:col-span-3 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-                <p className="mb-4 text-sm font-semibold text-gray-700">Monthly spending — last 12 months</p>
+                <p className="mb-4 text-sm font-semibold text-gray-700">Monthly spending — all time</p>
                 <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={last12} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                  <BarChart data={allMonthsChart} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                     <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false}
                       tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
                     <Tooltip content={<MonthTooltip />} cursor={{ fill: '#f9fafb' }} />
                     <Bar dataKey="total" radius={[4, 4, 0, 0]}>
-                      {last12.map((entry, i) => (
+                      {allMonthsChart.map((entry, i) => (
                         <Cell key={i} fill={entry.isSelected ? '#1f2937' : '#e5e7eb'} />
                       ))}
                     </Bar>
