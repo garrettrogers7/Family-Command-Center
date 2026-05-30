@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import {
-  Sun,
+  LayoutDashboard,
   CalendarDays,
   Home,
   Wallet,
@@ -10,7 +10,7 @@ import { useFamily } from '@/contexts/FamilyContext'
 import { UserAvatar } from '@/components/UserAvatar'
 
 const navItems = [
-  { to: '/today', label: 'Today', icon: Sun },
+  { to: '/today', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/week', label: 'This Week', icon: CalendarDays },
   { to: '/household', label: 'Household', icon: Home },
   { to: '/budget', label: 'Spending', icon: Wallet },

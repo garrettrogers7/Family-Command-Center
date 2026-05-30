@@ -5,7 +5,7 @@ import { Layout } from '@/components/Layout'
 import AuthPage from '@/pages/AuthPage'
 import OnboardingPage from '@/pages/OnboardingPage'
 import GoogleCallbackPage from '@/pages/GoogleCallbackPage'
-import TodayPage from '@/pages/TodayPage'
+import DashboardPage from '@/pages/DashboardPage'
 import WeekPage from '@/pages/WeekPage'
 import HouseholdPage from '@/pages/HouseholdPage'
 import VaultPage from '@/pages/VaultPage'
@@ -71,7 +71,7 @@ export default function App() {
         }
       >
         <Route index element={<Navigate to="/today" replace />} />
-        <Route path="today" element={<TodayPage />} />
+        <Route path="today" element={<DashboardPage />} />
         <Route path="week" element={<WeekPage />} />
         <Route path="household" element={<HouseholdPage />} />
         <Route path="vault" element={<VaultPage />} />

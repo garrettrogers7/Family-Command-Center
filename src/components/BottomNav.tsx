@@ -1,8 +1,8 @@
 import { NavLink } from 'react-router-dom'
-import { Sun, CalendarDays, Home, Wallet, Settings } from 'lucide-react'
+import { LayoutDashboard, CalendarDays, Home, Wallet, Settings } from 'lucide-react'
 
 const navItems = [
-  { to: '/today', label: 'Today', icon: Sun },
+  { to: '/today', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/week', label: 'Week', icon: CalendarDays },
   { to: '/household', label: 'Household', icon: Home },
   { to: '/budget', label: 'Spending', icon: Wallet },
