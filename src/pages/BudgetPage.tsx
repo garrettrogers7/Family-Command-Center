@@ -207,25 +207,33 @@ export default function BudgetPage() {
       const rows     = XLSX.utils.sheet_to_json<any[]>(ws, { header: 1 })
       const dataRows = rows.slice(1)
       const toInsert: object[] = []
+      let skippedRows = 0
 
       for (const row of dataRows) {
         const dateRaw     = row[0]
         const description = row[1]?.toString().trim()
         const amount      = typeof row[2] === 'number' ? row[2] : parseFloat(row[2])
         const account     = row[3]?.toString().trim() || null
-        const txnType     = row[4]?.toString().trim()
         const subcategory = row[6]?.toString().trim() || null
-        const grCategory  = row[8]?.toString().trim()
+        // grCategory may be in col 8; fall back to subcategory or 'Uncategorized'
+        const grCategory  = row[8]?.toString().trim() || row[7]?.toString().trim() || subcategory || 'Uncategorized'
 
-        if (!description || isNaN(amount) || txnType !== 'Expenses' || !grCategory) continue
+        // Skip rows with no date, no description, or no valid amount
+        if (!dateRaw || !description || isNaN(amount) || amount === 0) { skippedRows++; continue }
 
-        const dateStr = dateRaw instanceof Date
-          ? format(dateRaw, 'yyyy-MM-dd')
-          : format(new Date(dateRaw), 'yyyy-MM-dd')
+        let dateStr: string
+        try {
+          dateStr = dateRaw instanceof Date
+            ? format(dateRaw, 'yyyy-MM-dd')
+            : format(new Date(dateRaw), 'yyyy-MM-dd')
+          if (dateStr === 'Invalid Date') { skippedRows++; continue }
+        } catch { skippedRows++; continue }
 
         const hash = `${dateStr}|${description}|${amount}`
         toInsert.push({ family_id: family.id, date: dateStr, description, amount, account, category: grCategory, subcategory, import_hash: hash })
       }
+
+      console.log(`Import: ${toInsert.length} rows to insert, ${skippedRows} skipped`)
 
       if (replace) await supabase.from('budget_transactions').delete().eq('family_id', family.id)
 
@@ -240,7 +248,7 @@ export default function BudgetPage() {
         if (!error) { imported += data?.length ?? 0; skipped += batch.length - (data?.length ?? 0) }
       }
 
-      setImportResult({ imported, skipped })
+      setImportResult({ imported, skipped: skipped + skippedRows })
       await fetchAll()
     } catch (err) {
       setImportResult({ imported: 0, skipped: 0, error: String(err) })
