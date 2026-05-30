@@ -1,11 +1,11 @@
 import { NavLink } from 'react-router-dom'
-import { Sun, CalendarDays, Home, Lock, Settings } from 'lucide-react'
+import { Sun, CalendarDays, Home, Wallet, Settings } from 'lucide-react'
 
 const navItems = [
   { to: '/today', label: 'Today', icon: Sun },
   { to: '/week', label: 'Week', icon: CalendarDays },
   { to: '/household', label: 'Household', icon: Home },
-  { to: '/vault', label: 'Vault', icon: Lock },
+  { to: '/budget', label: 'Budget', icon: Wallet },
   { to: '/settings', label: 'Settings', icon: Settings },
 ]
 

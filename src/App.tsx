@@ -9,6 +9,7 @@ import TodayPage from '@/pages/TodayPage'
 import WeekPage from '@/pages/WeekPage'
 import HouseholdPage from '@/pages/HouseholdPage'
 import VaultPage from '@/pages/VaultPage'
+import BudgetPage from '@/pages/BudgetPage'
 import SettingsPage from '@/pages/SettingsPage'
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -74,6 +75,7 @@ export default function App() {
         <Route path="week" element={<WeekPage />} />
         <Route path="household" element={<HouseholdPage />} />
         <Route path="vault" element={<VaultPage />} />
+        <Route path="budget" element={<BudgetPage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="assistant" element={<Navigate to="/week" replace />} />
       </Route>

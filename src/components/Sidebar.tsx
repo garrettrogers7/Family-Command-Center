@@ -3,7 +3,7 @@ import {
   Sun,
   CalendarDays,
   Home,
-  Lock,
+  Wallet,
   Settings,
 } from 'lucide-react'
 import { useFamily } from '@/contexts/FamilyContext'
@@ -13,7 +13,7 @@ const navItems = [
   { to: '/today', label: 'Today', icon: Sun },
   { to: '/week', label: 'This Week', icon: CalendarDays },
   { to: '/household', label: 'Household', icon: Home },
-  { to: '/vault', label: 'Vault', icon: Lock },
+  { to: '/budget', label: 'Budget', icon: Wallet },
 ]
 
 export function Sidebar() {

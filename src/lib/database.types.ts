@@ -96,6 +96,28 @@ export interface MaintenanceHistoryEntry {
   created_at: string
 }
 
+export interface BudgetCategory {
+  id: string
+  family_id: string
+  name: string
+  monthly_budget: number
+  sort_order: number
+  created_at: string
+}
+
+export interface BudgetTransaction {
+  id: string
+  family_id: string
+  date: string           // ISO "YYYY-MM-DD"
+  description: string
+  amount: number         // negative = expense, positive = refund
+  account: string | null
+  category: string | null
+  subcategory: string | null
+  import_hash: string | null
+  created_at: string
+}
+
 export interface WeeklyPlan {
   id: string
   family_id: string
