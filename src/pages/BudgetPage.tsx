@@ -99,9 +99,26 @@ export default function BudgetPage() {
 
   const fetchAll = useCallback(async () => {
     if (!family) return
-    const [{ data: cats }, { data: txns }] = await Promise.all([
+
+    // Fetch all transactions via pagination (Supabase caps at 1000 rows per request)
+    const PAGE = 1000
+    const allTxns: BudgetTransaction[] = []
+    let page = 0
+    while (true) {
+      const { data, error } = await supabase
+        .from('budget_transactions')
+        .select('*')
+        .eq('family_id', family.id)
+        .order('date', { ascending: false })
+        .range(page * PAGE, (page + 1) * PAGE - 1)
+      if (error || !data?.length) break
+      allTxns.push(...(data as BudgetTransaction[]))
+      if (data.length < PAGE) break
+      page++
+    }
+
+    const [{ data: cats }] = await Promise.all([
       supabase.from('budget_categories').select('*').eq('family_id', family.id).order('sort_order'),
-      supabase.from('budget_transactions').select('*').eq('family_id', family.id).order('date', { ascending: false }),
     ])
 
     let catList = (cats as BudgetCategory[]) ?? []
@@ -114,7 +131,7 @@ export default function BudgetPage() {
     }
 
     setCategories(catList)
-    setTransactions((txns as BudgetTransaction[]) ?? [])
+    setTransactions(allTxns)
     setLoading(false)
   }, [family])
 
