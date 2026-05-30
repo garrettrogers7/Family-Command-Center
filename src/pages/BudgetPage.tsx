@@ -94,6 +94,7 @@ export default function BudgetPage() {
   const [importResult, setImportResult]     = useState<{ imported: number; skipped: number; error?: string } | null>(null)
   const [showBudget, setShowBudget]         = useState(false)
   const [filterCategory, setFilterCategory] = useState<string>('all')
+  const [showTransactions, setShowTransactions] = useState(false)
   const fileInputRef        = useRef<HTMLInputElement>(null)
   const replaceFileInputRef = useRef<HTMLInputElement>(null)
 
@@ -535,26 +536,36 @@ export default function BudgetPage() {
             )}
 
             {/* ── Full transaction list ── */}
-            <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-              <p className="mb-4 text-sm font-semibold text-gray-700">
-                All transactions{activeCat ? ` — ${activeCat}` : ''}
-              </p>
-              {filteredTxns.length === 0 ? (
-                <p className="py-8 text-center text-sm text-gray-400">No transactions this month.</p>
-              ) : (
-                <div className="divide-y divide-gray-50">
-                  {filteredTxns.map(t => (
-                    <div key={t.id} className="flex items-center gap-3 py-2.5 hover:bg-gray-50 -mx-2 px-2 rounded transition-colors">
-                      <span className="h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: catColor(t.category ?? '') }} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-800 truncate">{t.description}</p>
-                        <p className="text-xs text-gray-400">{format(parseISO(t.date), 'MMM d')} · {t.category}{t.subcategory ? ` · ${t.subcategory}` : ''}</p>
-                      </div>
-                      <span className="text-sm font-medium text-gray-900 tabular-nums flex-shrink-0">
-                        {usd(Math.abs(t.amount))}
-                      </span>
+            <div className="rounded-xl border border-gray-100 bg-white shadow-sm">
+              <button
+                onClick={() => setShowTransactions(v => !v)}
+                className="flex w-full items-center justify-between px-5 py-4 text-left"
+              >
+                <span className="text-sm font-semibold text-gray-700">
+                  All transactions{activeCat ? ` — ${activeCat}` : ''}{filteredTxns.length > 0 ? ` (${filteredTxns.length})` : ''}
+                </span>
+                <ChevronRight size={16} className={`text-gray-400 transition-transform ${showTransactions ? 'rotate-90' : ''}`} />
+              </button>
+              {showTransactions && (
+                <div className="border-t border-gray-50 px-5 pb-5">
+                  {filteredTxns.length === 0 ? (
+                    <p className="py-8 text-center text-sm text-gray-400">No transactions this month.</p>
+                  ) : (
+                    <div className="divide-y divide-gray-50">
+                      {filteredTxns.map(t => (
+                        <div key={t.id} className="flex items-center gap-3 py-2.5 hover:bg-gray-50 -mx-2 px-2 rounded transition-colors">
+                          <span className="h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: catColor(t.category ?? '') }} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-gray-800 truncate">{t.description}</p>
+                            <p className="text-xs text-gray-400">{format(parseISO(t.date), 'MMM d')} · {t.category}{t.subcategory ? ` · ${t.subcategory}` : ''}</p>
+                          </div>
+                          <span className="text-sm font-medium text-gray-900 tabular-nums flex-shrink-0">
+                            {usd(Math.abs(t.amount))}
+                          </span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
               )}
             </div>
