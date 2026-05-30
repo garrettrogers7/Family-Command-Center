@@ -13,7 +13,7 @@ const navItems = [
   { to: '/today', label: 'Today', icon: Sun },
   { to: '/week', label: 'This Week', icon: CalendarDays },
   { to: '/household', label: 'Household', icon: Home },
-  { to: '/budget', label: 'Budget', icon: Wallet },
+  { to: '/budget', label: 'Spending', icon: Wallet },
 ]
 
 export function Sidebar() {

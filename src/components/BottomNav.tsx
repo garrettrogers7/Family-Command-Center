@@ -5,7 +5,7 @@ const navItems = [
   { to: '/today', label: 'Today', icon: Sun },
   { to: '/week', label: 'Week', icon: CalendarDays },
   { to: '/household', label: 'Household', icon: Home },
-  { to: '/budget', label: 'Budget', icon: Wallet },
+  { to: '/budget', label: 'Spending', icon: Wallet },
   { to: '/settings', label: 'Settings', icon: Settings },
 ]
 

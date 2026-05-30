@@ -284,7 +284,7 @@ export default function BudgetPage() {
 
   return (
     <div>
-      <PageHeader title="Budget" subtitle="Spending analytics" />
+      <PageHeader title="Spending" subtitle="Spending analytics" />
 
       <div className="mx-auto max-w-5xl px-4 py-4 md:px-8 md:py-6 space-y-6">
 
