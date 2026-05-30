@@ -259,6 +259,17 @@ export default function BudgetPage() {
 
       <div className="mx-auto max-w-5xl px-4 py-4 md:px-8 md:py-6 space-y-6">
 
+        {/* Debug: data summary */}
+        {!loading && transactions.length > 0 && (() => {
+          const expenseTxns = transactions.filter(t => t.amount < 0)
+          const dates = expenseTxns.map(t => t.date).sort()
+          return (
+            <p className="text-xs text-gray-400">
+              {transactions.length} transactions loaded · expenses: {expenseTxns.length} · earliest: {dates[0] ?? '—'} · latest: {dates[dates.length - 1] ?? '—'}
+            </p>
+          )
+        })()}
+
         {/* Controls row */}
         <div className="flex items-center justify-between flex-wrap gap-3">
           {/* Month nav */}
