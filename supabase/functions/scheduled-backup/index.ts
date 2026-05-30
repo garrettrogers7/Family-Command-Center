@@ -67,16 +67,6 @@ Deno.serve(async (req) => {
 
       if (uploadErr) throw new Error(uploadErr.message)
 
-      // Keep only the 8 most recent backups per family (~2 months)
-      const { data: files } = await supabase.storage
-        .from('backups')
-        .list(family.id, { sortBy: { column: 'name', order: 'asc' } })
-
-      if (files && files.length > 8) {
-        const toDelete = files.slice(0, files.length - 8).map((f) => `${family.id}/${f.name}`)
-        await supabase.storage.from('backups').remove(toDelete)
-      }
-
       results.push({ familyId: family.id, path })
     } catch (err) {
       results.push({ familyId: family.id, path: '', error: String(err) })

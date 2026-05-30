@@ -324,7 +324,7 @@ export default function SettingsPage() {
                 </button>
               </div>
               <p className="mb-3 text-xs text-gray-400 leading-relaxed">
-                Your data is automatically backed up every Sunday. The 8 most recent backups are kept (~2 months).
+                Your data is automatically backed up every Sunday. All backups are kept.
               </p>
               {backupsLoading ? (
                 <p className="text-xs text-gray-400">Loading backups…</p>
