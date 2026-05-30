@@ -64,16 +64,9 @@ export interface Equipment {
   created_at: string
 }
 
-export type MaintenanceFrequency =
-  | 'Monthly'
-  | 'Quarterly'
-  | 'Semi-Annually'
-  | 'Annually'
-  | 'Every 2 Years'
-  | 'Every 3 Years'
-  | 'Every 5 Years'
-  | 'Every 10 Years'
-  | 'Once'
+// Stored as "Every N Days/Weeks/Months/Years" or "Once"
+// Legacy values ("Monthly", "Quarterly", etc.) are still handled by calcNextDue
+export type MaintenanceFrequency = string
 
 export interface MaintenanceItem {
   id: string

@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { useFamily } from '@/contexts/FamilyContext'
 import { PageHeader } from '@/components/PageHeader'
 import type { Equipment, MaintenanceItem, MaintenanceHistoryEntry, MaintenanceFrequency } from '@/lib/database.types'
-import { addMonths, addYears, differenceInDays, format, parseISO } from 'date-fns'
+import { addDays, addWeeks, addMonths, addYears, differenceInDays, format, parseISO } from 'date-fns'
 
 // ── Types ────────────────────────────────────────────────────────
 type Category = 'Home' | 'Car' | 'Yard'
@@ -17,11 +17,32 @@ const CATEGORIES: { key: Category; Icon: typeof Home; color: string }[] = [
   { key: 'Yard', Icon: Leaf, color: 'text-green-500' },
 ]
 
-const FREQUENCIES: MaintenanceFrequency[] = [
-  'Monthly', 'Quarterly', 'Semi-Annually', 'Annually',
-  'Every 2 Years', 'Every 3 Years', 'Every 5 Years', 'Every 10 Years',
-  'Once',
-]
+type FreqUnit = 'Days' | 'Weeks' | 'Months' | 'Years'
+
+// Build a frequency string from a count + unit, e.g. "Every 4 Years"
+function buildFrequency(count: string, unit: FreqUnit): string {
+  const n = Math.max(1, parseInt(count) || 1)
+  const singular = unit.slice(0, -1) // "Years" → "Year"
+  return `Every ${n} ${n === 1 ? singular : unit}`
+}
+
+// Parse a stored frequency string back into count + unit for the form
+function parseFrequency(freq: string): { count: string; unit: FreqUnit } {
+  const legacy: Record<string, { count: string; unit: FreqUnit }> = {
+    'Monthly':        { count: '1',  unit: 'Months' },
+    'Quarterly':      { count: '3',  unit: 'Months' },
+    'Semi-Annually':  { count: '6',  unit: 'Months' },
+    'Annually':       { count: '1',  unit: 'Years'  },
+    'Every 2 Years':  { count: '2',  unit: 'Years'  },
+    'Every 3 Years':  { count: '3',  unit: 'Years'  },
+    'Every 5 Years':  { count: '5',  unit: 'Years'  },
+    'Every 10 Years': { count: '10', unit: 'Years'  },
+  }
+  if (legacy[freq]) return legacy[freq]
+  const m = freq.match(/^Every (\d+) (Day|Week|Month|Year)s?$/)
+  if (m) return { count: m[1], unit: (m[2] + 's') as FreqUnit }
+  return { count: '1', unit: 'Years' }
+}
 
 // ── Helpers ──────────────────────────────────────────────────────
 function calcNextDue(item: MaintenanceItem): Date | null {
@@ -31,16 +52,32 @@ function calcNextDue(item: MaintenanceItem): Date | null {
   }
   if (!item.last_done) return null
   const d = parseISO(item.last_done)
-  switch (item.frequency) {
-    case 'Monthly':        return addMonths(d, 1)
-    case 'Quarterly':      return addMonths(d, 3)
-    case 'Semi-Annually':  return addMonths(d, 6)
-    case 'Annually':       return addYears(d, 1)
-    case 'Every 2 Years':  return addYears(d, 2)
-    case 'Every 3 Years':  return addYears(d, 3)
-    case 'Every 5 Years':  return addYears(d, 5)
-    case 'Every 10 Years': return addYears(d, 10)
+
+  // Legacy named frequencies
+  const legacy: Record<string, Date> = {
+    'Monthly':        addMonths(d, 1),
+    'Quarterly':      addMonths(d, 3),
+    'Semi-Annually':  addMonths(d, 6),
+    'Annually':       addYears(d, 1),
+    'Every 2 Years':  addYears(d, 2),
+    'Every 3 Years':  addYears(d, 3),
+    'Every 5 Years':  addYears(d, 5),
+    'Every 10 Years': addYears(d, 10),
   }
+  if (legacy[item.frequency]) return legacy[item.frequency]
+
+  // Dynamic "Every N Days/Weeks/Months/Years"
+  const m = item.frequency.match(/^Every (\d+) (Day|Week|Month|Year)s?$/)
+  if (m) {
+    const n = parseInt(m[1])
+    switch (m[2]) {
+      case 'Day':   return addDays(d, n)
+      case 'Week':  return addWeeks(d, n)
+      case 'Month': return addMonths(d, n)
+      case 'Year':  return addYears(d, n)
+    }
+  }
+  return null
 }
 
 function DueBadge({ item }: { item: MaintenanceItem }) {
@@ -67,9 +104,14 @@ function ItemForm({
   onSave: () => void
   onClose: () => void
 }) {
+  const isOnce = initial?.frequency === 'Once'
+  const parsed = initial?.frequency && !isOnce ? parseFrequency(initial.frequency) : { count: '1', unit: 'Years' as FreqUnit }
+
   const [task,        setTask]        = useState(initial?.task ?? '')
   const [category,    setCategory]    = useState<Category>(initial?.category ?? defaultCategory)
-  const [frequency,   setFrequency]   = useState<MaintenanceFrequency>(initial?.frequency ?? 'Annually')
+  const [freqType,    setFreqType]    = useState<'repeating' | 'once'>(isOnce ? 'once' : 'repeating')
+  const [freqCount,   setFreqCount]   = useState(parsed.count)
+  const [freqUnit,    setFreqUnit]    = useState<FreqUnit>(parsed.unit)
   const [lastDone,    setLastDone]    = useState(initial?.last_done ?? '')
   const [dueDate,     setDueDate]     = useState(initial?.due_date ?? '')
   const [cost,        setCost]        = useState(initial?.cost?.toString() ?? '')
@@ -80,13 +122,14 @@ function ItemForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
+    const frequency = freqType === 'once' ? 'Once' : buildFrequency(freqCount, freqUnit)
     const payload = {
       family_id: familyId,
       task: task.trim(),
       category,
       frequency,
-      last_done: frequency === 'Once' ? null : (lastDone || null),
-      due_date: frequency === 'Once' ? (dueDate || null) : null,
+      last_done: freqType === 'once' ? null : (lastDone || null),
+      due_date: freqType === 'once' ? (dueDate || null) : null,
       cost: cost ? parseFloat(cost) : null,
       notes: notes.trim() || null,
       equipment_id: equipmentId || null,
@@ -125,12 +168,34 @@ function ItemForm({
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-gray-600">Frequency</label>
-              <select value={frequency} onChange={(e) => setFrequency(e.target.value as MaintenanceFrequency)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400">
-                {FREQUENCIES.map(f => <option key={f}>{f}</option>)}
-              </select>
+              <div className="flex gap-1.5">
+                <button type="button" onClick={() => setFreqType('repeating')}
+                  className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition-colors ${freqType === 'repeating' ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
+                  Repeating
+                </button>
+                <button type="button" onClick={() => setFreqType('once')}
+                  className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition-colors ${freqType === 'once' ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
+                  One-time
+                </button>
+              </div>
             </div>
           </div>
+          {freqType === 'repeating' && (
+            <div>
+              <label className="mb-1 block text-xs font-medium text-gray-600">Repeat every</label>
+              <div className="flex items-center gap-2">
+                <input type="number" min="1" max="99" value={freqCount} onChange={(e) => setFreqCount(e.target.value)}
+                  className="w-20 rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400 text-center" />
+                <select value={freqUnit} onChange={(e) => setFreqUnit(e.target.value as FreqUnit)}
+                  className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400">
+                  <option value="Days">Days</option>
+                  <option value="Weeks">Weeks</option>
+                  <option value="Months">Months</option>
+                  <option value="Years">Years</option>
+                </select>
+              </div>
+            </div>
+          )}
           <div>
             <label className="mb-1 block text-xs font-medium text-gray-600">Equipment (optional)</label>
             <select value={equipmentId} onChange={(e) => setEquipmentId(e.target.value)}
@@ -142,7 +207,7 @@ function ItemForm({
               <p className="mt-1 text-xs text-gray-400">Add equipment in the Equipment tab first.</p>
             )}
           </div>
-          {frequency === 'Once' ? (
+          {freqType === 'once' ? (
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="mb-1 block text-xs font-medium text-gray-600">Due date</label>
