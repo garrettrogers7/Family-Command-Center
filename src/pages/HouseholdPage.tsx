@@ -1031,7 +1031,6 @@ export default function HouseholdPage() {
 
             {CATEGORIES.map(({ key, Icon, color }) => {
               const catItems = sortedFor(key)
-              if (focusMode && catItems.length === 0) return null
               return (
                 <section key={key}>
                   <h2 className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-400">
@@ -1042,12 +1041,10 @@ export default function HouseholdPage() {
                       <MaintenanceRow key={item.id} item={item} familyId={family!.id} equipment={equipment}
                         onUpdate={fetchAll} onEdit={setEditing} onDuplicate={duplicateItem} onDelete={deleteItem} />
                     ))}
-                    {!focusMode && (
-                      <button onClick={() => setAddingCategory(key)}
-                        className="flex w-full items-center gap-2 rounded-lg border border-dashed border-gray-200 px-4 py-2.5 text-sm text-gray-400 transition-colors hover:border-gray-300 hover:text-gray-500">
-                        <Plus size={13} />Add {key.toLowerCase()} item
-                      </button>
-                    )}
+                    <button onClick={() => setAddingCategory(key)}
+                      className="flex w-full items-center gap-2 rounded-lg border border-dashed border-gray-200 px-4 py-2.5 text-sm text-gray-400 transition-colors hover:border-gray-300 hover:text-gray-500">
+                      <Plus size={13} />Add {key.toLowerCase()} item
+                    </button>
                   </div>
                 </section>
               )
