@@ -4,12 +4,11 @@ import * as XLSX from 'xlsx'
 import { supabase } from '@/lib/supabase'
 import { useFamily } from '@/contexts/FamilyContext'
 import { PageHeader } from '@/components/PageHeader'
-import type { Equipment, MaintenanceItem, MaintenanceHistoryEntry } from '@/lib/database.types'
+import type { Equipment, MaintenanceItem, MaintenanceHistoryEntry, MaintenanceFrequency } from '@/lib/database.types'
 import { addMonths, addYears, differenceInDays, format, parseISO } from 'date-fns'
 
 // ── Types ────────────────────────────────────────────────────────
 type Category = 'Home' | 'Car' | 'Yard'
-type Frequency = 'Monthly' | 'Quarterly' | 'Semi-Annually' | 'Annually'
 type View = 'log' | 'history' | 'equipment'
 
 const CATEGORIES: { key: Category; Icon: typeof Home; color: string }[] = [
@@ -18,17 +17,29 @@ const CATEGORIES: { key: Category; Icon: typeof Home; color: string }[] = [
   { key: 'Yard', Icon: Leaf, color: 'text-green-500' },
 ]
 
-const FREQUENCIES: Frequency[] = ['Monthly', 'Quarterly', 'Semi-Annually', 'Annually']
+const FREQUENCIES: MaintenanceFrequency[] = [
+  'Monthly', 'Quarterly', 'Semi-Annually', 'Annually',
+  'Every 2 Years', 'Every 3 Years', 'Every 5 Years', 'Every 10 Years',
+  'Once',
+]
 
 // ── Helpers ──────────────────────────────────────────────────────
 function calcNextDue(item: MaintenanceItem): Date | null {
+  // 'Once' items use their explicit due_date field
+  if (item.frequency === 'Once') {
+    return item.due_date ? parseISO(item.due_date) : null
+  }
   if (!item.last_done) return null
   const d = parseISO(item.last_done)
   switch (item.frequency) {
-    case 'Monthly':       return addMonths(d, 1)
-    case 'Quarterly':     return addMonths(d, 3)
-    case 'Semi-Annually': return addMonths(d, 6)
-    case 'Annually':      return addYears(d, 1)
+    case 'Monthly':        return addMonths(d, 1)
+    case 'Quarterly':      return addMonths(d, 3)
+    case 'Semi-Annually':  return addMonths(d, 6)
+    case 'Annually':       return addYears(d, 1)
+    case 'Every 2 Years':  return addYears(d, 2)
+    case 'Every 3 Years':  return addYears(d, 3)
+    case 'Every 5 Years':  return addYears(d, 5)
+    case 'Every 10 Years': return addYears(d, 10)
   }
 }
 
@@ -37,7 +48,9 @@ function DueBadge({ item }: { item: MaintenanceItem }) {
   if (!due) return <span className="text-xs text-gray-300">No date set</span>
   const days = differenceInDays(due, new Date())
   if (days < 0)
-    return <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-600">Overdue {Math.abs(days)}d</span>
+    return <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-600">{item.frequency === 'Once' ? 'Overdue' : `Overdue ${Math.abs(days)}d`}</span>
+  if (days === 0)
+    return <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-600">Due today</span>
   if (days <= 30)
     return <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-600">Due in {days}d</span>
   return <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-500">Due {format(due, 'MMM d, yyyy')}</span>
@@ -56,8 +69,9 @@ function ItemForm({
 }) {
   const [task,        setTask]        = useState(initial?.task ?? '')
   const [category,    setCategory]    = useState<Category>(initial?.category ?? defaultCategory)
-  const [frequency,   setFrequency]   = useState<Frequency>(initial?.frequency ?? 'Annually')
+  const [frequency,   setFrequency]   = useState<MaintenanceFrequency>(initial?.frequency ?? 'Annually')
   const [lastDone,    setLastDone]    = useState(initial?.last_done ?? '')
+  const [dueDate,     setDueDate]     = useState(initial?.due_date ?? '')
   const [cost,        setCost]        = useState(initial?.cost?.toString() ?? '')
   const [notes,       setNotes]       = useState(initial?.notes ?? '')
   const [equipmentId, setEquipmentId] = useState(initial?.equipment_id ?? '')
@@ -71,7 +85,8 @@ function ItemForm({
       task: task.trim(),
       category,
       frequency,
-      last_done: lastDone || null,
+      last_done: frequency === 'Once' ? null : (lastDone || null),
+      due_date: frequency === 'Once' ? (dueDate || null) : null,
       cost: cost ? parseFloat(cost) : null,
       notes: notes.trim() || null,
       equipment_id: equipmentId || null,
@@ -110,7 +125,7 @@ function ItemForm({
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-gray-600">Frequency</label>
-              <select value={frequency} onChange={(e) => setFrequency(e.target.value as Frequency)}
+              <select value={frequency} onChange={(e) => setFrequency(e.target.value as MaintenanceFrequency)}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400">
                 {FREQUENCIES.map(f => <option key={f}>{f}</option>)}
               </select>
@@ -127,19 +142,35 @@ function ItemForm({
               <p className="mt-1 text-xs text-gray-400">Add equipment in the Equipment tab first.</p>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-1 block text-xs font-medium text-gray-600">Last done</label>
-              <input type="date" value={lastDone} onChange={(e) => setLastDone(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400" />
+          {frequency === 'Once' ? (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-600">Due date</label>
+                <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400" />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-600">Cost ($)</label>
+                <input type="number" min="0" step="0.01" value={cost} onChange={(e) => setCost(e.target.value)}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400"
+                  placeholder="Optional" />
+              </div>
             </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-gray-600">Cost ($)</label>
-              <input type="number" min="0" step="0.01" value={cost} onChange={(e) => setCost(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400"
-                placeholder="Optional" />
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-600">Last done</label>
+                <input type="date" value={lastDone} onChange={(e) => setLastDone(e.target.value)}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400" />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-600">Cost ($)</label>
+                <input type="number" min="0" step="0.01" value={cost} onChange={(e) => setCost(e.target.value)}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400"
+                  placeholder="Optional" />
+              </div>
             </div>
-          </div>
+          )}
           <div>
             <label className="mb-1 block text-xs font-medium text-gray-600">Notes</label>
             <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3}
@@ -225,10 +256,18 @@ function MaintenanceRow({
             <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-400">{item.frequency}</span>
             <DueBadge item={item} />
           </div>
-          {item.last_done && (
-            <p className="mt-0.5 text-xs text-gray-400">
-              Last done {format(parseISO(item.last_done), 'MMM d, yyyy')}{item.cost ? ` · $${item.cost}` : ''}
-            </p>
+          {item.frequency === 'Once' ? (
+            item.due_date && (
+              <p className="mt-0.5 text-xs text-gray-400">
+                One-time reminder{item.cost ? ` · $${item.cost}` : ''}
+              </p>
+            )
+          ) : (
+            item.last_done && (
+              <p className="mt-0.5 text-xs text-gray-400">
+                Last done {format(parseISO(item.last_done), 'MMM d, yyyy')}{item.cost ? ` · $${item.cost}` : ''}
+              </p>
+            )
           )}
         </div>
 
@@ -801,6 +840,7 @@ export default function HouseholdPage() {
       category: item.category,
       frequency: item.frequency,
       last_done: item.last_done,
+      due_date: item.due_date,
       cost: item.cost,
       notes: item.notes,
       equipment_id: item.equipment_id,
@@ -821,9 +861,15 @@ export default function HouseholdPage() {
     return differenceInDays(due, new Date()) <= 30
   }
 
+  function isOneOffCompleted(item: MaintenanceItem) {
+    // A 'Once' item is considered done if it has a last_done entry
+    return item.frequency === 'Once' && item.last_done !== null
+  }
+
   function sortedFor(cat: Category) {
     return items
       .filter(i => i.category === cat)
+      .filter(i => !isOneOffCompleted(i))  // hide completed one-offs from the log
       .filter(i => !focusMode || isUrgent(i))
       .sort((a, b) => {
         const da = calcNextDue(a), db = calcNextDue(b)

@@ -64,13 +64,25 @@ export interface Equipment {
   created_at: string
 }
 
+export type MaintenanceFrequency =
+  | 'Monthly'
+  | 'Quarterly'
+  | 'Semi-Annually'
+  | 'Annually'
+  | 'Every 2 Years'
+  | 'Every 3 Years'
+  | 'Every 5 Years'
+  | 'Every 10 Years'
+  | 'Once'
+
 export interface MaintenanceItem {
   id: string
   family_id: string
   task: string
   category: 'Car' | 'Yard' | 'Home'
-  frequency: 'Monthly' | 'Quarterly' | 'Semi-Annually' | 'Annually'
+  frequency: MaintenanceFrequency
   last_done: string | null  // ISO date "YYYY-MM-DD"
+  due_date: string | null   // ISO date "YYYY-MM-DD" — used when frequency is 'Once'
   cost: number | null
   notes: string | null
   equipment_id: string | null
