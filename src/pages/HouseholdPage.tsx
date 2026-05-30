@@ -118,10 +118,12 @@ function ItemForm({
   const [notes,       setNotes]       = useState(initial?.notes ?? '')
   const [equipmentId, setEquipmentId] = useState(initial?.equipment_id ?? '')
   const [saving,      setSaving]      = useState(false)
+  const [saveError,   setSaveError]   = useState<string | null>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
+    setSaveError(null)
     const frequency = freqType === 'once' ? 'Once' : buildFrequency(freqCount, freqUnit)
     const payload = {
       family_id: familyId,
@@ -134,12 +136,14 @@ function ItemForm({
       notes: notes.trim() || null,
       equipment_id: equipmentId || null,
     }
-    if (initial) {
-      await supabase.from('maintenance_items').update(payload).eq('id', initial.id)
-    } else {
-      await supabase.from('maintenance_items').insert(payload)
-    }
+    const { error } = initial
+      ? await supabase.from('maintenance_items').update(payload).eq('id', initial.id)
+      : await supabase.from('maintenance_items').insert(payload)
     setSaving(false)
+    if (error) {
+      setSaveError(error.message)
+      return
+    }
     onSave()
     onClose()
   }
@@ -242,6 +246,11 @@ function ItemForm({
               className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400"
               placeholder="Instructions, product links, reminders…" />
           </div>
+          {saveError && (
+            <p className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">
+              Save failed: {saveError}
+            </p>
+          )}
           <div className="flex gap-2 pt-1">
             <button type="button" onClick={onClose}
               className="flex-1 rounded-lg border border-gray-200 py-2 text-sm text-gray-500 hover:bg-gray-50">Cancel</button>
