@@ -139,42 +139,64 @@ export default function BudgetPage() {
 
   // ── Derived data ────────────────────────────────────────────────
 
-  function txnsForMonth(month: Date) {
+  const activeCat = filterCategory === 'all' ? null : filterCategory
+
+  function txnsForMonth(month: Date, catFilter?: string | null) {
     const s = startOfMonth(month), e = endOfMonth(month)
     return transactions.filter(t => {
       const d = parseISO(t.date)
-      return d >= s && d <= e && t.amount < 0
+      return d >= s && d <= e && t.amount < 0 && (!catFilter || t.category === catFilter)
     })
   }
 
-  const monthTxns     = txnsForMonth(selectedMonth)
-  const lastMonthTxns = txnsForMonth(subMonths(selectedMonth, 1))
-  const lastYearTxns  = txnsForMonth(subYears(selectedMonth, 1))
+  const monthTxns     = txnsForMonth(selectedMonth, activeCat)
+  const lastMonthTxns = txnsForMonth(subMonths(selectedMonth, 1), activeCat)
+  const lastYearTxns  = txnsForMonth(subYears(selectedMonth, 1), activeCat)
 
-  const totalSpent       = monthTxns.reduce((s, t) => s + Math.abs(t.amount), 0)
-  const lastMonthTotal   = lastMonthTxns.reduce((s, t) => s + Math.abs(t.amount), 0)
-  const lastYearTotal    = lastYearTxns.reduce((s, t) => s + Math.abs(t.amount), 0)
-  const totalBudget      = categories.reduce((s, c) => s + c.monthly_budget, 0)
+  const totalSpent     = monthTxns.reduce((s, t) => s + Math.abs(t.amount), 0)
+  const lastMonthTotal = lastMonthTxns.reduce((s, t) => s + Math.abs(t.amount), 0)
+  const lastYearTotal  = lastYearTxns.reduce((s, t) => s + Math.abs(t.amount), 0)
+  const totalBudget    = categories.reduce((s, c) => s + c.monthly_budget, 0)
 
-  // Category breakdown for selected month (sorted by spend desc)
+  // All categories that appear in the data (for filter chips)
+  const allKnownCategories = [...new Set(
+    transactions.filter(t => t.amount < 0 && t.category).map(t => t.category!)
+  )].sort()
+
+  // Category breakdown for selected month (sorted by spend desc) — only when unfiltered
   const catBreakdown = categories.map(c => ({
-    name:    c.name,
-    amount:  monthTxns.filter(t => t.category === c.name).reduce((s, t) => s + Math.abs(t.amount), 0),
-    budget:  c.monthly_budget,
-    color:   catColor(c.name),
+    name:   c.name,
+    amount: monthTxns.filter(t => t.category === c.name).reduce((s, t) => s + Math.abs(t.amount), 0),
+    budget: c.monthly_budget,
+    color:  catColor(c.name),
   })).filter(c => c.amount > 0).sort((a, b) => b.amount - a.amount)
 
-  // Bar chart: from earliest transaction month through selected month
+  // Subcategory breakdown — used when a category is drilled into
+  const SUBCAT_COLORS = ['#3b82f6','#f97316','#22c55e','#a855f7','#eab308','#14b8a6','#6366f1','#ec4899','#06b6d4','#f43f5e','#84cc16','#f59e0b']
+  const subcatBreakdown = activeCat
+    ? Object.entries(
+        monthTxns.reduce((acc, t) => {
+          const sub = t.subcategory || 'Other'
+          acc[sub] = (acc[sub] || 0) + Math.abs(t.amount)
+          return acc
+        }, {} as Record<string, number>)
+      )
+      .map(([name, amount], i) => ({ name, amount, color: SUBCAT_COLORS[i % SUBCAT_COLORS.length] }))
+      .sort((a, b) => b.amount - a.amount)
+    : []
+
+  // Bar chart: from earliest matching transaction through selected month
   const allMonthsChart = (() => {
-    if (transactions.length === 0) return []
-    const earliest = startOfMonth(
-      min(transactions.filter(t => t.amount < 0).map(t => parseISO(t.date)))
-    )
+    const baseTxns = activeCat
+      ? transactions.filter(t => t.amount < 0 && t.category === activeCat)
+      : transactions.filter(t => t.amount < 0)
+    if (baseTxns.length === 0) return []
+    const earliest = startOfMonth(min(baseTxns.map(t => parseISO(t.date))))
     const months: { month: string; total: number; isSelected: boolean }[] = []
     let cursor = earliest
     while (cursor <= selectedMonth) {
       const isSelected = format(cursor, 'yyyy-MM') === format(selectedMonth, 'yyyy-MM')
-      const total = txnsForMonth(cursor).reduce((s, t) => s + Math.abs(t.amount), 0)
+      const total = txnsForMonth(cursor, activeCat).reduce((s, t) => s + Math.abs(t.amount), 0)
       months.push({ month: format(cursor, 'MMM yy'), total, isSelected })
       cursor = addMonths(cursor, 1)
     }
@@ -186,9 +208,8 @@ export default function BudgetPage() {
     .sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))
     .slice(0, 10)
 
-  // Filtered transaction list
-  const filteredTxns = (filterCategory === 'all' ? monthTxns : monthTxns.filter(t => t.category === filterCategory))
-    .sort((a, b) => b.date.localeCompare(a.date))
+  // Transaction list (already filtered by activeCat via monthTxns)
+  const filteredTxns = [...monthTxns].sort((a, b) => b.date.localeCompare(a.date))
 
   // ── Import ──────────────────────────────────────────────────────
 
@@ -326,10 +347,27 @@ export default function BudgetPage() {
           </div>
         ) : (
           <>
+            {/* ── Category filter strip ── */}
+            <div className="flex gap-1.5 flex-wrap">
+              <button onClick={() => setFilterCategory('all')}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${filterCategory === 'all' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
+                All categories
+              </button>
+              {allKnownCategories.map(cat => (
+                <button key={cat} onClick={() => setFilterCategory(filterCategory === cat ? 'all' : cat)}
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${filterCategory === cat ? 'text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                  style={filterCategory === cat ? { backgroundColor: catColor(cat) } : {}}>
+                  {cat}
+                </button>
+              ))}
+            </div>
+
             {/* ── Summary cards ── */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm col-span-2 md:col-span-1">
-                <p className="text-xs font-medium uppercase tracking-wide text-gray-400">This month</p>
+                <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
+                  {activeCat ? activeCat : 'This month'}
+                </p>
                 <p className="mt-1 text-2xl font-bold text-gray-900">{usd(totalSpent)}</p>
                 <div className="mt-1 space-y-0.5">
                   <Delta current={totalSpent} previous={lastMonthTotal} label="last month" />
@@ -341,15 +379,27 @@ export default function BudgetPage() {
                 <p className="mt-1 text-2xl font-bold text-gray-900">{monthTxns.length}</p>
                 <p className="mt-1 text-xs text-gray-400">avg {usd(totalSpent / (monthTxns.length || 1))}</p>
               </div>
-              <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-                <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Top category</p>
-                {catBreakdown[0] ? (
-                  <>
-                    <p className="mt-1 text-lg font-bold text-gray-900">{catBreakdown[0].name}</p>
-                    <p className="mt-0.5 text-xs text-gray-400">{usd(catBreakdown[0].amount)} · {Math.round(catBreakdown[0].amount / totalSpent * 100)}% of total</p>
-                  </>
-                ) : <p className="mt-1 text-sm text-gray-400">—</p>}
-              </div>
+              {!activeCat ? (
+                <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                  <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Top category</p>
+                  {catBreakdown[0] ? (
+                    <>
+                      <p className="mt-1 text-lg font-bold text-gray-900">{catBreakdown[0].name}</p>
+                      <p className="mt-0.5 text-xs text-gray-400">{usd(catBreakdown[0].amount)} · {Math.round(catBreakdown[0].amount / totalSpent * 100)}% of total</p>
+                    </>
+                  ) : <p className="mt-1 text-sm text-gray-400">—</p>}
+                </div>
+              ) : (
+                <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                  <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Top subcategory</p>
+                  {subcatBreakdown[0] ? (
+                    <>
+                      <p className="mt-1 text-lg font-bold text-gray-900">{subcatBreakdown[0].name}</p>
+                      <p className="mt-0.5 text-xs text-gray-400">{usd(subcatBreakdown[0].amount)} · {Math.round(subcatBreakdown[0].amount / totalSpent * 100)}%</p>
+                    </>
+                  ) : <p className="mt-1 text-sm text-gray-400">—</p>}
+                </div>
+              )}
               <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
                 <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Biggest purchase</p>
                 {topTxns[0] ? (
@@ -365,7 +415,9 @@ export default function BudgetPage() {
             <div className="grid md:grid-cols-5 gap-4">
               {/* Monthly trend bar chart */}
               <div className="md:col-span-3 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-                <p className="mb-4 text-sm font-semibold text-gray-700">Monthly spending — all time</p>
+                <p className="mb-4 text-sm font-semibold text-gray-700">
+                  Monthly spending{activeCat ? ` — ${activeCat}` : ' — all time'}
+                </p>
                 <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={allMonthsChart} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                     <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
@@ -374,76 +426,91 @@ export default function BudgetPage() {
                     <Tooltip content={<MonthTooltip />} cursor={{ fill: '#f9fafb' }} />
                     <Bar dataKey="total" radius={[4, 4, 0, 0]}>
                       {allMonthsChart.map((entry, i) => (
-                        <Cell key={i} fill={entry.isSelected ? '#1f2937' : '#e5e7eb'} />
+                        <Cell key={i} fill={entry.isSelected ? (activeCat ? catColor(activeCat) : '#1f2937') : '#e5e7eb'} />
                       ))}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
 
-              {/* Category donut */}
+              {/* Category donut / subcategory donut when drilled in */}
               <div className="md:col-span-2 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-                <p className="mb-2 text-sm font-semibold text-gray-700">By category</p>
-                {catBreakdown.length === 0 ? (
-                  <div className="flex h-48 items-center justify-center text-xs text-gray-400">No data for this month</div>
-                ) : (
-                  <ResponsiveContainer width="100%" height={200}>
-                    <PieChart>
-                      <Pie data={catBreakdown} dataKey="amount" nameKey="name"
-                        cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={2}>
-                        {catBreakdown.map((entry, i) => (
-                          <Cell key={i} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(v: number) => usd(v)} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                )}
+                <p className="mb-2 text-sm font-semibold text-gray-700">
+                  {activeCat ? 'By subcategory' : 'By category'}
+                </p>
+                {(() => {
+                  const pieData = activeCat ? subcatBreakdown : catBreakdown
+                  if (pieData.length === 0) return (
+                    <div className="flex h-48 items-center justify-center text-xs text-gray-400">No data for this month</div>
+                  )
+                  return (
+                    <ResponsiveContainer width="100%" height={200}>
+                      <PieChart>
+                        <Pie data={pieData} dataKey="amount" nameKey="name"
+                          cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={2}>
+                          {pieData.map((entry, i) => (
+                            <Cell key={i} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(v: number) => usd(v)} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  )
+                })()}
               </div>
             </div>
 
-            {/* ── Category breakdown list ── */}
+            {/* ── Category / subcategory breakdown list ── */}
             <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-              <p className="mb-4 text-sm font-semibold text-gray-700">Category breakdown</p>
-              {catBreakdown.length === 0 ? (
-                <p className="text-sm text-gray-400 italic">No transactions this month.</p>
-              ) : (
-                <div className="space-y-3">
-                  {catBreakdown.map(cat => {
-                    const pct = totalSpent > 0 ? (cat.amount / totalSpent) * 100 : 0
-                    const overBudget = showBudget && cat.budget > 0 && cat.amount > cat.budget
-                    return (
-                      <div key={cat.name}>
-                        <div className="flex items-center justify-between mb-1">
-                          <div className="flex items-center gap-2">
-                            <span className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
-                            <span className="text-sm text-gray-700">{cat.name}</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs text-gray-400">{Math.round(pct)}% of total</span>
-                            {showBudget && cat.budget > 0 && (
-                              <span className={`text-xs font-medium ${overBudget ? 'text-red-500' : 'text-gray-400'}`}>
-                                / {usd(cat.budget)}
+              <p className="mb-4 text-sm font-semibold text-gray-700">
+                {activeCat ? `${activeCat} — subcategories` : 'Category breakdown'}
+              </p>
+              {(() => {
+                const rows = activeCat ? subcatBreakdown : catBreakdown
+                if (rows.length === 0) return <p className="text-sm text-gray-400 italic">No transactions this month.</p>
+                return (
+                  <div className="space-y-3">
+                    {rows.map(row => {
+                      const pct = totalSpent > 0 ? (row.amount / totalSpent) * 100 : 0
+                      const budget = (row as any).budget as number | undefined
+                      const overBudget = showBudget && !activeCat && budget && budget > 0 && row.amount > budget
+                      return (
+                        <div key={row.name}>
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center gap-2">
+                              <span className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: row.color }} />
+                              <button
+                                onClick={() => !activeCat && setFilterCategory(row.name)}
+                                className={`text-sm text-gray-700 ${!activeCat ? 'hover:text-gray-900 hover:underline cursor-pointer' : ''}`}>
+                                {row.name}
+                              </button>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className="text-xs text-gray-400">{Math.round(pct)}% of total</span>
+                              {showBudget && !activeCat && budget && budget > 0 && (
+                                <span className={`text-xs font-medium ${overBudget ? 'text-red-500' : 'text-gray-400'}`}>
+                                  / {usd(budget)}
+                                </span>
+                              )}
+                              <span className="text-sm font-semibold text-gray-900 w-16 text-right tabular-nums">
+                                {usd(row.amount)}
                               </span>
-                            )}
-                            <span className="text-sm font-semibold text-gray-900 w-16 text-right tabular-nums">
-                              {usd(cat.amount)}
-                            </span>
+                            </div>
+                          </div>
+                          <div className="h-1.5 w-full rounded-full bg-gray-100">
+                            <div className="h-1.5 rounded-full transition-all"
+                              style={{
+                                width: `${pct}%`,
+                                backgroundColor: overBudget ? '#f87171' : row.color,
+                                opacity: 0.7,
+                              }} />
                           </div>
                         </div>
-                        <div className="h-1.5 w-full rounded-full bg-gray-100">
-                          <div className="h-1.5 rounded-full transition-all"
-                            style={{
-                              width: `${pct}%`,
-                              backgroundColor: overBudget ? '#f87171' : cat.color,
-                              opacity: 0.7,
-                            }} />
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
+                      )
+                    })}
+                  </div>
+                )
+              })()}
             </div>
 
             {/* ── Top transactions ── */}
@@ -456,7 +523,7 @@ export default function BudgetPage() {
                       <span className="h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: catColor(t.category ?? '') }} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-gray-800 truncate">{t.description}</p>
-                        <p className="text-xs text-gray-400">{format(parseISO(t.date), 'MMM d')} · {t.category}</p>
+                        <p className="text-xs text-gray-400">{format(parseISO(t.date), 'MMM d')} · {t.category}{t.subcategory ? ` · ${t.subcategory}` : ''}</p>
                       </div>
                       <span className="text-sm font-semibold text-gray-900 tabular-nums flex-shrink-0">
                         {usd(Math.abs(t.amount))}
@@ -469,22 +536,9 @@ export default function BudgetPage() {
 
             {/* ── Full transaction list ── */}
             <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-              <div className="mb-4 flex items-center justify-between flex-wrap gap-2">
-                <p className="text-sm font-semibold text-gray-700">All transactions</p>
-                <div className="flex gap-1.5 flex-wrap">
-                  <button onClick={() => setFilterCategory('all')}
-                    className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${filterCategory === 'all' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
-                    All
-                  </button>
-                  {catBreakdown.map(c => (
-                    <button key={c.name} onClick={() => setFilterCategory(c.name)}
-                      className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${filterCategory === c.name ? 'text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
-                      style={filterCategory === c.name ? { backgroundColor: c.color } : {}}>
-                      {c.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <p className="mb-4 text-sm font-semibold text-gray-700">
+                All transactions{activeCat ? ` — ${activeCat}` : ''}
+              </p>
               {filteredTxns.length === 0 ? (
                 <p className="py-8 text-center text-sm text-gray-400">No transactions this month.</p>
               ) : (
@@ -494,7 +548,7 @@ export default function BudgetPage() {
                       <span className="h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: catColor(t.category ?? '') }} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-gray-800 truncate">{t.description}</p>
-                        <p className="text-xs text-gray-400">{format(parseISO(t.date), 'MMM d')} · {t.category}</p>
+                        <p className="text-xs text-gray-400">{format(parseISO(t.date), 'MMM d')} · {t.category}{t.subcategory ? ` · ${t.subcategory}` : ''}</p>
                       </div>
                       <span className="text-sm font-medium text-gray-900 tabular-nums flex-shrink-0">
                         {usd(Math.abs(t.amount))}
