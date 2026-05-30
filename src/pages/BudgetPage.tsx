@@ -215,11 +215,10 @@ export default function BudgetPage() {
         const amount      = typeof row[2] === 'number' ? row[2] : parseFloat(row[2])
         const account     = row[3]?.toString().trim() || null
         const subcategory = row[6]?.toString().trim() || null
-        // grCategory may be in col 8; fall back to subcategory or 'Uncategorized'
-        const grCategory  = row[8]?.toString().trim() || row[7]?.toString().trim() || subcategory || 'Uncategorized'
+        const grCategory  = row[8]?.toString().trim() || null
 
-        // Skip rows with no date, no description, or no valid amount
-        if (!dateRaw || !description || isNaN(amount) || amount === 0) { skippedRows++; continue }
+        // Skip rows with no date, no description, no valid amount, or no GR Category
+        if (!dateRaw || !description || isNaN(amount) || amount === 0 || !grCategory) { skippedRows++; continue }
 
         let dateStr: string
         try {
@@ -230,7 +229,7 @@ export default function BudgetPage() {
         } catch { skippedRows++; continue }
 
         const hash = `${dateStr}|${description}|${amount}`
-        toInsert.push({ family_id: family.id, date: dateStr, description, amount, account, category: grCategory, subcategory, import_hash: hash })
+        toInsert.push({ family_id: family.id, date: dateStr, description, amount, account, category: grCategory!, subcategory, import_hash: hash })
       }
 
       console.log(`Import: ${toInsert.length} rows to insert, ${skippedRows} skipped`)
