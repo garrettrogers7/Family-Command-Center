@@ -118,6 +118,31 @@ export interface BudgetTransaction {
   created_at: string
 }
 
+export type ProjectStatus = 'planning' | 'active' | 'done'
+
+export interface Project {
+  id: string
+  family_id: string
+  title: string
+  description: string | null
+  category: string | null
+  status: ProjectStatus
+  target_date: string | null  // ISO date "YYYY-MM-DD"
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
+export interface ProjectTask {
+  id: string
+  project_id: string
+  family_id: string
+  text: string
+  completed: boolean
+  sort_order: number
+  created_at: string
+}
+
 export interface WeeklyPlan {
   id: string
   family_id: string

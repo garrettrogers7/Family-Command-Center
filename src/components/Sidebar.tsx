@@ -4,16 +4,18 @@ import {
   CalendarDays,
   Home,
   Wallet,
+  FolderKanban,
   Settings,
 } from 'lucide-react'
 import { useFamily } from '@/contexts/FamilyContext'
 import { UserAvatar } from '@/components/UserAvatar'
 
 const navItems = [
-  { to: '/today', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/week', label: 'This Week', icon: CalendarDays },
+  { to: '/today',     label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/week',      label: 'This Week', icon: CalendarDays },
   { to: '/household', label: 'Household', icon: Home },
-  { to: '/budget', label: 'Spending', icon: Wallet },
+  { to: '/budget',    label: 'Spending',  icon: Wallet },
+  { to: '/projects',  label: 'Projects',  icon: FolderKanban },
 ]
 
 export function Sidebar() {

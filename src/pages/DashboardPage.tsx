@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  CalendarDays, Home, Wallet, Settings,
+  CalendarDays, Home, Wallet, Settings, FolderKanban,
   TrendingUp, TrendingDown, Minus,
   CheckCheck, AlertTriangle, ShieldCheck,
 } from 'lucide-react'
@@ -85,6 +85,7 @@ export default function DashboardPage() {
   const [maintenance,  setMaintenance]  = useState<MaintenanceItem[]>([])
   const [monthSpend,   setMonthSpend]   = useState<number | null>(null)
   const [lastMonthSpend, setLastMonthSpend] = useState<number>(0)
+  const [activeProjects, setActiveProjects] = useState<number>(0)
   const [loading,      setLoading]      = useState(true)
 
   useEffect(() => {
@@ -112,9 +113,14 @@ export default function DashboardPage() {
         .select('amount')
         .eq('family_id', family.id)
         .gte('date', lms).lte('date', lme),
-    ]).then(([tasks, maint, txns, lastTxns]) => {
+      supabase.from('projects')
+        .select('id, status')
+        .eq('family_id', family.id)
+        .in('status', ['planning', 'active']),
+    ]).then(([tasks, maint, txns, lastTxns, projects]) => {
       setWeekTasks((tasks.data as Task[]) ?? [])
       setMaintenance((maint.data as MaintenanceItem[]) ?? [])
+      setActiveProjects((projects.data ?? []).length)
 
       const spend = ((txns.data ?? []) as { amount: number }[])
         .filter(t => t.amount < 0)
@@ -236,15 +242,32 @@ export default function DashboardPage() {
               }
             />
 
-            {/* Settings */}
+            {/* Projects */}
             <DashCard
-              to="/settings"
-              icon={<Settings size={22} className="text-gray-400" />}
-              iconBg="bg-gray-50"
-              label="Settings"
-              kpi={family?.name ?? '—'}
-              sub={`${members.length} ${members.length === 1 ? 'member' : 'members'}`}
+              to="/projects"
+              icon={<FolderKanban size={22} className="text-violet-500" />}
+              iconBg="bg-violet-50"
+              label="Projects"
+              kpi={activeProjects}
+              sub={activeProjects === 1 ? 'project in progress' : 'projects in progress'}
             />
+
+            {/* Settings — spans full width as a slim footer card */}
+            <Link
+              to="/settings"
+              className="col-span-2 flex items-center justify-between rounded-2xl border border-gray-100 bg-white px-5 py-3.5 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
+            >
+              <div className="flex items-center gap-3">
+                <div className="rounded-xl bg-gray-50 p-2">
+                  <Settings size={16} className="text-gray-400" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Settings</p>
+                  <p className="text-sm font-semibold text-gray-900">{family?.name ?? '—'}</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-400">{members.length} {members.length === 1 ? 'member' : 'members'}</p>
+            </Link>
 
           </div>
         )}
