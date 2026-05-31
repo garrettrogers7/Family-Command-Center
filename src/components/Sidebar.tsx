@@ -19,12 +19,12 @@ export function Sidebar() {
 
   return (
     <aside
-      className="hidden md:flex h-screen w-56 flex-shrink-0 flex-col px-3 py-6"
+      className="hidden md:flex h-screen w-56 flex-shrink-0 flex-col px-4 py-6"
       style={{ backgroundColor: '#ffffff', borderRight: '1px solid #e2e8f0' }}
     >
       {/* Wordmark */}
-      <div className="mb-6 px-3">
-        <span className="text-base font-bold tracking-tight" style={{ color: '#0f172a' }}>
+      <div className="mb-8 px-2">
+        <span className="text-sm font-bold tracking-widest uppercase" style={{ color: '#1e3a5f' }}>
           Home Base
         </span>
         {family && (
@@ -38,19 +38,15 @@ export function Sidebar() {
           <NavLink
             key={to}
             to={to}
-            className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all"
+            className="flex items-center gap-2.5 px-2 py-2 text-sm font-medium transition-all"
             style={({ isActive }) => isActive
-              ? { backgroundColor: '#eef2ff', color: '#4338ca' }
-              : { color: '#64748b' }
+              ? { color: '#1e3a5f', borderLeft: '2px solid #3b82f6', paddingLeft: '6px', backgroundColor: '#f0f7ff' }
+              : { color: '#64748b', borderLeft: '2px solid transparent', paddingLeft: '6px' }
             }
           >
             {({ isActive }) => (
               <>
-                <Icon
-                  size={16}
-                  strokeWidth={isActive ? 2.25 : 1.75}
-                  color={isActive ? '#4338ca' : '#94a3b8'}
-                />
+                <Icon size={15} strokeWidth={isActive ? 2.25 : 1.75} color={isActive ? '#1e3a5f' : '#94a3b8'} />
                 <span className={isActive ? 'font-semibold' : ''}>{label}</span>
               </>
             )}
@@ -59,9 +55,9 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom: members + settings */}
-      <div className="space-y-1 pt-4" style={{ borderTop: '1px solid #e2e8f0' }}>
+      <div className="space-y-0.5 pt-4" style={{ borderTop: '1px solid #e2e8f0' }}>
         {currentMember && (
-          <div className="flex items-center gap-2 px-3 py-2 mb-1">
+          <div className="flex items-center gap-2 px-2 py-2 mb-1">
             <UserAvatar member={currentMember} size="sm" />
             {otherMember && <UserAvatar member={otherMember} size="sm" />}
             <span className="text-xs truncate" style={{ color: '#94a3b8' }}>
@@ -72,15 +68,15 @@ export function Sidebar() {
         )}
         <NavLink
           to="/settings"
-          className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all"
+          className="flex items-center gap-2.5 px-2 py-2 text-sm font-medium transition-all"
           style={({ isActive }) => isActive
-            ? { backgroundColor: '#eef2ff', color: '#4338ca' }
-            : { color: '#64748b' }
+            ? { color: '#1e3a5f', borderLeft: '2px solid #3b82f6', paddingLeft: '6px', backgroundColor: '#f0f7ff' }
+            : { color: '#64748b', borderLeft: '2px solid transparent', paddingLeft: '6px' }
           }
         >
           {({ isActive }) => (
             <>
-              <Settings size={16} strokeWidth={isActive ? 2.25 : 1.75} color={isActive ? '#4338ca' : '#94a3b8'} />
+              <Settings size={15} strokeWidth={isActive ? 2.25 : 1.75} color={isActive ? '#1e3a5f' : '#94a3b8'} />
               <span className={isActive ? 'font-semibold' : ''}>Settings</span>
             </>
           )}

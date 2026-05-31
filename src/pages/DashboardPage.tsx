@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  CalendarDays, Home, Wallet, Settings, FolderKanban, Compass,
-  TrendingUp, TrendingDown, AlertTriangle, ShieldCheck, ChevronRight,
+  ShieldCheck, ChevronRight,
 } from 'lucide-react'
 import {
   format, startOfMonth, endOfMonth, subMonths,
@@ -42,45 +41,35 @@ function usd(n: number) {
   return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
 }
 
-// ── Section card ──────────────────────────────────────────────────
+// ── Section card — MidOcean style ─────────────────────────────────
 
 interface SectionCardProps {
   to: string
   label: string
-  icon: React.ReactNode
-  tint: string        // gradient overlay class
-  border: string      // border color class
-  iconColor: string   // icon color class
+  accentColor: string   // top accent bar color (CSS color string)
   kpi: React.ReactNode
   sub: React.ReactNode
   badge?: React.ReactNode
-  badgeColor?: string
 }
 
-function SectionCard({ to, label, icon, tint, border, iconColor, kpi, sub, badge, badgeColor = 'bg-red-500' }: SectionCardProps) {
+function SectionCard({ to, label, accentColor, kpi, sub, badge }: SectionCardProps) {
   return (
     <Link
       to={to}
-      className="group relative flex flex-col overflow-hidden rounded-2xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-      style={{
-        background: '#ffffff',
-        border: `1px solid ${border}`,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04)',
-      }}
+      className="group flex flex-col bg-white transition-all duration-200 hover:shadow-md"
+      style={{ border: '1px solid #e2e8f0', borderRadius: '4px', overflow: 'hidden' }}
     >
-      {/* Subtle tint overlay */}
-      <div className={`pointer-events-none absolute inset-0 rounded-2xl ${tint}`} />
+      {/* Top accent bar — the MidOcean signature */}
+      <div style={{ height: '3px', backgroundColor: accentColor }} />
 
-      {/* Content */}
-      <div className="relative z-10 flex flex-col h-full gap-3">
-        {/* Header row */}
+      <div className="flex flex-col gap-3 p-5">
+        {/* Label row */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <span className={iconColor}>{icon}</span>
-            <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#94a3b8' }}>{label}</span>
-          </div>
+          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#94a3b8' }}>
+            {label}
+          </span>
           {badge != null && (
-            <span className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-bold text-slate-900 ${badgeColor}`}>
+            <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">
               {badge}
             </span>
           )}
@@ -88,13 +77,13 @@ function SectionCard({ to, label, icon, tint, border, iconColor, kpi, sub, badge
 
         {/* KPI */}
         <div className="flex-1">
-          <div className="text-2xl font-bold leading-tight tracking-tight" style={{ color: '#0f172a' }}>{kpi}</div>
-          <div className="mt-1 text-xs leading-snug" style={{ color: '#94a3b8' }}>{sub}</div>
+          <div className="text-2xl font-bold leading-tight" style={{ color: '#0f172a' }}>{kpi}</div>
+          <div className="mt-1 text-xs" style={{ color: '#94a3b8' }}>{sub}</div>
         </div>
 
         {/* Arrow */}
         <div className="flex justify-end">
-          <ChevronRight size={14} style={{ color: '#cbd5e1' }} className="transition-all group-hover:translate-x-0.5 group-hover:text-slate-400" />
+          <ChevronRight size={13} style={{ color: '#cbd5e1' }} className="transition-all group-hover:translate-x-0.5 group-hover:text-slate-400" />
         </div>
       </div>
     </Link>
@@ -165,15 +154,15 @@ export default function DashboardPage() {
       <div className="mx-auto max-w-2xl px-5 pt-10 pb-12 md:px-8">
 
         {/* ── Greeting ── */}
-        <div className="mb-10">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: '#94a3b8' }}>
+        <div className="mb-8 pb-8" style={{ borderBottom: '1px solid #e2e8f0' }}>
+          <p className="text-[10px] font-bold tracking-widest uppercase mb-2" style={{ color: '#94a3b8' }}>
             {format(today, 'EEEE, MMMM d')}
           </p>
-          <h1 className="text-4xl font-bold tracking-tight leading-tight" style={{ color: '#0f172a' }}>
+          <h1 className="text-3xl font-bold tracking-tight" style={{ color: '#0f172a' }}>
             {greeting}{firstName ? `, ${firstName}` : ''}
           </h1>
           {members.length > 1 && (
-            <p className="mt-2 text-sm" style={{ color: '#94a3b8' }}>
+            <p className="mt-1.5 text-sm" style={{ color: '#64748b' }}>
               {members.map(m => m.display_name.split(' ')[0]).join(' & ')}
             </p>
           )}
@@ -186,64 +175,45 @@ export default function DashboardPage() {
             <p className="text-sm">Loading…</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
 
             {/* This Week */}
             <SectionCard
               to="/week"
               label="This Week"
-              icon={<CalendarDays size={18} strokeWidth={1.75} />}
-              tint="bg-gradient-to-br from-violet-50 to-transparent"
-              border="#e9d5ff"
-              iconColor="text-violet-500"
+              accentColor="#7c3aed"
               kpi={weekTaskCount ?? '—'}
               sub={weekTaskCount === 1 ? 'task remaining' : 'tasks remaining'}
               badge={weekTaskCount ? weekTaskCount : undefined}
-              badgeColor="bg-red-500"
             />
 
             {/* Household */}
             <SectionCard
               to="/household"
               label="Household"
-              icon={overdueItems.length > 0
-                ? <AlertTriangle size={18} strokeWidth={1.75} />
-                : <Home size={18} strokeWidth={1.75} />
-              }
-              tint="bg-gradient-to-br from-emerald-50 to-transparent"
-              border="#a7f3d0"
-              iconColor={overdueItems.length > 0 ? 'text-red-500' : dueSoonItems.length > 0 ? 'text-amber-500' : 'text-emerald-500'}
+              accentColor="#059669"
               kpi={
                 overdueItems.length > 0
                   ? <span className="text-red-600">{overdueItems.length} overdue</span>
                   : dueSoonItems.length > 0
                   ? <span className="text-amber-600">{dueSoonItems.length} due soon</span>
-                  : <span className="flex items-center gap-2 text-emerald-600"><ShieldCheck size={22} strokeWidth={2} />All clear</span>
+                  : <span className="flex items-center gap-2 text-emerald-700"><ShieldCheck size={18} strokeWidth={2} />All clear</span>
               }
               sub="maintenance status"
               badge={overdueItems.length > 0 ? overdueItems.length : undefined}
-              badgeColor="bg-red-500"
             />
 
             {/* Spending */}
             <SectionCard
               to="/budget"
               label="Spending"
-              icon={spendDelta != null && spendDelta > 5
-                ? <TrendingUp size={18} strokeWidth={1.75} />
-                : spendDelta != null && spendDelta < -5
-                ? <TrendingDown size={18} strokeWidth={1.75} />
-                : <Wallet size={18} strokeWidth={1.75} />
-              }
-              tint="bg-gradient-to-br from-orange-50 to-transparent"
-              border="#fed7aa"
-              iconColor={spendDelta != null && spendDelta > 5 ? 'text-red-500' : spendDelta != null && spendDelta < -5 ? 'text-emerald-500' : 'text-orange-500'}
+              accentColor="#d97706"
               kpi={monthSpend != null ? usd(monthSpend) : '—'}
               sub={
                 spendDelta == null ? format(today, 'MMMM')
                 : Math.abs(spendDelta) < 5 ? 'about the same as last month'
-                : spendDelta > 0 ? `${spendDelta}% more than last month`
-                : `${Math.abs(spendDelta)}% less than last month`
+                : spendDelta > 0 ? `↑ ${spendDelta}% vs last month`
+                : `↓ ${Math.abs(spendDelta)}% vs last month`
               }
             />
 
@@ -251,10 +221,7 @@ export default function DashboardPage() {
             <SectionCard
               to="/projects"
               label="Projects"
-              icon={<FolderKanban size={18} strokeWidth={1.75} />}
-              tint="bg-gradient-to-br from-sky-50 to-transparent"
-              border="#bae6fd"
-              iconColor="text-sky-500"
+              accentColor="#0284c7"
               kpi={activeProjects ?? '—'}
               sub={activeProjects === 1 ? 'project in progress' : 'projects in progress'}
             />
@@ -263,10 +230,7 @@ export default function DashboardPage() {
             <SectionCard
               to="/vision"
               label="Vision"
-              icon={<Compass size={18} strokeWidth={1.75} />}
-              tint="bg-gradient-to-br from-pink-50 to-transparent"
-              border="#fbcfe8"
-              iconColor="text-pink-500"
+              accentColor="#db2777"
               kpi="Values"
               sub="goals & traditions"
             />
@@ -275,10 +239,7 @@ export default function DashboardPage() {
             <SectionCard
               to="/settings"
               label="Settings"
-              icon={<Settings size={18} strokeWidth={1.75} />}
-              tint="bg-gradient-to-br from-indigo-50 to-transparent"
-              border="#c7d2fe"
-              iconColor="text-indigo-500"
+              accentColor="#1e3a5f"
               kpi={family?.name ?? '—'}
               sub={`${members.length} ${members.length === 1 ? 'member' : 'members'}`}
             />

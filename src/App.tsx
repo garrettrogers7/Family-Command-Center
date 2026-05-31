@@ -30,8 +30,8 @@ function RequireFamily({ children }: { children: React.ReactNode }) {
 
 function FullScreenSpinner() {
   return (
-    <div className="flex h-screen items-center justify-center" style={{ backgroundColor: '#0d0d14' }}>
-      <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/10 border-t-white/60" />
+    <div className="flex h-screen items-center justify-center" style={{ backgroundColor: '#f1f5f9' }}>
+      <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-200 border-t-slate-500" />
     </div>
   )
 }

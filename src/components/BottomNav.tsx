@@ -20,15 +20,15 @@ export function BottomNav() {
           key={to}
           to={to}
           className="relative flex flex-1 flex-col items-center justify-center gap-0.5 py-3 text-[10px] font-medium transition-colors"
-          style={({ isActive }) => ({ color: isActive ? '#4338ca' : '#94a3b8' })}
+          style={({ isActive }) => ({ color: isActive ? '#1e3a5f' : '#94a3b8' })}
         >
           {({ isActive }) => (
             <>
               {isActive && (
-                <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-8 rounded-b-full bg-indigo-600" />
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-8" style={{ backgroundColor: '#3b82f6' }} />
               )}
-              <Icon size={21} strokeWidth={isActive ? 2.25 : 1.6} />
-              <span className={isActive ? 'font-semibold' : ''}>{label}</span>
+              <Icon size={20} strokeWidth={isActive ? 2.25 : 1.6} />
+              <span className={isActive ? 'font-bold' : ''}>{label}</span>
             </>
           )}
         </NavLink>
