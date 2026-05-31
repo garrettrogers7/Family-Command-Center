@@ -4,7 +4,7 @@ import { BottomNav } from '@/components/BottomNav'
 
 export function Layout() {
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
+    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: '#0d0d14' }}>
       {/* Sidebar — desktop only */}
       <Sidebar />
 
