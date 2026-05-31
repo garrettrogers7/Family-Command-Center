@@ -113,7 +113,7 @@ function EntryForm({ familyId, userId, entry, onSave, onClose }: EntryFormProps)
             <button type="button" onClick={onClose} className="flex-1 rounded-lg border border-slate-200 py-2 text-sm text-slate-400">
               Cancel
             </button>
-            <button type="submit" disabled={saving} className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-slate-900 disabled:opacity-50">
+            <button type="submit" disabled={saving} className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-slate-900 disabled:opacity-50">
               {saving ? 'Saving…' : 'Save'}
             </button>
           </div>
@@ -171,7 +171,7 @@ export default function VaultPage() {
         action={
           <button
             onClick={() => setAdding(true)}
-            className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-slate-900"
+            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-slate-900"
           >
             <Plus size={14} />
             Add entry
@@ -190,7 +190,7 @@ export default function VaultPage() {
             </p>
             <button
               onClick={() => setAdding(true)}
-              className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-slate-900"
+              className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-slate-900"
             >
               Add first entry
             </button>

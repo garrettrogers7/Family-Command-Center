@@ -24,7 +24,7 @@ export function Sidebar() {
     >
       {/* Wordmark */}
       <div className="mb-8 px-2">
-        <span className="text-sm font-bold tracking-widest uppercase" style={{ color: '#1e3a5f' }}>
+        <span className="text-sm font-bold tracking-widest uppercase" style={{ color: '#1a6db5' }}>
           Home Base
         </span>
         {family && (
@@ -40,13 +40,13 @@ export function Sidebar() {
             to={to}
             className="flex items-center gap-2.5 px-2 py-2 text-sm font-medium transition-all"
             style={({ isActive }) => isActive
-              ? { color: '#1e3a5f', borderLeft: '2px solid #3b82f6', paddingLeft: '6px', backgroundColor: '#f0f7ff' }
+              ? { color: '#1a6db5', borderLeft: '2px solid #1a6db5', paddingLeft: '6px', backgroundColor: '#eff6ff' }
               : { color: '#64748b', borderLeft: '2px solid transparent', paddingLeft: '6px' }
             }
           >
             {({ isActive }) => (
               <>
-                <Icon size={15} strokeWidth={isActive ? 2.25 : 1.75} color={isActive ? '#1e3a5f' : '#94a3b8'} />
+                <Icon size={15} strokeWidth={isActive ? 2.25 : 1.75} color={isActive ? '#1a6db5' : '#94a3b8'} />
                 <span className={isActive ? 'font-semibold' : ''}>{label}</span>
               </>
             )}
@@ -70,13 +70,13 @@ export function Sidebar() {
           to="/settings"
           className="flex items-center gap-2.5 px-2 py-2 text-sm font-medium transition-all"
           style={({ isActive }) => isActive
-            ? { color: '#1e3a5f', borderLeft: '2px solid #3b82f6', paddingLeft: '6px', backgroundColor: '#f0f7ff' }
+            ? { color: '#1a6db5', borderLeft: '2px solid #1a6db5', paddingLeft: '6px', backgroundColor: '#eff6ff' }
             : { color: '#64748b', borderLeft: '2px solid transparent', paddingLeft: '6px' }
           }
         >
           {({ isActive }) => (
             <>
-              <Settings size={15} strokeWidth={isActive ? 2.25 : 1.75} color={isActive ? '#1e3a5f' : '#94a3b8'} />
+              <Settings size={15} strokeWidth={isActive ? 2.25 : 1.75} color={isActive ? '#1a6db5' : '#94a3b8'} />
               <span className={isActive ? 'font-semibold' : ''}>Settings</span>
             </>
           )}

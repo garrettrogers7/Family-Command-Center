@@ -45,17 +45,17 @@
   /* Buttons — primary */
   .btn {
     @apply inline-flex items-center gap-1.5 rounded px-4 py-2 text-sm font-semibold text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed;
-    background-color: #1e3a5f;
+    background-color: #1a6db5;
   }
   .btn:hover:not(:disabled) {
-    background-color: #162d4a;
+    background-color: #1560a0;
   }
   .btn-sm {
     @apply inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-semibold text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed;
-    background-color: #1e3a5f;
+    background-color: #1a6db5;
   }
   .btn-sm:hover:not(:disabled) {
-    background-color: #162d4a;
+    background-color: #1560a0;
   }
 
   /* Buttons — ghost */

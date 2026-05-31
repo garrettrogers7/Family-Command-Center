@@ -221,7 +221,7 @@ export default function DashboardPage() {
             <SectionCard
               to="/projects"
               label="Projects"
-              accentColor="#0284c7"
+              accentColor="#1a6db5"
               kpi={activeProjects ?? '—'}
               sub={activeProjects === 1 ? 'project in progress' : 'projects in progress'}
             />
@@ -239,7 +239,7 @@ export default function DashboardPage() {
             <SectionCard
               to="/settings"
               label="Settings"
-              accentColor="#1e3a5f"
+              accentColor="#1a6db5"
               kpi={family?.name ?? '—'}
               sub={`${members.length} ${members.length === 1 ? 'member' : 'members'}`}
             />

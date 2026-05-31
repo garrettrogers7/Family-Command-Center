@@ -45,7 +45,7 @@ function Section({
   children: React.ReactNode
 }) {
   const accentMap: Record<string, string> = {
-    blue:   'bg-indigo-600',
+    blue:   'bg-blue-600',
     violet: 'bg-violet-600',
     rose:   'bg-rose-500/100',
     amber:  'bg-amber-500/100',
@@ -53,11 +53,11 @@ function Section({
   return (
     <section className="rounded-2xl border border-slate-200 bg-white/[0.04] shadow-sm overflow-hidden">
       {/* Colored top bar */}
-      <div className={`h-1 w-full ${accentMap[accent] ?? 'bg-indigo-600'}`} />
+      <div className={`h-1 w-full ${accentMap[accent] ?? 'bg-blue-600'}`} />
       <div className="p-6">
         <div className="mb-5 flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${accentMap[accent] ?? 'bg-indigo-600'} bg-opacity-10`}>
+            <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${accentMap[accent] ?? 'bg-blue-600'} bg-opacity-10`}>
               <span className={`${accent === 'blue' ? 'text-indigo-500' : accent === 'violet' ? 'text-violet-600' : accent === 'rose' ? 'text-rose-500' : 'text-amber-500'}`}>
                 {icon}
               </span>

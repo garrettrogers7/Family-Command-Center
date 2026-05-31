@@ -398,7 +398,7 @@ function SortableFunRow({
             <button
               onClick={handleSave}
               disabled={!editText.trim()}
-              className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-slate-900 disabled:opacity-40"
+              className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-slate-900 disabled:opacity-40"
             >
               Save
             </button>

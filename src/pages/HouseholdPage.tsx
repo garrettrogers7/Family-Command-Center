@@ -174,11 +174,11 @@ function ItemForm({
               <label className="mb-1 block text-xs font-medium text-slate-500">Frequency</label>
               <div className="flex gap-1.5">
                 <button type="button" onClick={() => setFreqType('repeating')}
-                  className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition-colors ${freqType === 'repeating' ? 'border-indigo-600 bg-indigo-600 text-slate-900' : 'border-slate-200 text-slate-400 hover:bg-slate-50'}`}>
+                  className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition-colors ${freqType === 'repeating' ? 'border-indigo-600 bg-blue-600 text-slate-900' : 'border-slate-200 text-slate-400 hover:bg-slate-50'}`}>
                   Repeating
                 </button>
                 <button type="button" onClick={() => setFreqType('once')}
-                  className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition-colors ${freqType === 'once' ? 'border-indigo-600 bg-indigo-600 text-slate-900' : 'border-slate-200 text-slate-400 hover:bg-slate-50'}`}>
+                  className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition-colors ${freqType === 'once' ? 'border-indigo-600 bg-blue-600 text-slate-900' : 'border-slate-200 text-slate-400 hover:bg-slate-50'}`}>
                   One-time
                 </button>
               </div>
@@ -255,7 +255,7 @@ function ItemForm({
             <button type="button" onClick={onClose}
               className="flex-1 rounded-lg border border-slate-200 py-2 text-sm text-slate-400 hover:bg-slate-50">Cancel</button>
             <button type="submit" disabled={saving}
-              className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-slate-900 disabled:opacity-50">
+              className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-slate-900 disabled:opacity-50">
               {saving ? 'Saving…' : 'Save'}
             </button>
           </div>
@@ -850,7 +850,7 @@ function EquipmentManager({ familyId, equipment, items, history, onUpdate }: {
             <button type="button" onClick={() => setAdding(false)}
               className="flex-1 rounded-lg border border-slate-200 py-2 text-sm text-slate-400 hover:bg-slate-50">Cancel</button>
             <button type="submit" disabled={saving}
-              className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-slate-900 disabled:opacity-50">
+              className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-slate-900 disabled:opacity-50">
               {saving ? 'Saving…' : 'Add'}
             </button>
           </div>
