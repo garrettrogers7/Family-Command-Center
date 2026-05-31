@@ -194,7 +194,7 @@ export default function DashboardPage() {
             <SectionCard
               to="/household"
               label="Household"
-              accentColor="#e07b2a"
+              accentColor="#1a6db5"
               kpi={
                 overdueItems.length > 0
                   ? <span className="text-red-600">{overdueItems.length} overdue</span>
@@ -210,7 +210,7 @@ export default function DashboardPage() {
             <SectionCard
               to="/budget"
               label="Spending"
-              accentColor="#e07b2a"
+              accentColor="#1a6db5"
               kpi={monthSpend != null ? usd(monthSpend) : '—'}
               sub={
                 spendDelta == null ? format(today, 'MMMM')
@@ -224,7 +224,7 @@ export default function DashboardPage() {
             <SectionCard
               to="/projects"
               label="Projects"
-              accentColor="#3d8fc4"
+              accentColor="#1a6db5"
               kpi={activeProjects ?? '—'}
               sub={activeProjects === 1 ? 'project in progress' : 'projects in progress'}
             />
@@ -233,7 +233,7 @@ export default function DashboardPage() {
             <SectionCard
               to="/vision"
               label="Vision"
-              accentColor="#6b8eae"
+              accentColor="#1a6db5"
               kpi="Values"
               sub="goals & traditions"
             />
@@ -242,7 +242,7 @@ export default function DashboardPage() {
             <SectionCard
               to="/settings"
               label="Settings"
-              accentColor="#8fa8bf"
+              accentColor="#1a6db5"
               kpi={family?.name ?? '—'}
               sub={`${members.length} ${members.length === 1 ? 'member' : 'members'}`}
             />
