@@ -282,11 +282,11 @@ function InsightCard({ text, loading }: { text: string; loading: boolean }) {
   const [collapsed, setCollapsed] = useState(false)
 
   return (
-    <div className="rounded-xl border border-amber-100 bg-gradient-to-br from-amber-50 to-orange-50 p-5">
+    <div className="rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-50 to-orange-50 p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 flex-shrink-0">
           <Sparkles size={16} className="text-amber-500 mt-0.5" />
-          <span className="text-sm font-semibold text-amber-700">Proactive Insights</span>
+          <span className="text-sm font-semibold text-amber-400">Proactive Insights</span>
         </div>
         {!loading && text && (
           <button
@@ -299,7 +299,7 @@ function InsightCard({ text, loading }: { text: string; loading: boolean }) {
       </div>
 
       {!collapsed && (
-        <div className="mt-3 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+        <div className="mt-3 text-sm text-white/75 leading-relaxed whitespace-pre-wrap">
           {loading && !text ? (
             <div className="flex items-center gap-2 text-amber-500">
               <Loader2 size={14} className="animate-spin" />
@@ -327,7 +327,7 @@ function MessageBubble({ msg }: { msg: Message & { streaming?: boolean } }) {
         className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
           isUser
             ? 'bg-blue-600 text-white rounded-br-sm'
-            : 'bg-white border border-gray-100 text-gray-700 rounded-bl-sm shadow-sm'
+            : 'bg-[#13131f] border border-white/8 text-white/75 rounded-bl-sm shadow-sm'
         }`}
       >
         {msg.content}
@@ -465,7 +465,7 @@ export default function AssistantPage() {
           <button
             onClick={loadInsights}
             disabled={insightLoading}
-            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-[#13131f] px-3 py-1.5 text-xs font-medium text-white/60 hover:bg-white/5 disabled:opacity-50 transition-colors"
           >
             <RefreshCw size={12} className={insightLoading ? 'animate-spin' : ''} />
             Refresh
@@ -489,7 +489,7 @@ export default function AssistantPage() {
         {/* Suggested prompts — shown when chat is empty */}
         {messages.length === 0 && !insightLoading && (
           <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-white/35">
               Ask me anything
             </p>
             <div className="flex flex-wrap gap-2">
@@ -502,7 +502,7 @@ export default function AssistantPage() {
                 <button
                   key={prompt}
                   onClick={() => { setInput(prompt); inputRef.current?.focus() }}
-                  className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-colors"
+                  className="rounded-full border border-white/10 bg-[#13131f] px-3 py-1.5 text-xs text-white/60 hover:bg-white/5 hover:border-white/15 transition-colors"
                 >
                   {prompt}
                 </button>
@@ -515,7 +515,7 @@ export default function AssistantPage() {
       </div>
 
       {/* Input bar */}
-      <div className="border-t border-gray-100 bg-white px-8 py-4">
+      <div className="border-t border-white/8 bg-[#13131f] px-8 py-4">
         <div className="flex items-end gap-3 max-w-4xl">
           <textarea
             ref={inputRef}
@@ -524,7 +524,7 @@ export default function AssistantPage() {
             onKeyDown={handleKeyDown}
             placeholder="Ask a follow-up question…"
             rows={1}
-            className="flex-1 resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-gray-400 focus:bg-white transition-colors placeholder:text-gray-400"
+            className="flex-1 resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-white/20 focus:bg-[#13131f] transition-colors placeholder:text-white/35"
             style={{ minHeight: '44px', maxHeight: '120px' }}
             onInput={(e) => {
               const el = e.currentTarget
@@ -544,7 +544,7 @@ export default function AssistantPage() {
             )}
           </button>
         </div>
-        <p className="mt-2 text-xs text-gray-300">Press Enter to send · Shift+Enter for new line</p>
+        <p className="mt-2 text-xs text-white/20">Press Enter to send · Shift+Enter for new line</p>
       </div>
     </div>
   )

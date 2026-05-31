@@ -14,10 +14,10 @@
   }
 
   body {
-    @apply bg-slate-50 font-sans text-gray-900;
+    @apply font-sans text-white;
+    background-color: #0d0d14;
   }
 
-  /* Tighter tracking on headings at display sizes */
   h1, h2, h3 {
     letter-spacing: -0.015em;
   }
@@ -28,10 +28,12 @@
 
   /* Cards */
   .card {
-    @apply bg-white rounded-2xl border border-gray-100 shadow-sm;
+    background-color: #13131f;
+    @apply rounded-2xl border border-white/8 shadow-sm;
   }
   .card-lg {
-    @apply bg-white rounded-2xl border border-gray-100 shadow-md;
+    background-color: #13131f;
+    @apply rounded-2xl border border-white/10 shadow-md;
   }
 
   /* Buttons — primary */
@@ -44,42 +46,45 @@
 
   /* Buttons — ghost */
   .btn-ghost {
-    @apply inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:opacity-40;
+    @apply inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-white/50 transition-colors hover:bg-white/8 hover:text-white/80 disabled:opacity-40;
   }
   .btn-ghost-sm {
-    @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:opacity-40;
+    @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-white/50 transition-colors hover:bg-white/8 hover:text-white/80 disabled:opacity-40;
   }
 
   /* Buttons — outlined */
   .btn-outline {
-    @apply inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 bg-white transition-colors hover:bg-gray-50 hover:border-gray-300 disabled:opacity-40;
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-white/60 bg-transparent transition-colors hover:bg-white/5 hover:border-white/20 disabled:opacity-40;
   }
   .btn-outline-sm {
-    @apply inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 bg-white transition-colors hover:bg-gray-50 hover:border-gray-300 disabled:opacity-40;
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-white/60 bg-transparent transition-colors hover:bg-white/5 hover:border-white/20 disabled:opacity-40;
   }
 
   /* Buttons — danger ghost */
   .btn-danger {
-    @apply inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-red-500 transition-colors hover:bg-red-50 disabled:opacity-40;
+    @apply inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10 disabled:opacity-40;
   }
   .btn-danger-sm {
-    @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-red-500 transition-colors hover:bg-red-50 disabled:opacity-40;
+    @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/10 disabled:opacity-40;
   }
 
   /* Form inputs */
   .input {
-    @apply w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100;
+    @apply w-full rounded-lg border border-white/10 px-3 py-2.5 text-sm text-white placeholder:text-white/25 transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20;
+    background-color: rgba(255, 255, 255, 0.05);
   }
   .input-sm {
-    @apply w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100;
+    @apply w-full rounded-lg border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/25 transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20;
+    background-color: rgba(255, 255, 255, 0.05);
   }
   select.input, select.input-sm {
     @apply cursor-pointer;
+    color-scheme: dark;
   }
 
   /* Section label (ALL CAPS meta label) */
   .label {
-    @apply text-xs font-semibold uppercase tracking-wider text-gray-400;
+    @apply text-xs font-semibold uppercase tracking-wider text-white/40;
   }
 
   /* Badge / status chip */
@@ -91,19 +96,19 @@
 /* ── Scrollbar (WebKit) ─────────────────────────────────────────── */
 ::-webkit-scrollbar        { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track  { background: transparent; }
-::-webkit-scrollbar-thumb  { background: #e5e7eb; border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background: #d1d5db; }
+::-webkit-scrollbar-thumb  { background: rgba(255,255,255,0.1); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
-/* ── Coral color utilities (not built-in to Tailwind) ─────────── */
+/* ── Coral color utilities ──────────────────────────────────────── */
 @layer utilities {
-  .bg-coral-50  { background-color: #fff4f2; }
-  .bg-coral-100 { background-color: #ffe4de; }
-  .bg-coral-200 { background-color: #ffc5b8; }
+  .bg-coral-50  { background-color: rgba(249, 87, 56, 0.1); }
+  .bg-coral-100 { background-color: rgba(249, 87, 56, 0.15); }
+  .bg-coral-200 { background-color: rgba(249, 87, 56, 0.2); }
   .bg-coral-400 { background-color: #ff7a61; }
   .bg-coral-500 { background-color: #f95738; }
   .text-coral-400 { color: #ff7a61; }
-  .text-coral-600 { color: #e03e1f; }
-  .border-coral-100 { border-color: #ffe4de; }
-  .ring-coral-200 { --tw-ring-color: #ffc5b8; }
-  .ring-coral-300 { --tw-ring-color: #ffaa96; }
+  .text-coral-600 { color: #f95738; }
+  .border-coral-100 { border-color: rgba(249, 87, 56, 0.2); }
+  .ring-coral-200 { --tw-ring-color: rgba(249, 87, 56, 0.2); }
+  .ring-coral-300 { --tw-ring-color: rgba(249, 87, 56, 0.3); }
 }

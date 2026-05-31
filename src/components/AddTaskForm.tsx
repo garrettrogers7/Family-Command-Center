@@ -44,7 +44,7 @@ export function AddTaskForm({ module, onAdd }: Props) {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="flex w-full items-center gap-2 rounded-xl border border-dashed border-gray-200 px-4 py-3 text-sm text-gray-400 transition-colors hover:border-gray-300 hover:text-gray-600"
+        className="flex w-full items-center gap-2 rounded-xl border border-dashed border-white/10 px-4 py-3 text-sm text-white/35 transition-colors hover:border-white/15 hover:text-white/60"
       >
         <Plus size={14} />
         Add task

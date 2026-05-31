@@ -11,22 +11,24 @@ const navItems = [
 
 export function BottomNav() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 flex border-t border-gray-100 bg-white/95 backdrop-blur-sm md:hidden">
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-50 flex border-t border-white/8 backdrop-blur-sm md:hidden"
+      style={{ backgroundColor: 'rgba(13, 13, 20, 0.96)' }}
+    >
       {navItems.map(({ to, label, icon: Icon }) => (
         <NavLink
           key={to}
           to={to}
           className={({ isActive }) =>
             `relative flex flex-1 flex-col items-center justify-center gap-0.5 py-3 text-[10px] font-medium transition-colors ${
-              isActive ? 'text-blue-600' : 'text-gray-400'
+              isActive ? 'text-blue-400' : 'text-white/30'
             }`
           }
         >
           {({ isActive }) => (
             <>
-              {/* Active indicator bar */}
               {isActive && (
-                <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-8 rounded-b-full bg-blue-600" />
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-8 rounded-b-full bg-blue-500" />
               )}
               <Icon size={21} strokeWidth={isActive ? 2.25 : 1.6} />
               <span className={isActive ? 'font-semibold' : ''}>{label}</span>

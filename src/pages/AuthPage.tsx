@@ -36,7 +36,7 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-white/5 px-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="mb-8 text-center">
@@ -45,21 +45,21 @@ export default function AuthPage() {
               <path d="M16 5L4 14h3v12h7v-7h4v7h7V14h3L16 5z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-semibold text-gray-900">Home Base</h1>
-          <p className="mt-1 text-sm text-gray-500">Your family command center</p>
+          <h1 className="text-2xl font-semibold text-white">Home Base</h1>
+          <p className="mt-1 text-sm text-white/45">Your family command center</p>
         </div>
 
-        <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+        <div className="rounded-xl border border-white/10 bg-[#13131f] p-8 shadow-sm">
           {/* Mode toggle */}
-          <div className="mb-6 flex rounded-lg bg-gray-100 p-1">
+          <div className="mb-6 flex rounded-lg bg-white/8 p-1">
             {(['signin', 'signup'] as const).map((m) => (
               <button
                 key={m}
                 onClick={() => { setMode(m); setError(null) }}
                 className={`flex-1 rounded-md py-1.5 text-sm font-medium transition-colors ${
                   mode === m
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-[#13131f] text-white shadow-sm'
+                    : 'text-white/45 hover:text-white/75'
                 }`}
               >
                 {m === 'signin' ? 'Sign in' : 'Sign up'}
@@ -69,7 +69,7 @@ export default function AuthPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-gray-700">
+              <label className="mb-1.5 block text-xs font-medium text-white/75">
                 Email
               </label>
               <input
@@ -78,12 +78,12 @@ export default function AuthPage() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100"
+                className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20 focus:ring-2 focus:ring-gray-100"
                 placeholder="you@example.com"
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-gray-700">
+              <label className="mb-1.5 block text-xs font-medium text-white/75">
                 Password
               </label>
               <input
@@ -92,13 +92,13 @@ export default function AuthPage() {
                 autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100"
+                className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20 focus:ring-2 focus:ring-gray-100"
                 placeholder="••••••••"
               />
             </div>
 
             {error && (
-              <p className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">
+              <p className="rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-600">
                 {error}
               </p>
             )}

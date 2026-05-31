@@ -326,7 +326,7 @@ function SortableTaskRow({ task, onUpdate }: { task: Task; onUpdate: () => void 
       <button
         {...attributes}
         {...listeners}
-        className="flex-shrink-0 cursor-grab active:cursor-grabbing touch-none text-gray-200 hover:text-gray-400 transition-colors p-1"
+        className="flex-shrink-0 cursor-grab active:cursor-grabbing touch-none text-gray-200 hover:text-white/35 transition-colors p-1"
         tabIndex={-1}
         aria-label="Drag to reorder"
       >
@@ -379,12 +379,12 @@ function SortableFunRow({
         className="flex items-start gap-1"
       >
         <div className="w-6 flex-shrink-0" /> {/* spacer for grip alignment */}
-        <div className="flex-1 rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-3">
+        <div className="flex-1 rounded-lg border border-white/10 bg-[#13131f] p-4 shadow-sm space-y-3">
           <input
             autoFocus
             value={editText}
             onChange={(e) => setEditText(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400"
+            className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20"
             placeholder="Event title"
           />
           <textarea
@@ -392,7 +392,7 @@ function SortableFunRow({
             onChange={(e) => setEditNotes(e.target.value)}
             placeholder="Add notes…"
             rows={2}
-            className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400 placeholder:text-gray-300"
+            className="w-full resize-none rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20 placeholder:text-white/20"
           />
           <div className="flex gap-2">
             <button
@@ -402,7 +402,7 @@ function SortableFunRow({
             >
               Save
             </button>
-            <button onClick={() => setEditing(false)} className="rounded-md px-3 py-1.5 text-xs text-gray-500 hover:text-gray-700">
+            <button onClick={() => setEditing(false)} className="rounded-md px-3 py-1.5 text-xs text-white/45 hover:text-white/75">
               Cancel
             </button>
           </div>
@@ -420,28 +420,28 @@ function SortableFunRow({
       <button
         {...attributes}
         {...listeners}
-        className="flex-shrink-0 cursor-grab active:cursor-grabbing touch-none text-gray-200 hover:text-gray-400 transition-colors p-1 mt-2.5"
+        className="flex-shrink-0 cursor-grab active:cursor-grabbing touch-none text-gray-200 hover:text-white/35 transition-colors p-1 mt-2.5"
         tabIndex={-1}
         aria-label="Drag to reorder"
       >
         <GripVertical size={14} />
       </button>
-      <div className="flex-1 min-w-0 rounded-lg border border-gray-100 bg-white group">
+      <div className="flex-1 min-w-0 rounded-lg border border-white/8 bg-[#13131f] group">
         <div className="flex items-center gap-3 px-4 py-3">
-          <span className="flex-1 text-sm text-gray-700">{item.text}</span>
+          <span className="flex-1 text-sm text-white/75">{item.text}</span>
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             {confirmDeleteId === item.id ? (
               <span className="flex items-center gap-1.5 text-xs">
-                <span className="text-gray-500">Delete?</span>
-                <button onClick={() => onDelete(item.id)} className="font-medium text-red-500 hover:text-red-700">Yes</button>
-                <button onClick={onCancelDelete} className="text-gray-400 hover:text-gray-600">No</button>
+                <span className="text-white/45">Delete?</span>
+                <button onClick={() => onDelete(item.id)} className="font-medium text-red-500 hover:text-red-400">Yes</button>
+                <button onClick={onCancelDelete} className="text-white/35 hover:text-white/60">No</button>
               </span>
             ) : (
               <>
-                <button onClick={openEdit} className="text-gray-300 hover:text-gray-500 p-0.5" title="Edit">
+                <button onClick={openEdit} className="text-white/20 hover:text-white/45 p-0.5" title="Edit">
                   <Pencil size={13} />
                 </button>
-                <button onClick={() => onConfirmDelete(item.id)} className="text-gray-300 hover:text-red-400 p-0.5" title="Delete">
+                <button onClick={() => onConfirmDelete(item.id)} className="text-white/20 hover:text-red-400 p-0.5" title="Delete">
                   <Trash2 size={13} />
                 </button>
               </>
@@ -450,7 +450,7 @@ function SortableFunRow({
         </div>
         {item.notes && (
           <div className="border-t border-gray-50 px-4 py-2">
-            <p className="text-xs text-gray-400 leading-relaxed">{item.notes}</p>
+            <p className="text-xs text-white/35 leading-relaxed">{item.notes}</p>
           </div>
         )}
       </div>
@@ -862,10 +862,10 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
         action={
           <div className="flex items-center gap-2">
             {/* Week navigation */}
-            <div className="flex items-center gap-1 rounded-lg border border-gray-200 bg-white p-0.5">
+            <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-[#13131f] p-0.5">
               <button
                 onClick={() => setWeekOffset((o) => o - 1)}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors"
+                className="flex h-7 w-7 items-center justify-center rounded-md text-white/45 hover:bg-white/8 hover:text-white/90 transition-colors"
                 title="Previous week"
               >
                 <ChevronLeft size={14} />
@@ -873,14 +873,14 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
               {!isCurrentWeek && (
                 <button
                   onClick={() => setWeekOffset(0)}
-                  className="px-2 text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                  className="px-2 text-xs font-medium text-white/60 hover:text-white transition-colors"
                 >
                   Today
                 </button>
               )}
               <button
                 onClick={() => setWeekOffset((o) => o + 1)}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors"
+                className="flex h-7 w-7 items-center justify-center rounded-md text-white/45 hover:bg-white/8 hover:text-white/90 transition-colors"
                 title="Next week"
               >
                 <ChevronRight size={14} />
@@ -896,7 +896,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                 setCalRefreshing(false)
               }}
               disabled={calRefreshing}
-              className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-[#13131f] px-3 py-1.5 text-xs font-medium text-white/60 hover:bg-white/5 disabled:opacity-50 transition-colors"
             >
               <RefreshCw size={12} className={calRefreshing ? 'animate-spin' : ''} />
               Sync calendars
@@ -907,12 +907,12 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
 
       <div className="px-4 py-4 md:px-8 md:py-6 space-y-8">
         {loading ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-20 text-gray-400"><div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-500" /><p className="text-sm">Loading…</p></div>
+          <div className="flex flex-col items-center justify-center gap-3 py-20 text-white/35"><div className="h-7 w-7 animate-spin rounded-full border-2 border-white/10 border-t-blue-500" /><p className="text-sm">Loading…</p></div>
         ) : (
           <>
             {/* ── Day Planner ──────────────────────────────────────────── */}
             <section>
-              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-white/35">
                 Day Planner
               </h2>
               <div className="-mx-4 px-4 md:mx-0 md:px-0 overflow-x-auto pb-2">
@@ -928,15 +928,15 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                   return (
                     <div
                       key={day}
-                      className={`w-52 md:flex-1 md:w-auto min-w-0 rounded-lg border bg-white p-4 ${
-                        isToday ? 'border-gray-400 shadow-sm' : 'border-gray-100'
+                      className={`w-52 md:flex-1 md:w-auto min-w-0 rounded-lg border bg-[#13131f] p-4 ${
+                        isToday ? 'border-white/20 shadow-sm' : 'border-white/8'
                       }`}
                     >
                       {/* Day header */}
-                      <p className={`mb-3 text-sm font-semibold capitalize ${isToday ? 'text-gray-900' : 'text-gray-500'}`}>
+                      <p className={`mb-3 text-sm font-semibold capitalize ${isToday ? 'text-white' : 'text-white/45'}`}>
                         {day.slice(0, 3)}
                         <span className={`ml-1.5 inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium ${
-                          isToday ? 'bg-blue-600 text-white' : 'text-gray-400 font-normal'
+                          isToday ? 'bg-blue-600 text-white' : 'text-white/35 font-normal'
                         }`}>
                           {format(date, 'd')}
                         </span>
@@ -953,17 +953,17 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                               return (
                                 <div
                                   key={event.id}
-                                  className="rounded-md px-2 py-1.5 border border-gray-200"
+                                  className="rounded-md px-2 py-1.5 border border-white/10"
                                   style={{ background: 'linear-gradient(to right, #eff6ff, #fff4f2)' }}
                                 >
                                   <div className="flex items-start gap-1 mb-0.5">
                                     <span className="h-1.5 w-1.5 rounded-full bg-blue-400 flex-shrink-0 mt-1" />
                                     <span className="h-1.5 w-1.5 rounded-full bg-coral-400 flex-shrink-0 mt-1" />
-                                    <p className="text-xs font-medium leading-snug text-gray-700 break-words min-w-0">
+                                    <p className="text-xs font-medium leading-snug text-white/75 break-words min-w-0">
                                       {event.summary ?? '(No title)'}
                                     </p>
                                   </div>
-                                  <p className="text-xs text-gray-400">{formatStoredEventTime(event)}</p>
+                                  <p className="text-xs text-white/35">{formatStoredEventTime(event)}</p>
                                 </div>
                               )
                             }
@@ -972,11 +972,11 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                               <div
                                 key={event.id}
                                 className={`rounded-md px-2 py-1.5 border ${
-                                  isBlue ? 'bg-blue-50 border-blue-100' : 'bg-coral-50 border-coral-100'
+                                  isBlue ? 'bg-blue-500/10 border-blue-500/20' : 'bg-coral-50 border-coral-100'
                                 }`}
                               >
                                 <p className={`text-xs font-medium leading-snug break-words ${
-                                  isBlue ? 'text-blue-800' : 'text-coral-600'
+                                  isBlue ? 'text-blue-300' : 'text-coral-600'
                                 }`}>
                                   {event.summary ?? '(No title)'}
                                 </p>
@@ -996,20 +996,20 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                             autoFocus
                             value={editValue}
                             onChange={(e) => setEditValue(e.target.value)}
-                            className="w-full resize-none rounded border border-gray-200 p-2 text-sm outline-none focus:border-gray-400"
+                            className="w-full resize-none rounded border border-white/10 p-2 text-sm outline-none focus:border-white/20"
                             rows={3}
                           />
                           <div className="mt-1.5 flex gap-2">
-                            <button onClick={() => saveSection(day as DayKey)} className="text-xs font-medium text-gray-700 hover:underline">Save</button>
-                            <button onClick={() => setEditingSection(null)} className="text-xs text-gray-400 hover:underline">Cancel</button>
+                            <button onClick={() => saveSection(day as DayKey)} className="text-xs font-medium text-white/75 hover:underline">Save</button>
+                            <button onClick={() => setEditingSection(null)} className="text-xs text-white/35 hover:underline">Cancel</button>
                           </div>
                         </div>
                       ) : (
                         <button
                           onClick={() => { setEditingSection(day); setEditValue(note) }}
-                          className="w-full text-left text-sm text-gray-500 hover:text-gray-700"
+                          className="w-full text-left text-sm text-white/45 hover:text-white/75"
                         >
-                          {note || <span className="text-gray-300 text-xs">Add note…</span>}
+                          {note || <span className="text-white/20 text-xs">Add note…</span>}
                         </button>
                       )}
                     </div>
@@ -1021,7 +1021,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
 
             {/* ── Tasks ────────────────────────────────────────────────── */}
             <section>
-              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-white/35">
                 Tasks this week
               </h2>
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleTaskDragEnd}>
@@ -1040,7 +1040,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                 <div className="mt-4">
                   <button
                     onClick={() => setShowCompleted((v) => !v)}
-                    className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                    className="flex items-center gap-1.5 text-xs text-white/35 hover:text-white/60 transition-colors"
                   >
                     <span className={`transition-transform ${showCompleted ? 'rotate-90' : ''}`}>▶</span>
                     Done ({tasks.filter((t) => t.completed).length})
@@ -1058,7 +1058,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
 
             {/* ── Fun & Upcoming ───────────────────────────────────────── */}
             <section>
-              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-white/35">
                 Fun & Upcoming
               </h2>
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleFunDragEnd}>
@@ -1082,18 +1082,18 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
               {/* Add new fun item */}
               <form
                 onSubmit={(e) => { e.preventDefault(); addFunItem() }}
-                className="mt-2 flex items-center gap-2 rounded-lg border border-dashed border-gray-200 bg-white px-4 py-2.5"
+                className="mt-2 flex items-center gap-2 rounded-lg border border-dashed border-white/10 bg-[#13131f] px-4 py-2.5"
               >
                 <input
                   value={newFunText}
                   onChange={(e) => setNewFunText(e.target.value)}
                   placeholder="Add a birthday, vacation, holiday…"
-                  className="flex-1 bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-300"
+                  className="flex-1 bg-transparent text-sm text-white/75 outline-none placeholder:text-white/20"
                 />
                 {newFunText.trim() && (
                   <button
                     type="submit"
-                    className="text-xs font-medium text-gray-500 hover:text-gray-800 transition-colors"
+                    className="text-xs font-medium text-white/45 hover:text-white/90 transition-colors"
                   >
                     Add
                   </button>
@@ -1104,29 +1104,29 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
             {/* ── AI Assistant ─────────────────────────────────────────── */}
             <section>
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-400 flex items-center gap-1.5">
-                  <Sparkles size={12} className="text-gray-400" />
+                <h2 className="text-xs font-semibold uppercase tracking-wide text-white/35 flex items-center gap-1.5">
+                  <Sparkles size={12} className="text-white/35" />
                   AI Assistant
                 </h2>
                 <button
                   onClick={() => setShowAssistant((v) => !v)}
-                  className="text-xs text-gray-400 hover:text-gray-600 transition-colors flex items-center gap-1"
+                  className="text-xs text-white/35 hover:text-white/60 transition-colors flex items-center gap-1"
                 >
                   {showAssistant ? <><ChevronUp size={13} /> Hide</> : <><ChevronDown size={13} /> Show</>}
                 </button>
               </div>
 
               {showAssistant && (
-                <div className="rounded-lg border border-gray-100 bg-white shadow-sm divide-y divide-gray-50">
+                <div className="rounded-lg border border-white/8 bg-[#13131f] shadow-sm divide-y divide-gray-50">
                   {/* Insights */}
                   <div className="p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <p className="text-xs font-medium text-gray-500">Proactive insights</p>
+                      <p className="text-xs font-medium text-white/45">Proactive insights</p>
                       {insightText && (
                         <button
                           onClick={loadInsights}
                           disabled={insightLoading}
-                          className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 disabled:opacity-50 transition-colors"
+                          className="flex items-center gap-1 text-xs text-white/35 hover:text-white/60 disabled:opacity-50 transition-colors"
                         >
                           <RefreshCw size={11} className={insightLoading ? 'animate-spin' : ''} />
                           Refresh
@@ -1134,17 +1134,17 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                       )}
                     </div>
 
-                    <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                    <div className="text-sm text-white/75 leading-relaxed whitespace-pre-wrap">
                       {!insightText && !insightLoading ? (
                         <button
                           onClick={loadInsights}
-                          className="flex items-center gap-2 rounded-lg border border-dashed border-gray-200 px-4 py-3 text-sm text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors w-full justify-center"
+                          className="flex items-center gap-2 rounded-lg border border-dashed border-white/10 px-4 py-3 text-sm text-white/35 hover:text-white/60 hover:border-white/15 transition-colors w-full justify-center"
                         >
                           <Sparkles size={13} />
                           Generate insights for this week
                         </button>
                       ) : insightLoading && !insightText ? (
-                        <div className="flex items-center gap-2 text-gray-400">
+                        <div className="flex items-center gap-2 text-white/35">
                           <Loader2 size={14} className="animate-spin" />
                           <span>Reviewing your schedule and home…</span>
                         </div>
@@ -1170,7 +1170,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                               className={`max-w-[85%] rounded-xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
                                 isUser
                                   ? 'bg-blue-600 text-white rounded-br-sm'
-                                  : 'bg-gray-50 border border-gray-100 text-gray-700 rounded-bl-sm'
+                                  : 'bg-white/5 border border-white/8 text-white/75 rounded-bl-sm'
                               }`}
                             >
                               {msg.content}
@@ -1198,7 +1198,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                           <button
                             key={prompt}
                             onClick={() => { setChatInput(prompt); chatInputRef.current?.focus() }}
-                            className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 hover:border-gray-300 transition-colors"
+                            className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/60 hover:bg-white/8 hover:border-white/15 transition-colors"
                           >
                             {prompt}
                           </button>
@@ -1222,7 +1222,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                         }}
                         placeholder="Ask a follow-up question…"
                         rows={1}
-                        className="flex-1 resize-none rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none focus:border-gray-400 focus:bg-white transition-colors placeholder:text-gray-300"
+                        className="flex-1 resize-none rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-white/20 focus:bg-[#13131f] transition-colors placeholder:text-white/20"
                         style={{ minHeight: '36px', maxHeight: '100px' }}
                         onInput={(e) => {
                           const el = e.currentTarget

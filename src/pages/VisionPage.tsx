@@ -14,21 +14,21 @@ function uid() {
 }
 
 const TIMEFRAMES: { key: GoalTimeframe; label: string; sub: string; color: string; bg: string }[] = [
-  { key: '1year',   label: 'This Year',    sub: 'Goals for the next 12 months', color: 'text-blue-600',   bg: 'bg-blue-50'   },
-  { key: '5year',   label: 'Next 5 Years', sub: 'Where we want to be by then',  color: 'text-violet-600', bg: 'bg-violet-50' },
-  { key: '10year',  label: '10+ Years',    sub: 'Our long-term vision',          color: 'text-rose-600',   bg: 'bg-rose-50'   },
-  { key: 'someday', label: 'Someday',      sub: 'Dreams without a deadline',     color: 'text-amber-600',  bg: 'bg-amber-50'  },
+  { key: '1year',   label: 'This Year',    sub: 'Goals for the next 12 months', color: 'text-blue-600',   bg: 'bg-blue-500/10'   },
+  { key: '5year',   label: 'Next 5 Years', sub: 'Where we want to be by then',  color: 'text-violet-600', bg: 'bg-violet-500/10' },
+  { key: '10year',  label: '10+ Years',    sub: 'Our long-term vision',          color: 'text-rose-600',   bg: 'bg-rose-500/10'   },
+  { key: 'someday', label: 'Someday',      sub: 'Dreams without a deadline',     color: 'text-amber-600',  bg: 'bg-amber-500/10'  },
 ]
 
 const VALUE_COLORS = [
-  { card: 'bg-blue-50   border-blue-100',   text: 'text-blue-800',   dot: 'bg-blue-400'   },
-  { card: 'bg-violet-50 border-violet-100', text: 'text-violet-800', dot: 'bg-violet-400' },
-  { card: 'bg-rose-50   border-rose-100',   text: 'text-rose-800',   dot: 'bg-rose-400'   },
-  { card: 'bg-amber-50  border-amber-100',  text: 'text-amber-800',  dot: 'bg-amber-400'  },
-  { card: 'bg-emerald-50 border-emerald-100', text: 'text-emerald-800', dot: 'bg-emerald-400' },
-  { card: 'bg-cyan-50   border-cyan-100',   text: 'text-cyan-800',   dot: 'bg-cyan-400'   },
-  { card: 'bg-orange-50 border-orange-100', text: 'text-orange-800', dot: 'bg-orange-400' },
-  { card: 'bg-pink-50   border-pink-100',   text: 'text-pink-800',   dot: 'bg-pink-400'   },
+  { card: 'bg-blue-500/10   border-blue-500/20',   text: 'text-blue-300',   dot: 'bg-blue-400'   },
+  { card: 'bg-violet-500/10 border-violet-500/20', text: 'text-violet-300', dot: 'bg-violet-400' },
+  { card: 'bg-rose-500/10   border-rose-500/20',   text: 'text-rose-300',   dot: 'bg-rose-400'   },
+  { card: 'bg-amber-500/10  border-amber-500/20',  text: 'text-amber-300',  dot: 'bg-amber-400'  },
+  { card: 'bg-emerald-500/10 border-emerald-500/20', text: 'text-emerald-300', dot: 'bg-emerald-400' },
+  { card: 'bg-cyan-500/10   border-cyan-500/20',   text: 'text-cyan-300',   dot: 'bg-cyan-400'   },
+  { card: 'bg-orange-500/10 border-orange-500/20', text: 'text-orange-300', dot: 'bg-orange-400' },
+  { card: 'bg-pink-500/10   border-pink-500/20',   text: 'text-pink-300',   dot: 'bg-pink-400'   },
 ]
 
 // ── Section wrapper ───────────────────────────────────────────────
@@ -47,11 +47,11 @@ function Section({
   const accentMap: Record<string, string> = {
     blue:   'bg-blue-600',
     violet: 'bg-violet-600',
-    rose:   'bg-rose-500',
-    amber:  'bg-amber-500',
+    rose:   'bg-rose-500/100',
+    amber:  'bg-amber-500/100',
   }
   return (
-    <section className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
+    <section className="rounded-2xl border border-white/8 bg-[#13131f] shadow-sm overflow-hidden">
       {/* Colored top bar */}
       <div className={`h-1 w-full ${accentMap[accent] ?? 'bg-blue-600'}`} />
       <div className="p-6">
@@ -63,13 +63,13 @@ function Section({
               </span>
             </div>
             <div>
-              <h2 className="text-lg font-bold text-gray-900 tracking-tight">{title}</h2>
-              {subtitle && <p className="mt-0.5 text-xs text-gray-400">{subtitle}</p>}
+              <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+              {subtitle && <p className="mt-0.5 text-xs text-white/35">{subtitle}</p>}
             </div>
           </div>
           {onEdit && !editing && (
             <button onClick={onEdit}
-              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors flex-shrink-0">
+              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs text-white/35 hover:bg-white/8 hover:text-white/60 transition-colors flex-shrink-0">
               <Pencil size={12} /> Edit
             </button>
           )}
@@ -180,7 +180,7 @@ export default function VisionPage() {
       <div>
         <PageHeader title="Vision" subtitle="Values, goals & traditions" />
         <div className="flex items-center justify-center py-24">
-          <div className="flex flex-col items-center gap-3 text-gray-400">
+          <div className="flex flex-col items-center gap-3 text-white/35">
             <Sparkles size={28} className="animate-pulse" />
             <p className="text-sm">Loading your family vision…</p>
           </div>
@@ -222,13 +222,13 @@ export default function VisionPage() {
           ) : content.mission ? (
             <div className="relative">
               <span className="absolute -top-2 -left-1 text-6xl leading-none text-blue-100 font-serif select-none">"</span>
-              <p className="relative z-10 pt-4 text-lg leading-relaxed text-gray-700 italic font-medium">
+              <p className="relative z-10 pt-4 text-lg leading-relaxed text-white/75 italic font-medium">
                 {content.mission}
               </p>
             </div>
           ) : (
             <button onClick={startEditMission}
-              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 py-10 text-gray-400 hover:border-blue-200 hover:text-blue-500 transition-colors">
+              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-white/10 py-10 text-white/35 hover:border-blue-200 hover:text-blue-500 transition-colors">
               <Star size={20} />
               <span className="text-sm font-medium">Write your family mission statement</span>
             </button>
@@ -264,13 +264,13 @@ export default function VisionPage() {
                     />
                   </div>
                   <button onClick={() => removeDraftValue(v.id)}
-                    className="mt-1.5 text-gray-300 hover:text-red-400 transition-colors flex-shrink-0">
+                    className="mt-1.5 text-white/20 hover:text-red-400 transition-colors flex-shrink-0">
                     <X size={14} />
                   </button>
                 </div>
               ))}
               <button onClick={addDraftValue}
-                className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-violet-600 transition-colors">
+                className="flex items-center gap-1.5 text-sm text-white/35 hover:text-violet-600 transition-colors">
                 <Plus size={13} /> Add value
               </button>
               <div className="flex justify-end gap-2 pt-1">
@@ -290,7 +290,7 @@ export default function VisionPage() {
                       <p className={`font-bold text-sm ${colors.text}`}>{v.name}</p>
                     </div>
                     {v.description && (
-                      <p className="text-xs text-gray-500 leading-snug">{v.description}</p>
+                      <p className="text-xs text-white/45 leading-snug">{v.description}</p>
                     )}
                   </div>
                 )
@@ -298,7 +298,7 @@ export default function VisionPage() {
             </div>
           ) : (
             <button onClick={startEditValues}
-              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 py-10 text-gray-400 hover:border-violet-200 hover:text-violet-500 transition-colors">
+              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-white/10 py-10 text-white/35 hover:border-violet-200 hover:text-violet-500 transition-colors">
               <Heart size={20} />
               <span className="text-sm font-medium">Add your family values</span>
             </button>
@@ -332,7 +332,7 @@ export default function VisionPage() {
                             className="input-sm flex-1"
                           />
                           <button onClick={() => removeDraftGoal(g.id)}
-                            className="text-gray-300 hover:text-red-400 transition-colors flex-shrink-0">
+                            className="text-white/20 hover:text-red-400 transition-colors flex-shrink-0">
                             <X size={14} />
                           </button>
                         </div>
@@ -345,7 +345,7 @@ export default function VisionPage() {
                   </div>
                 )
               })}
-              <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
+              <div className="flex justify-end gap-2 pt-2 border-t border-white/8">
                 <button onClick={() => setEditGoals(false)} className="btn-ghost-sm">Cancel</button>
                 <button onClick={saveGoals} className="btn-sm">Save</button>
               </div>
@@ -366,12 +366,12 @@ export default function VisionPage() {
                           <button
                             onClick={() => toggleGoalDone(g.id)}
                             className={`mt-0.5 flex-shrink-0 flex items-center justify-center rounded-full border-2 transition-colors
-                              ${g.done ? 'bg-blue-500 border-blue-500' : 'border-gray-300 hover:border-blue-400'}`}
+                              ${g.done ? 'bg-blue-500/100 border-blue-500' : 'border-white/15 hover:border-blue-400'}`}
                             style={{ width: 18, height: 18 }}
                           >
                             {g.done && <Check size={11} strokeWidth={3} className="text-white" />}
                           </button>
-                          <span className={`text-sm leading-snug ${g.done ? 'line-through text-gray-400' : 'text-gray-700'}`}>
+                          <span className={`text-sm leading-snug ${g.done ? 'line-through text-white/35' : 'text-white/75'}`}>
                             {g.text}
                           </span>
                         </li>
@@ -383,7 +383,7 @@ export default function VisionPage() {
             </div>
           ) : (
             <button onClick={startEditGoals}
-              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 py-10 text-gray-400 hover:border-rose-200 hover:text-rose-500 transition-colors">
+              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-white/10 py-10 text-white/35 hover:border-rose-200 hover:text-rose-500 transition-colors">
               <Target size={20} />
               <span className="text-sm font-medium">Add your family goals</span>
             </button>
@@ -411,13 +411,13 @@ export default function VisionPage() {
                     className="input-sm flex-1"
                   />
                   <button onClick={() => removeDraftTradition(t.id)}
-                    className="text-gray-300 hover:text-red-400 transition-colors flex-shrink-0">
+                    className="text-white/20 hover:text-red-400 transition-colors flex-shrink-0">
                     <X size={14} />
                   </button>
                 </div>
               ))}
               <button onClick={addDraftTradition}
-                className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-amber-600 transition-colors">
+                className="flex items-center gap-1.5 text-sm text-white/35 hover:text-amber-600 transition-colors">
                 <Plus size={13} /> Add tradition
               </button>
               <div className="flex justify-end gap-2 pt-1">
@@ -430,13 +430,13 @@ export default function VisionPage() {
               {content.traditions!.map((t, i) => (
                 <li key={t.id} className="flex items-start gap-3">
                   <span className={`mt-1.5 h-2 w-2 flex-shrink-0 rounded-full ${VALUE_COLORS[i % VALUE_COLORS.length].dot}`} />
-                  <span className="text-sm text-gray-700 leading-relaxed">{t.text}</span>
+                  <span className="text-sm text-white/75 leading-relaxed">{t.text}</span>
                 </li>
               ))}
             </ul>
           ) : (
             <button onClick={startEditTraditions}
-              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 py-10 text-gray-400 hover:border-amber-200 hover:text-amber-500 transition-colors">
+              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-white/10 py-10 text-white/35 hover:border-amber-200 hover:text-amber-500 transition-colors">
               <Sparkles size={20} />
               <span className="text-sm font-medium">Add your family traditions</span>
             </button>
