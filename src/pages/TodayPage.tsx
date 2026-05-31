@@ -57,11 +57,11 @@ export default function TodayPage() {
     <div>
       <PageHeader title="Today" subtitle={format(today, 'EEEE, MMMM d')} />
 
-      <div className="mx-auto max-w-2xl px-4 py-4 md:px-8 md:py-6">
+      <div className="mx-auto max-w-2xl px-4 py-3 md:px-8 md:py-5">
         {loading ? (
           <div className="py-12 text-center text-sm text-gray-400">Loading…</div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-5">
 
             {/* Calendar events */}
             {connected && sortedEvents.length > 0 && (

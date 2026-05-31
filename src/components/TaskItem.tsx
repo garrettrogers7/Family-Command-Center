@@ -111,7 +111,7 @@ export function TaskItem({ task, onUpdate }: Props) {
           className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
             task.completed
               ? 'border-blue-500 bg-indigo-500'
-              : 'border-slate-200 hover:border-indigo-400'
+              : 'border-blue-100 hover:border-indigo-400'
           }`}
         >
           {task.completed && <Check size={10} strokeWidth={3} className="text-slate-900" />}
@@ -136,11 +136,11 @@ export function TaskItem({ task, onUpdate }: Props) {
             <span className="flex items-center gap-1.5 text-xs">
               <span className="text-slate-400">Delete?</span>
               <button onClick={deleteTask} className="font-medium text-red-500 hover:text-red-600">Yes</button>
-              <button onClick={() => setConfirmDelete(false)} className="text-slate-400 hover:text-slate-500">No</button>
+              <button onClick={() => setConfirmDelete(false)} className="text-slate-400 hover:text-slate-600">No</button>
             </span>
           ) : (
             <>
-              <button onClick={openEdit} className="rounded p-1 text-slate-300 hover:bg-slate-100 hover:text-slate-500 transition-colors" title="Edit">
+              <button onClick={openEdit} className="rounded p-1 text-slate-300 hover:bg-blue-50 hover:text-slate-600 transition-colors" title="Edit">
                 <Pencil size={13} />
               </button>
               <button onClick={() => setConfirmDelete(true)} className="rounded p-1 text-slate-300 hover:bg-red-50 hover:text-red-600 transition-colors" title="Delete">
@@ -153,7 +153,7 @@ export function TaskItem({ task, onUpdate }: Props) {
 
       {/* Notes */}
       {task.notes && (
-        <div className="border-t border-slate-200 px-4 py-2.5">
+        <div className="border-t border-blue-100 px-4 py-2.5">
           <p className="text-xs text-slate-400 leading-relaxed">{task.notes}</p>
         </div>
       )}

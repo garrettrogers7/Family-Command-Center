@@ -51,7 +51,7 @@ function Section({
     amber:  'bg-amber-500/100',
   }
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white/[0.04] shadow-sm overflow-hidden">
+    <section className="rounded-2xl border border-blue-100 bg-white shadow-sm overflow-hidden">
       {/* Colored top bar */}
       <div className={`h-1 w-full ${accentMap[accent] ?? 'bg-blue-600'}`} />
       <div className="p-6">
@@ -69,7 +69,7 @@ function Section({
           </div>
           {onEdit && !editing && (
             <button onClick={onEdit}
-              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs text-slate-400 hover:bg-slate-100 hover:text-slate-500 transition-colors flex-shrink-0">
+              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs text-slate-400 hover:bg-blue-50 hover:text-slate-600 transition-colors flex-shrink-0">
               <Pencil size={12} /> Edit
             </button>
           )}
@@ -228,7 +228,7 @@ export default function VisionPage() {
             </div>
           ) : (
             <button onClick={startEditMission}
-              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 py-10 text-slate-400 hover:border-blue-200 hover:text-blue-500 transition-colors">
+              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-blue-100 py-10 text-slate-400 hover:border-blue-200 hover:text-blue-500 transition-colors">
               <Star size={20} />
               <span className="text-sm font-medium">Write your family mission statement</span>
             </button>
@@ -298,7 +298,7 @@ export default function VisionPage() {
             </div>
           ) : (
             <button onClick={startEditValues}
-              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 py-10 text-slate-400 hover:border-violet-200 hover:text-violet-500 transition-colors">
+              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-blue-100 py-10 text-slate-400 hover:border-violet-200 hover:text-violet-500 transition-colors">
               <Heart size={20} />
               <span className="text-sm font-medium">Add your family values</span>
             </button>
@@ -345,7 +345,7 @@ export default function VisionPage() {
                   </div>
                 )
               })}
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
+              <div className="flex justify-end gap-2 pt-2 border-t border-blue-100">
                 <button onClick={() => setEditGoals(false)} className="btn-ghost-sm">Cancel</button>
                 <button onClick={saveGoals} className="btn-sm">Save</button>
               </div>
@@ -366,7 +366,7 @@ export default function VisionPage() {
                           <button
                             onClick={() => toggleGoalDone(g.id)}
                             className={`mt-0.5 flex-shrink-0 flex items-center justify-center rounded-full border-2 transition-colors
-                              ${g.done ? 'bg-indigo-500 border-blue-500' : 'border-slate-200 hover:border-indigo-400'}`}
+                              ${g.done ? 'bg-indigo-500 border-blue-500' : 'border-blue-100 hover:border-indigo-400'}`}
                             style={{ width: 18, height: 18 }}
                           >
                             {g.done && <Check size={11} strokeWidth={3} className="text-slate-900" />}
@@ -383,7 +383,7 @@ export default function VisionPage() {
             </div>
           ) : (
             <button onClick={startEditGoals}
-              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 py-10 text-slate-400 hover:border-rose-200 hover:text-rose-500 transition-colors">
+              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-blue-100 py-10 text-slate-400 hover:border-rose-200 hover:text-rose-500 transition-colors">
               <Target size={20} />
               <span className="text-sm font-medium">Add your family goals</span>
             </button>
@@ -436,7 +436,7 @@ export default function VisionPage() {
             </ul>
           ) : (
             <button onClick={startEditTraditions}
-              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 py-10 text-slate-400 hover:border-amber-200 hover:text-amber-500 transition-colors">
+              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-blue-100 py-10 text-slate-400 hover:border-amber-200 hover:text-amber-500 transition-colors">
               <Sparkles size={20} />
               <span className="text-sm font-medium">Add your family traditions</span>
             </button>

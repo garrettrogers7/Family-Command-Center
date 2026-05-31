@@ -19,34 +19,34 @@ export function Sidebar() {
 
   return (
     <aside
-      className="hidden md:flex h-screen w-56 flex-shrink-0 flex-col px-4 py-6"
-      style={{ backgroundColor: '#ffffff', borderRight: '1px solid #e2e8f0' }}
+      className="hidden md:flex h-screen w-56 flex-shrink-0 flex-col py-6"
+      style={{ backgroundColor: '#0c2340', borderRight: 'none' }}
     >
       {/* Wordmark */}
-      <div className="mb-8 px-2">
-        <span className="text-sm font-bold tracking-widest uppercase" style={{ color: '#1a6db5' }}>
+      <div className="mb-8 px-5">
+        <span className="text-sm font-bold tracking-widest uppercase text-white">
           Home Base
         </span>
         {family && (
-          <p className="mt-0.5 text-xs" style={{ color: '#94a3b8' }}>{family.name}</p>
+          <p className="mt-0.5 text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{family.name}</p>
         )}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-0.5">
+      <nav className="flex-1 px-3 space-y-0.5">
         {navItems.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
-            className="flex items-center gap-2.5 px-2 py-2 text-sm font-medium transition-all"
+            className="flex items-center gap-3 px-3 py-2.5 rounded text-sm font-medium transition-all"
             style={({ isActive }) => isActive
-              ? { color: '#1a6db5', borderLeft: '2px solid #1a6db5', paddingLeft: '6px', backgroundColor: '#eff6ff' }
-              : { color: '#64748b', borderLeft: '2px solid transparent', paddingLeft: '6px' }
+              ? { backgroundColor: '#1a6db5', color: 'white' }
+              : { color: 'rgba(255,255,255,0.55)' }
             }
           >
             {({ isActive }) => (
               <>
-                <Icon size={15} strokeWidth={isActive ? 2.25 : 1.75} color={isActive ? '#1a6db5' : '#94a3b8'} />
+                <Icon size={15} strokeWidth={isActive ? 2.25 : 1.75} />
                 <span className={isActive ? 'font-semibold' : ''}>{label}</span>
               </>
             )}
@@ -55,12 +55,12 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom: members + settings */}
-      <div className="space-y-0.5 pt-4" style={{ borderTop: '1px solid #e2e8f0' }}>
+      <div className="px-3 pt-4 space-y-0.5" style={{ borderTop: '1px solid rgba(255,255,255,0.10)' }}>
         {currentMember && (
-          <div className="flex items-center gap-2 px-2 py-2 mb-1">
+          <div className="flex items-center gap-2.5 px-3 py-2 mb-1">
             <UserAvatar member={currentMember} size="sm" />
             {otherMember && <UserAvatar member={otherMember} size="sm" />}
-            <span className="text-xs truncate" style={{ color: '#94a3b8' }}>
+            <span className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.45)' }}>
               {currentMember.display_name.split(' ')[0]}
               {otherMember ? ` & ${otherMember.display_name.split(' ')[0]}` : ''}
             </span>
@@ -68,15 +68,15 @@ export function Sidebar() {
         )}
         <NavLink
           to="/settings"
-          className="flex items-center gap-2.5 px-2 py-2 text-sm font-medium transition-all"
+          className="flex items-center gap-3 px-3 py-2.5 rounded text-sm font-medium transition-all"
           style={({ isActive }) => isActive
-            ? { color: '#1a6db5', borderLeft: '2px solid #1a6db5', paddingLeft: '6px', backgroundColor: '#eff6ff' }
-            : { color: '#64748b', borderLeft: '2px solid transparent', paddingLeft: '6px' }
+            ? { backgroundColor: '#1a6db5', color: 'white' }
+            : { color: 'rgba(255,255,255,0.55)' }
           }
         >
           {({ isActive }) => (
             <>
-              <Settings size={15} strokeWidth={isActive ? 2.25 : 1.75} color={isActive ? '#1a6db5' : '#94a3b8'} />
+              <Settings size={15} strokeWidth={isActive ? 2.25 : 1.75} />
               <span className={isActive ? 'font-semibold' : ''}>Settings</span>
             </>
           )}

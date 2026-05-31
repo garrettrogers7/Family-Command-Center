@@ -170,7 +170,7 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
   }
 
   return (
-    <div className={`rounded-2xl border border-slate-200 bg-white/[0.04] shadow-sm overflow-hidden border-l-4 transition-all hover:shadow-md ${styles.border} ${project.status === 'done' ? 'opacity-70' : ''}`}>
+    <div className={`rounded-2xl border border-blue-100 bg-white shadow-sm overflow-hidden border-l-4 transition-all hover:shadow-md ${styles.border} ${project.status === 'done' ? 'opacity-70' : ''}`}>
       {/* Card header */}
       <div
         className="flex items-center gap-3 px-5 py-4 cursor-pointer select-none"
@@ -236,18 +236,18 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
           ) : (
             <>
               {project.description && (
-                <p className="text-sm text-slate-500 leading-relaxed whitespace-pre-wrap">{project.description}</p>
+                <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{project.description}</p>
               )}
 
               {/* Task list */}
               {tasks.length > 0 && (
                 <ul className="space-y-2">
                   {tasks.map(task => (
-                    <li key={task.id} className="group flex items-center gap-3 rounded-lg px-2 py-1 hover:bg-slate-50 transition-colors">
+                    <li key={task.id} className="group flex items-center gap-3 rounded-lg px-2 py-1 hover:bg-blue-50 transition-colors">
                       <button
                         onClick={() => handleToggleTask(task)}
                         className={`flex-shrink-0 flex items-center justify-center rounded border-2 transition-colors
-                          ${task.completed ? 'bg-indigo-500 border-blue-500' : 'border-slate-200 hover:border-indigo-400'}`}
+                          ${task.completed ? 'bg-indigo-500 border-blue-500' : 'border-blue-100 hover:border-indigo-400'}`}
                         style={{ height: 18, width: 18 }}
                       >
                         {task.completed && <Check size={11} strokeWidth={3} className="text-slate-900" />}
@@ -273,7 +273,7 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
                   value={newTask}
                   onChange={e => setNewTask(e.target.value)}
                   placeholder="Add a task…"
-                  className="flex-1 rounded-lg border border-dashed border-slate-200 px-3 py-1.5 text-sm text-slate-700 placeholder-white/25 focus:border-blue-300 focus:outline-none focus:border-solid transition-colors"
+                  className="flex-1 rounded-lg border border-dashed border-blue-100 px-3 py-1.5 text-sm text-slate-700 placeholder-white/25 focus:border-blue-300 focus:outline-none focus:border-solid transition-colors"
                 />
                 <button type="submit" disabled={!newTask.trim() || addingTask}
                   className="rounded-lg bg-slate-100 px-2.5 py-1.5 text-slate-400 hover:bg-indigo-50 hover:text-indigo-500 transition-colors disabled:opacity-40">
@@ -284,7 +284,7 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
               {/* Actions */}
               <div className="flex items-center justify-end gap-1 pt-1 border-t border-gray-50">
                 <button onClick={() => setEditing(true)}
-                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-slate-400 hover:bg-slate-100 hover:text-slate-500 transition-colors">
+                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-slate-400 hover:bg-blue-50 hover:text-slate-600 transition-colors">
                   <Pencil size={12} /> Edit
                 </button>
                 <button onClick={handleDelete}
@@ -364,20 +364,20 @@ export default function ProjectsPage() {
       <div className="mx-auto max-w-2xl px-4 py-6 md:px-8 space-y-4">
 
         {/* Filter tabs */}
-        <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1 w-fit">
+        <div className="flex items-center gap-1 rounded-xl p-1 w-fit rounded-md border border-blue-100">
           {STATUS_FILTERS.map(s => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
               className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all capitalize ${
                 statusFilter === s
-                  ? 'bg-white/[0.04] text-slate-900 shadow-sm'
+                  ? 'bg-white text-slate-900 shadow-sm'
                   : 'text-slate-400 hover:text-slate-700'
               }`}
             >
               {s === 'all' ? 'All' : STATUS_LABEL[s as ProjectStatus]}
               {counts[s] > 0 && (
-                <span className={`ml-1.5 text-[10px] font-bold ${statusFilter === s ? 'text-slate-400' : 'text-slate-400'}`}>
+                <span className={`ml-1.5 text-[10px] font-bold ${statusFilter === s ? 'text-blue-300' : 'text-blue-300'}`}>
                   {counts[s]}
                 </span>
               )}
@@ -387,7 +387,7 @@ export default function ProjectsPage() {
 
         {/* New project form */}
         {showNewForm && (
-          <div className="rounded-2xl border border-indigo-200 bg-white/[0.04] p-5 shadow-sm">
+          <div className="rounded-2xl border border-indigo-200 bg-white p-5 shadow-sm">
             <p className="mb-4 text-sm font-bold text-slate-800">New project</p>
             <ProjectForm
               onSave={handleAddProject}
@@ -404,7 +404,7 @@ export default function ProjectsPage() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 py-16 text-center">
+          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-blue-100 py-16 text-center">
             <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100">
               <FolderOpen size={22} className="text-slate-400" />
             </div>

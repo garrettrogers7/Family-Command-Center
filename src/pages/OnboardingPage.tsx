@@ -132,14 +132,14 @@ export default function OnboardingPage() {
           <p className="mt-1 text-sm text-slate-400">Set up your family workspace</p>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white/[0.04] p-8 shadow-sm">
+        <div className="rounded-xl border border-blue-100 bg-white p-8 shadow-sm">
 
           {/* Step 1: choose */}
           {step === 'choose' && (
             <div className="space-y-3">
               <button
                 onClick={() => setStep('create')}
-                className="w-full rounded-lg border border-slate-200 p-4 text-left transition-colors hover:border-slate-200 hover:bg-slate-50"
+                className="w-full rounded-lg border border-blue-100 p-4 text-left transition-colors hover:border-blue-100 hover:bg-blue-50"
               >
                 <p className="font-medium text-slate-900">Create a new family</p>
                 <p className="mt-0.5 text-sm text-slate-400">
@@ -148,7 +148,7 @@ export default function OnboardingPage() {
               </button>
               <button
                 onClick={() => setStep('join')}
-                className="w-full rounded-lg border border-slate-200 p-4 text-left transition-colors hover:border-slate-200 hover:bg-slate-50"
+                className="w-full rounded-lg border border-blue-100 p-4 text-left transition-colors hover:border-blue-100 hover:bg-blue-50"
               >
                 <p className="font-medium text-slate-900">Join an existing family</p>
                 <p className="mt-0.5 text-sm text-slate-400">
@@ -172,7 +172,7 @@ export default function OnboardingPage() {
                   value={familyName}
                   onChange={(e) => setFamilyName(e.target.value)}
                   placeholder="e.g. The Rogers Family"
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
+                  className="w-full rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200"
                 />
               </div>
 
@@ -185,7 +185,7 @@ export default function OnboardingPage() {
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="e.g. Garrett"
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
+                  className="w-full rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200"
                 />
               </div>
 
@@ -246,7 +246,7 @@ export default function OnboardingPage() {
                   value={inviteCode}
                   onChange={(e) => setInviteCode(e.target.value)}
                   placeholder="8-character code"
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm uppercase tracking-widest outline-none focus:border-slate-300"
+                  className="w-full rounded-lg border border-blue-100 px-3 py-2 text-sm uppercase tracking-widest outline-none focus:border-blue-200"
                   maxLength={8}
                 />
               </div>
@@ -260,7 +260,7 @@ export default function OnboardingPage() {
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="e.g. Jordan"
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
+                  className="w-full rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200"
                 />
               </div>
 

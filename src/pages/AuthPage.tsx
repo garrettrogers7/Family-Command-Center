@@ -49,7 +49,7 @@ export default function AuthPage() {
           <p className="mt-1 text-sm text-slate-400">Your family command center</p>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white/[0.04] p-8 shadow-sm">
+        <div className="rounded-xl border border-blue-100 bg-white p-8 shadow-sm">
           {/* Mode toggle */}
           <div className="mb-6 flex rounded-lg bg-slate-100 p-1">
             {(['signin', 'signup'] as const).map((m) => (
@@ -58,7 +58,7 @@ export default function AuthPage() {
                 onClick={() => { setMode(m); setError(null) }}
                 className={`flex-1 rounded-md py-1.5 text-sm font-medium transition-colors ${
                   mode === m
-                    ? 'bg-white/[0.04] text-slate-900 shadow-sm'
+                    ? 'bg-white text-slate-900 shadow-sm'
                     : 'text-slate-400 hover:text-slate-700'
                 }`}
               >
@@ -78,7 +78,7 @@ export default function AuthPage() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300 focus:ring-2 focus:ring-gray-100"
+                className="w-full rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200 focus:ring-2 focus:ring-gray-100"
                 placeholder="you@example.com"
               />
             </div>
@@ -92,7 +92,7 @@ export default function AuthPage() {
                 autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300 focus:ring-2 focus:ring-gray-100"
+                className="w-full rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200 focus:ring-2 focus:ring-gray-100"
                 placeholder="••••••••"
               />
             </div>

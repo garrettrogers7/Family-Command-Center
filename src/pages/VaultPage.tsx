@@ -63,10 +63,10 @@ function EntryForm({ familyId, userId, entry, onSave, onClose }: EntryFormProps)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
-      <div className="w-full max-w-lg rounded-xl bg-white/[0.04] p-6 shadow-xl">
+      <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-semibold text-slate-900">{entry ? 'Edit entry' : 'New vault entry'}</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-500"><X size={18} /></button>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X size={18} /></button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -74,7 +74,7 @@ function EntryForm({ familyId, userId, entry, onSave, onClose }: EntryFormProps)
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
+              className="w-full rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200"
             >
               {PRESET_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               <option value="custom">Custom…</option>
@@ -85,7 +85,7 @@ function EntryForm({ familyId, userId, entry, onSave, onClose }: EntryFormProps)
                 value={customCategory}
                 onChange={(e) => setCustomCategory(e.target.value)}
                 placeholder="Category name"
-                className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
+                className="mt-2 w-full rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200"
               />
             )}
           </div>
@@ -96,7 +96,7 @@ function EntryForm({ familyId, userId, entry, onSave, onClose }: EntryFormProps)
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Chase checking account"
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
+              className="w-full rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200"
             />
           </div>
           <div>
@@ -106,11 +106,11 @@ function EntryForm({ familyId, userId, entry, onSave, onClose }: EntryFormProps)
               onChange={(e) => setContent(e.target.value)}
               rows={5}
               placeholder="Account numbers, notes, instructions…"
-              className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300 font-mono"
+              className="w-full resize-none rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200 font-mono"
             />
           </div>
           <div className="flex gap-2 pt-1">
-            <button type="button" onClick={onClose} className="flex-1 rounded-lg border border-slate-200 py-2 text-sm text-slate-400">
+            <button type="button" onClick={onClose} className="flex-1 rounded-lg border border-blue-100 py-2 text-sm text-slate-400">
               Cancel
             </button>
             <button type="submit" disabled={saving} className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-slate-900 disabled:opacity-50">
@@ -179,11 +179,11 @@ export default function VaultPage() {
         }
       />
 
-      <div className="mx-auto max-w-3xl px-4 py-4 md:px-8 md:py-6">
+      <div className="mx-auto max-w-3xl px-4 py-3 md:px-8 md:py-5">
         {loading ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-20 text-slate-400"><div className="h-7 w-7 animate-spin rounded-full border-2 border-slate-200 border-t-blue-500" /><p className="text-sm">Loading…</p></div>
+          <div className="flex flex-col items-center justify-center gap-3 py-20 text-slate-400"><div className="h-7 w-7 animate-spin rounded-full border-2 border-blue-100 border-t-blue-500" /><p className="text-sm">Loading…</p></div>
         ) : entries.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-200 py-16 text-center">
+          <div className="rounded-xl border border-dashed border-blue-100 py-16 text-center">
             <p className="text-sm text-slate-400">Your vault is empty.</p>
             <p className="mt-1 text-xs text-slate-300">
               Store account info, insurance details, passwords, and anything else you want to share.
@@ -200,10 +200,10 @@ export default function VaultPage() {
             {Object.entries(grouped).map(([category, catEntries]) => {
               const isCollapsed = collapsed[category]
               return (
-                <div key={category} className="rounded-lg border border-slate-200 bg-white/[0.04] overflow-hidden shadow-sm">
+                <div key={category} className="rounded-lg border border-blue-100 bg-white overflow-hidden shadow-sm">
                   <button
                     onClick={() => toggleCategory(category)}
-                    className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-slate-50"
+                    className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-blue-50"
                   >
                     <span className="text-sm font-semibold text-slate-700">{category}</span>
                     <div className="flex items-center gap-2 text-slate-400">
@@ -213,7 +213,7 @@ export default function VaultPage() {
                   </button>
 
                   {!isCollapsed && (
-                    <div className="divide-y divide-slate-100 border-t border-slate-200">
+                    <div className="divide-y divide-slate-100 border-t border-blue-100">
                       {catEntries.map((entry) => {
                         const updater = members.find((m) => m.user_id === entry.updated_by)
                         return (
@@ -238,7 +238,7 @@ export default function VaultPage() {
                               <div className="flex items-center gap-1 flex-shrink-0">
                                 <button
                                   onClick={() => setEditing(entry)}
-                                  className="rounded p-1 text-slate-300 hover:text-slate-500 transition-colors"
+                                  className="rounded p-1 text-slate-300 hover:text-slate-600 transition-colors"
                                 >
                                   <Pencil size={13} />
                                 </button>

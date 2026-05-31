@@ -13,7 +13,7 @@ type View = 'log' | 'history' | 'equipment'
 
 const CATEGORIES: { key: Category; Icon: typeof Home; color: string }[] = [
   { key: 'Home', Icon: Home, color: 'text-blue-500' },
-  { key: 'Car',  Icon: Car,  color: 'text-slate-400' },
+  { key: 'Car',  Icon: Car,  color: 'text-blue-300' },
   { key: 'Yard', Icon: Leaf, color: 'text-green-500' },
 ]
 
@@ -150,35 +150,35 @@ function ItemForm({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
-      <div className="w-full max-w-md rounded-xl bg-white/[0.04] p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-semibold text-slate-900">{initial ? 'Edit item' : 'Add maintenance item'}</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-500"><X size={18} /></button>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X size={18} /></button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-500">Task name</label>
+            <label className="mb-1 block text-xs font-medium text-slate-600">Task name</label>
             <input required autoFocus value={task} onChange={(e) => setTask(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
+              className="w-full rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200"
               placeholder="e.g. Oil Change" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-500">Category</label>
+              <label className="mb-1 block text-xs font-medium text-slate-600">Category</label>
               <select value={category} onChange={(e) => setCategory(e.target.value as Category)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300">
+                className="w-full rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200">
                 <option>Home</option><option>Car</option><option>Yard</option>
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-500">Frequency</label>
+              <label className="mb-1 block text-xs font-medium text-slate-600">Frequency</label>
               <div className="flex gap-1.5">
                 <button type="button" onClick={() => setFreqType('repeating')}
-                  className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition-colors ${freqType === 'repeating' ? 'border-indigo-600 bg-blue-600 text-slate-900' : 'border-slate-200 text-slate-400 hover:bg-slate-50'}`}>
+                  className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition-colors ${freqType === 'repeating' ? 'border-indigo-600 bg-blue-600 text-slate-900' : 'border-blue-100 text-slate-400 hover:bg-blue-50'}`}>
                   Repeating
                 </button>
                 <button type="button" onClick={() => setFreqType('once')}
-                  className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition-colors ${freqType === 'once' ? 'border-indigo-600 bg-blue-600 text-slate-900' : 'border-slate-200 text-slate-400 hover:bg-slate-50'}`}>
+                  className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition-colors ${freqType === 'once' ? 'border-indigo-600 bg-blue-600 text-slate-900' : 'border-blue-100 text-slate-400 hover:bg-blue-50'}`}>
                   One-time
                 </button>
               </div>
@@ -186,12 +186,12 @@ function ItemForm({
           </div>
           {freqType === 'repeating' && (
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-500">Repeat every</label>
+              <label className="mb-1 block text-xs font-medium text-slate-600">Repeat every</label>
               <div className="flex items-center gap-2">
                 <input type="number" min="1" max="99" value={freqCount} onChange={(e) => setFreqCount(e.target.value)}
-                  className="w-20 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300 text-center" />
+                  className="w-20 rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200 text-center" />
                 <select value={freqUnit} onChange={(e) => setFreqUnit(e.target.value as FreqUnit)}
-                  className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300">
+                  className="flex-1 rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200">
                   <option value="Days">Days</option>
                   <option value="Weeks">Weeks</option>
                   <option value="Months">Months</option>
@@ -201,9 +201,9 @@ function ItemForm({
             </div>
           )}
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-500">Equipment (optional)</label>
+            <label className="mb-1 block text-xs font-medium text-slate-600">Equipment (optional)</label>
             <select value={equipmentId} onChange={(e) => setEquipmentId(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300">
+              className="w-full rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200">
               <option value="">— None —</option>
               {equipment.map(eq => <option key={eq.id} value={eq.id}>{eq.name}</option>)}
             </select>
@@ -214,36 +214,36 @@ function ItemForm({
           {freqType === 'once' ? (
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 block text-xs font-medium text-slate-500">Due date</label>
+                <label className="mb-1 block text-xs font-medium text-slate-600">Due date</label>
                 <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300" />
+                  className="w-full rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200" />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-slate-500">Cost ($)</label>
+                <label className="mb-1 block text-xs font-medium text-slate-600">Cost ($)</label>
                 <input type="number" min="0" step="0.01" value={cost} onChange={(e) => setCost(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
+                  className="w-full rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200"
                   placeholder="Optional" />
               </div>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 block text-xs font-medium text-slate-500">Last done</label>
+                <label className="mb-1 block text-xs font-medium text-slate-600">Last done</label>
                 <input type="date" value={lastDone} onChange={(e) => setLastDone(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300" />
+                  className="w-full rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200" />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-slate-500">Cost ($)</label>
+                <label className="mb-1 block text-xs font-medium text-slate-600">Cost ($)</label>
                 <input type="number" min="0" step="0.01" value={cost} onChange={(e) => setCost(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
+                  className="w-full rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200"
                   placeholder="Optional" />
               </div>
             </div>
           )}
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-500">Notes</label>
+            <label className="mb-1 block text-xs font-medium text-slate-600">Notes</label>
             <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3}
-              className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
+              className="w-full resize-none rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200"
               placeholder="Instructions, product links, reminders…" />
           </div>
           {saveError && (
@@ -253,7 +253,7 @@ function ItemForm({
           )}
           <div className="flex gap-2 pt-1">
             <button type="button" onClick={onClose}
-              className="flex-1 rounded-lg border border-slate-200 py-2 text-sm text-slate-400 hover:bg-slate-50">Cancel</button>
+              className="flex-1 rounded-lg border border-blue-100 py-2 text-sm text-slate-400 hover:bg-blue-50">Cancel</button>
             <button type="submit" disabled={saving}
               className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-slate-900 disabled:opacity-50">
               {saving ? 'Saving…' : 'Save'}
@@ -310,12 +310,12 @@ function MaintenanceRow({
   const isDueSoon = daysUntil !== null && daysUntil >= 0 && daysUntil <= 30
 
   return (
-    <div className={`rounded-lg border bg-white/[0.04] transition-colors ${isOverdue ? 'border-red-200' : isDueSoon ? 'border-amber-200' : 'border-slate-200'}`}>
+    <div className={`rounded-lg border bg-white transition-colors ${isOverdue ? 'border-red-200' : isDueSoon ? 'border-amber-200' : 'border-blue-100'}`}>
       <div className="flex items-center gap-3 px-4 py-3">
         {/* Mark done */}
         <button onClick={markDone} disabled={markingDone} title="Mark as done today"
           className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-            isOverdue ? 'border-red-300 hover:bg-red-50' : isDueSoon ? 'border-amber-300 hover:bg-amber-50' : 'border-slate-200 hover:bg-slate-50'
+            isOverdue ? 'border-red-300 hover:bg-red-50' : isDueSoon ? 'border-amber-300 hover:bg-amber-50' : 'border-blue-100 hover:bg-blue-50'
           }`}>
           {markingDone && <span className="h-2 w-2 rounded-full bg-gray-300" />}
         </button>
@@ -353,7 +353,7 @@ function MaintenanceRow({
             <span className="flex items-center gap-1.5 ml-1">
               <span className="text-xs text-slate-400">Delete?</span>
               <button onClick={() => onDelete(item.id)} className="text-xs font-medium text-red-500 hover:text-red-600">Yes</button>
-              <button onClick={() => setConfirmDelete(false)} className="text-xs text-slate-400 hover:text-slate-500">Cancel</button>
+              <button onClick={() => setConfirmDelete(false)} className="text-xs text-slate-400 hover:text-slate-600">Cancel</button>
             </span>
           ) : (
             <button onClick={() => setConfirmDelete(true)} title="Delete" className="rounded p-1 text-slate-300 hover:text-red-600 transition-colors"><X size={13} /></button>
@@ -401,7 +401,7 @@ function HistoryEntryRow({ entry, familyId, equipment, items, onUpdate }: { entr
 
   const catDef = CATEGORIES.find(c => c.key === entry.category)
   const Icon = catDef?.Icon ?? Home
-  const color = catDef?.color ?? 'text-slate-400'
+  const color = catDef?.color ?? 'text-blue-300'
   const receipts: string[] = entry.receipt_urls ?? []
 
   // Extract the bare storage path from either a full URL or a stored path
@@ -504,7 +504,7 @@ function HistoryEntryRow({ entry, familyId, equipment, items, onUpdate }: { entr
   }
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white/[0.04]">
+    <div className="rounded-lg border border-blue-100 bg-white">
       <div className="flex items-center gap-3 px-4 py-3">
         <Icon size={13} className={`flex-shrink-0 ${color}`} />
         <div className="flex-1 min-w-0">
@@ -526,7 +526,7 @@ function HistoryEntryRow({ entry, familyId, equipment, items, onUpdate }: { entr
             <span className="flex items-center gap-1.5 ml-1">
               <span className="text-xs text-slate-400">Delete?</span>
               <button onClick={deleteEntry} className="text-xs font-medium text-red-500 hover:text-red-600">Yes</button>
-              <button onClick={() => setConfirmDelete(false)} className="text-xs text-slate-400 hover:text-slate-500">Cancel</button>
+              <button onClick={() => setConfirmDelete(false)} className="text-xs text-slate-400 hover:text-slate-600">Cancel</button>
             </span>
           ) : (
             <button onClick={() => setConfirmDelete(true)} className="rounded p-1 text-slate-300 hover:text-red-600 transition-colors"><X size={13} /></button>
@@ -546,18 +546,18 @@ function HistoryEntryRow({ entry, familyId, equipment, items, onUpdate }: { entr
                 <div>
                   <label className="mb-1 block text-xs font-medium text-slate-400">Date completed</label>
                   <input type="date" value={editCompletedOn} onChange={(e) => setEditCompletedOn(e.target.value)}
-                    className="w-full rounded-lg border border-slate-200 p-2 text-xs outline-none focus:border-slate-300" />
+                    className="w-full rounded-lg border border-blue-100 p-2 text-xs outline-none focus:border-blue-200" />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-slate-400">Cost ($)</label>
                   <input type="number" min="0" step="0.01" value={editCost} onChange={(e) => setEditCost(e.target.value)}
-                    className="w-full rounded-lg border border-slate-200 p-2 text-xs outline-none focus:border-slate-300" placeholder="0.00" />
+                    className="w-full rounded-lg border border-blue-100 p-2 text-xs outline-none focus:border-blue-200" placeholder="0.00" />
                 </div>
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-400">Notes</label>
                 <textarea autoFocus value={editNotes} onChange={(e) => setEditNotes(e.target.value)} rows={3}
-                  className="w-full resize-none rounded border border-slate-200 p-2 text-xs outline-none focus:border-slate-300"
+                  className="w-full resize-none rounded border border-blue-100 p-2 text-xs outline-none focus:border-blue-200"
                   placeholder="Add notes about this service…" />
               </div>
               {saveError && (
@@ -587,7 +587,7 @@ function HistoryEntryRow({ entry, familyId, equipment, items, onUpdate }: { entr
                   return (
                     <div key={url} className="flex items-center gap-2">
                       <a href={href} target="_blank" rel="noopener noreferrer"
-                        className="flex flex-1 min-w-0 items-center gap-1.5 rounded bg-slate-50 px-2 py-1.5 text-xs text-indigo-500 hover:bg-slate-100 transition-colors">
+                        className="flex flex-1 min-w-0 items-center gap-1.5 rounded bg-slate-50 px-2 py-1.5 text-xs text-indigo-500 hover:bg-blue-50 transition-colors">
                         <Paperclip size={11} className="flex-shrink-0" />
                         <span className="truncate">{fileName}</span>
                       </a>
@@ -602,7 +602,7 @@ function HistoryEntryRow({ entry, familyId, equipment, items, onUpdate }: { entr
             <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileUpload}
               accept="image/*,.pdf,.jpg,.jpeg,.png,.heic" />
             <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
-              className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-500 transition-colors disabled:opacity-50">
+              className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50">
               <Paperclip size={12} />
               {uploading ? 'Uploading…' : 'Attach receipt'}
             </button>
@@ -652,18 +652,18 @@ function EquipmentRow({ eq, items, history, onUpdate }: {
 
   if (editing) {
     return (
-      <form onSubmit={save} className="rounded-lg border border-slate-200 bg-white/[0.04] px-4 py-3 space-y-2">
+      <form onSubmit={save} className="rounded-lg border border-blue-100 bg-white px-4 py-3 space-y-2">
         <input required autoFocus value={name} onChange={e => setName(e.target.value)}
-          className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm outline-none focus:border-slate-300"
+          className="w-full rounded-lg border border-blue-100 px-2 py-1.5 text-sm outline-none focus:border-blue-200"
           placeholder="Name" />
         <div className="grid grid-cols-2 gap-2">
           <select value={category} onChange={e => setCategory(e.target.value as Category | '')}
-            className="rounded-lg border border-slate-200 px-2 py-1.5 text-sm outline-none focus:border-slate-300">
+            className="rounded-lg border border-blue-100 px-2 py-1.5 text-sm outline-none focus:border-blue-200">
             <option value="">— No category —</option>
             <option>Home</option><option>Car</option><option>Yard</option>
           </select>
           <input value={notes} onChange={e => setNotes(e.target.value)}
-            className="rounded-lg border border-slate-200 px-2 py-1.5 text-sm outline-none focus:border-slate-300"
+            className="rounded-lg border border-blue-100 px-2 py-1.5 text-sm outline-none focus:border-blue-200"
             placeholder="Notes (VIN, serial #…)" />
         </div>
         <div className="flex gap-2">
@@ -678,7 +678,7 @@ function EquipmentRow({ eq, items, history, onUpdate }: {
   }
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white/[0.04]">
+    <div className="rounded-lg border border-blue-100 bg-white">
       {/* Header row */}
       <div className="flex items-start gap-3 px-4 py-3">
         <button onClick={() => setExpanded(e => !e)} className="flex-1 min-w-0 text-left">
@@ -822,19 +822,19 @@ function EquipmentManager({ familyId, equipment, items, history, onUpdate }: {
 
       {/* Add form */}
       {adding ? (
-        <form onSubmit={addEquipment} className="rounded-lg border border-slate-200 bg-white/[0.04] p-4 space-y-3">
+        <form onSubmit={addEquipment} className="rounded-lg border border-blue-100 bg-white p-4 space-y-3">
           <p className="text-sm font-medium text-slate-700">Add equipment</p>
           <div>
             <label className="mb-1 block text-xs font-medium text-slate-400">Name</label>
             <input required autoFocus value={newName} onChange={(e) => setNewName(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
+              className="w-full rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200"
               placeholder="e.g. Ford F-150, HVAC Unit, Lawn Mower" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="mb-1 block text-xs font-medium text-slate-400">Category (optional)</label>
               <select value={newCategory} onChange={(e) => setNewCategory(e.target.value as Category | '')}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300">
+                className="w-full rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200">
                 <option value="">— None —</option>
                 <option>Home</option><option>Car</option><option>Yard</option>
               </select>
@@ -842,13 +842,13 @@ function EquipmentManager({ familyId, equipment, items, history, onUpdate }: {
             <div>
               <label className="mb-1 block text-xs font-medium text-slate-400">Notes (optional)</label>
               <input value={newNotes} onChange={(e) => setNewNotes(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
+                className="w-full rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200"
                 placeholder="e.g. 2021, VIN, serial #" />
             </div>
           </div>
           <div className="flex gap-2">
             <button type="button" onClick={() => setAdding(false)}
-              className="flex-1 rounded-lg border border-slate-200 py-2 text-sm text-slate-400 hover:bg-slate-50">Cancel</button>
+              className="flex-1 rounded-lg border border-blue-100 py-2 text-sm text-slate-400 hover:bg-blue-50">Cancel</button>
             <button type="submit" disabled={saving}
               className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-slate-900 disabled:opacity-50">
               {saving ? 'Saving…' : 'Add'}
@@ -857,7 +857,7 @@ function EquipmentManager({ familyId, equipment, items, history, onUpdate }: {
         </form>
       ) : (
         <button onClick={() => setAdding(true)}
-          className="flex w-full items-center gap-2 rounded-lg border border-dashed border-slate-200 px-4 py-3 text-sm text-slate-400 transition-colors hover:border-slate-200 hover:text-slate-400">
+          className="flex w-full items-center gap-2 rounded-lg border border-dashed border-blue-100 px-4 py-3 text-sm text-slate-400 transition-colors hover:border-blue-100 hover:text-slate-400">
           <Plus size={13} />Add equipment
         </button>
       )}
@@ -975,19 +975,19 @@ export default function HouseholdPage() {
     <div>
       <PageHeader title="Household" subtitle="Maintenance log" />
 
-      <div className="mx-auto max-w-4xl px-4 py-4 md:px-8 md:py-6 space-y-8">
+      <div className="mx-auto max-w-4xl px-4 py-3 md:px-8 md:py-5 space-y-5">
         {/* Tab switcher */}
-        <div className="flex gap-1 rounded-lg bg-slate-100 p-1 w-fit">
+        <div className="flex gap-1 rounded-lg p-1 w-fit rounded-md border border-blue-100">
           {([['log', 'Maintenance'], ['history', 'History'], ['equipment', 'Equipment']] as [View, string][]).map(([v, label]) => (
             <button key={v} onClick={() => setView(v)}
-              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${view === v ? 'bg-white/[0.04] text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-700'}`}>
+              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${view === v ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-700'}`}>
               {label}
             </button>
           ))}
         </div>
 
         {loading ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-20 text-slate-400"><div className="h-7 w-7 animate-spin rounded-full border-2 border-slate-200 border-t-blue-500" /><p className="text-sm">Loading…</p></div>
+          <div className="flex flex-col items-center justify-center gap-3 py-20 text-slate-400"><div className="h-7 w-7 animate-spin rounded-full border-2 border-blue-100 border-t-blue-500" /><p className="text-sm">Loading…</p></div>
         ) : view === 'equipment' ? (
           <EquipmentManager familyId={family!.id} equipment={equipment} items={items} history={history} onUpdate={fetchAll} />
         ) : view === 'history' ? (
@@ -997,7 +997,7 @@ export default function HouseholdPage() {
             <>
               <div className="flex justify-end">
                 <button onClick={exportHistory}
-                  className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-400 hover:bg-slate-50 transition-colors">
+                  className="flex items-center gap-1.5 rounded-lg border border-blue-100 px-3 py-1.5 text-xs font-medium text-slate-400 hover:bg-blue-50 transition-colors">
                   <Download size={13} />
                   Export to Excel
                 </button>
@@ -1024,7 +1024,7 @@ export default function HouseholdPage() {
                 {urgentCount === 0 ? 'Everything is on track' : `${urgentCount} item${urgentCount !== 1 ? 's' : ''} need${urgentCount === 1 ? 's' : ''} attention`}
               </p>
               <button onClick={() => setFocusMode(!focusMode)}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${focusMode ? 'bg-blue-600 text-slate-900' : 'bg-slate-100 text-slate-400 hover:bg-slate-100'}`}>
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${focusMode ? 'bg-blue-600 text-slate-900' : 'bg-slate-100 text-slate-400 hover:bg-blue-50'}`}>
                 {focusMode ? 'Show all' : 'Needs attention only'}
               </button>
             </div>
@@ -1042,7 +1042,7 @@ export default function HouseholdPage() {
                         onUpdate={fetchAll} onEdit={setEditing} onDuplicate={duplicateItem} onDelete={deleteItem} />
                     ))}
                     <button onClick={() => setAddingCategory(key)}
-                      className="flex w-full items-center gap-2 rounded-lg border border-dashed border-slate-200 px-4 py-2.5 text-sm text-slate-400 transition-colors hover:border-slate-200 hover:text-slate-400">
+                      className="flex w-full items-center gap-2 rounded-lg border border-dashed border-blue-100 px-4 py-2.5 text-sm text-slate-400 transition-colors hover:border-blue-100 hover:text-slate-400">
                       <Plus size={13} />Add {key.toLowerCase()} item
                     </button>
                   </div>

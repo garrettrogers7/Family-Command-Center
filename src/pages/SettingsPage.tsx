@@ -136,12 +136,12 @@ export default function SettingsPage() {
     <div>
       <PageHeader title="Settings" />
 
-      <div className="mx-auto max-w-2xl px-4 py-4 md:px-8 md:py-6 space-y-8">
+      <div className="mx-auto max-w-2xl px-4 py-3 md:px-8 md:py-5 space-y-5">
 
         {/* Profile */}
         <section>
           <h2 className="mb-4 text-sm font-semibold text-slate-700">Your profile</h2>
-          <div className="rounded-xl border border-slate-200 bg-white/[0.04] p-6 shadow-sm">
+          <div className="rounded-xl border border-blue-100 bg-white p-6 shadow-sm">
             <div className="mb-4 flex items-center gap-3">
               {currentMember && <UserAvatar member={currentMember} />}
               <div>
@@ -158,7 +158,7 @@ export default function SettingsPage() {
                 <input
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
+                  className="w-full rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-200"
                 />
               </div>
 
@@ -178,7 +178,7 @@ export default function SettingsPage() {
                         className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm transition-all ${
                           color === opt.value
                             ? 'border-gray-900 bg-slate-50 font-medium text-slate-900'
-                            : 'border-slate-200 text-slate-400 hover:border-slate-200'
+                            : 'border-blue-100 text-slate-400 hover:border-blue-100'
                         } ${isTaken ? 'cursor-not-allowed opacity-40' : ''}`}
                       >
                         <span className={`h-3 w-3 rounded-full ${opt.dot}`} />
@@ -208,7 +208,7 @@ export default function SettingsPage() {
         {/* Family */}
         <section>
           <h2 className="mb-4 text-sm font-semibold text-slate-700">Family</h2>
-          <div className="rounded-xl border border-slate-200 bg-white/[0.04] p-6 shadow-sm space-y-5">
+          <div className="rounded-xl border border-blue-100 bg-white p-6 shadow-sm space-y-5">
             {/* Family name */}
             <div>
               <p className="text-xs font-medium text-slate-400">Family name</p>
@@ -222,12 +222,12 @@ export default function SettingsPage() {
                 Share this code with your partner so they can join.
               </p>
               <div className="flex items-center gap-2">
-                <code className="rounded-lg bg-slate-50 px-3 py-1.5 text-sm font-mono tracking-widest text-slate-800 border border-slate-200">
+                <code className="rounded-lg bg-slate-50 px-3 py-1.5 text-sm font-mono tracking-widest text-slate-800 border border-blue-100">
                   {family?.invite_code ?? '—'}
                 </code>
                 <button
                   onClick={copyInviteCode}
-                  className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-400 hover:text-slate-700 transition-colors"
+                  className="flex items-center gap-1.5 rounded-lg border border-blue-100 px-3 py-1.5 text-xs text-slate-400 hover:text-slate-700 transition-colors"
                 >
                   {copied ? <Check size={12} /> : <Copy size={12} />}
                   {copied ? 'Copied!' : 'Copy'}
@@ -265,7 +265,7 @@ export default function SettingsPage() {
         {/* Google Calendar */}
         <section>
           <h2 className="mb-4 text-sm font-semibold text-slate-700">Integrations</h2>
-          <div className="rounded-xl border border-slate-200 bg-white/[0.04] p-6 shadow-sm">
+          <div className="rounded-xl border border-blue-100 bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${connected ? 'bg-green-500/10' : 'bg-indigo-50'}`}>
@@ -284,7 +284,7 @@ export default function SettingsPage() {
               {connected ? (
                 <button
                   onClick={disconnect}
-                  className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-400 hover:border-red-200 hover:text-red-500 transition-colors"
+                  className="flex items-center gap-1.5 rounded-lg border border-blue-100 px-3 py-1.5 text-xs text-slate-400 hover:border-red-200 hover:text-red-500 transition-colors"
                 >
                   <Unlink size={12} />
                   Disconnect
@@ -313,7 +313,7 @@ export default function SettingsPage() {
         {/* Data backup */}
         <section>
           <h2 className="mb-4 text-sm font-semibold text-slate-700">Data backup</h2>
-          <div className="rounded-xl border border-slate-200 bg-white/[0.04] p-6 shadow-sm space-y-5">
+          <div className="rounded-xl border border-blue-100 bg-white p-6 shadow-sm space-y-5">
 
             {/* Automated backups */}
             <div>
@@ -331,13 +331,13 @@ export default function SettingsPage() {
               ) : autoBackups.length === 0 ? (
                 <p className="text-xs text-slate-400 italic">No automatic backups yet — the first one will run this Sunday.</p>
               ) : (
-                <div className="divide-y divide-slate-100 rounded-lg border border-slate-200 overflow-hidden">
+                <div className="divide-y divide-slate-100 rounded-lg border border-blue-100 overflow-hidden">
                   {autoBackups.map((file) => {
                     const dateStr = file.name.replace('.json', '') // YYYY-MM-DD
                     const label = new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
                     return (
-                      <div key={file.name} className="flex items-center justify-between px-3 py-2.5 bg-white/[0.04] hover:bg-slate-50 transition-colors">
-                        <span className="text-xs text-slate-500">{label}</span>
+                      <div key={file.name} className="flex items-center justify-between px-3 py-2.5 bg-white hover:bg-blue-50 transition-colors">
+                        <span className="text-xs text-slate-600">{label}</span>
                         <button
                           onClick={() => downloadAutoBackup(file.name)}
                           className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-700 transition-colors"
@@ -352,7 +352,7 @@ export default function SettingsPage() {
             </div>
 
             {/* Divider */}
-            <div className="border-t border-slate-200" />
+            <div className="border-t border-blue-100" />
 
             {/* Manual download */}
             <div>
@@ -381,7 +381,7 @@ export default function SettingsPage() {
         <section>
           <button
             onClick={signOut}
-            className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-400 hover:border-red-200 hover:text-red-600 transition-colors"
+            className="flex items-center gap-2 rounded-lg border border-blue-100 px-4 py-2 text-sm text-slate-400 hover:border-red-200 hover:text-red-600 transition-colors"
           >
             <LogOut size={14} />
             Sign out
