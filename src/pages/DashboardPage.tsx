@@ -62,17 +62,20 @@ function DashCard({ to, icon, iconBg, label, kpi, sub, status }: CardProps) {
   return (
     <Link
       to={to}
-      className="group relative flex flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
+      className="group relative flex flex-col rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-lg hover:-translate-y-0.5 hover:border-blue-100"
     >
       {statusDot && (
-        <span className={`absolute right-4 top-4 h-2.5 w-2.5 rounded-full ${statusDot}`} />
+        <span className={`absolute right-4 top-4 h-2.5 w-2.5 rounded-full ${statusDot} ring-4 ring-white`} />
       )}
-      <div className={`mb-4 inline-flex items-center justify-center rounded-xl p-3 ${iconBg}`}>
+      <div className={`mb-3 inline-flex items-center justify-center rounded-xl p-2.5 ${iconBg}`}>
         {icon}
       </div>
-      <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">{label}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">{label}</p>
       <div className="mt-1 text-2xl font-bold text-gray-900">{kpi}</div>
-      <div className="mt-1 text-sm text-gray-400">{sub}</div>
+      <div className="mt-1 text-xs text-gray-400">{sub}</div>
+      <div className="mt-3 flex items-center text-xs font-medium text-blue-600 opacity-0 transition-opacity group-hover:opacity-100">
+        View <span className="ml-0.5">→</span>
+      </div>
     </Link>
   )
 }
@@ -165,11 +168,11 @@ export default function DashboardPage() {
   return (
     <div>
       {/* Header */}
-      <div className="border-b border-gray-100 bg-white px-4 py-5 md:px-8">
-        <h1 className="text-xl font-semibold text-gray-900">
+      <div className="bg-gradient-to-br from-blue-600 to-blue-700 px-4 py-8 md:px-8">
+        <h1 className="text-2xl font-bold text-white">
           {greeting}{firstName ? `, ${firstName}` : ''}
         </h1>
-        <p className="mt-0.5 text-sm text-gray-400">
+        <p className="mt-1 text-sm text-blue-100">
           {format(today, 'EEEE, MMMM d')}
           {members.length > 1 && (
             <span> · {members.map(m => m.display_name.split(' ')[0]).join(' & ')}</span>

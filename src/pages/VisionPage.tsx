@@ -220,7 +220,7 @@ export default function VisionPage() {
                       Cancel
                     </button>
                     <button onClick={saveMission}
-                      className="rounded-lg bg-gray-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors">
+                      className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
                       Save
                     </button>
                   </div>
@@ -279,7 +279,7 @@ export default function VisionPage() {
                       Cancel
                     </button>
                     <button onClick={saveValues}
-                      className="rounded-lg bg-gray-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors">
+                      className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
                       Save
                     </button>
                   </div>
@@ -348,7 +348,7 @@ export default function VisionPage() {
                       Cancel
                     </button>
                     <button onClick={saveGoals}
-                      className="rounded-lg bg-gray-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors">
+                      className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
                       Save
                     </button>
                   </div>
@@ -367,7 +367,7 @@ export default function VisionPage() {
                               <button
                                 onClick={() => toggleGoalDone(g.id)}
                                 className={`mt-0.5 flex-shrink-0 flex items-center justify-center rounded-full border transition-colors
-                                  ${g.done ? 'bg-gray-900 border-gray-900' : 'border-gray-300 hover:border-gray-500'}`}
+                                  ${g.done ? 'bg-blue-600 border-blue-600' : 'border-gray-300 hover:border-gray-500'}`}
                                 style={{ width: 18, height: 18 }}
                               >
                                 {g.done && <Check size={11} strokeWidth={3} className="text-white" />}
@@ -424,7 +424,7 @@ export default function VisionPage() {
                       Cancel
                     </button>
                     <button onClick={saveTraditions}
-                      className="rounded-lg bg-gray-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors">
+                      className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
                       Save
                     </button>
                   </div>

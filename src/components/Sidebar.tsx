@@ -24,14 +24,14 @@ export function Sidebar() {
   const { family, currentMember, otherMember } = useFamily()
 
   return (
-    <aside className="hidden md:flex h-screen w-56 flex-shrink-0 flex-col border-r border-gray-100 bg-white px-3 py-6">
+    <aside className="hidden md:flex h-screen w-56 flex-shrink-0 flex-col bg-slate-900 px-3 py-6">
       {/* Wordmark */}
       <div className="mb-6 px-3">
-        <span className="text-base font-bold tracking-tight text-gray-900">
+        <span className="text-base font-bold tracking-tight text-white">
           Home Base
         </span>
         {family && (
-          <p className="mt-0.5 text-xs text-gray-400">{family.name}</p>
+          <p className="mt-0.5 text-xs text-slate-400">{family.name}</p>
         )}
       </div>
 
@@ -44,8 +44,8 @@ export function Sidebar() {
             className={({ isActive }) =>
               `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
                 isActive
-                  ? 'bg-gray-100 text-gray-900'
-                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
               }`
             }
           >
@@ -54,7 +54,7 @@ export function Sidebar() {
                 <Icon
                   size={16}
                   strokeWidth={isActive ? 2.25 : 1.75}
-                  className={isActive ? 'text-gray-900' : 'text-gray-400'}
+                  className={isActive ? 'text-white' : 'text-slate-400'}
                 />
                 <span className={isActive ? 'font-semibold' : ''}>{label}</span>
               </>
@@ -64,13 +64,13 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom: members + settings */}
-      <div className="space-y-1 border-t border-gray-100 pt-4">
+      <div className="space-y-1 border-t border-slate-700/60 pt-4">
         {/* Who's here */}
         {currentMember && (
           <div className="flex items-center gap-2 px-3 py-2 mb-1">
             <UserAvatar member={currentMember} size="sm" />
             {otherMember && <UserAvatar member={otherMember} size="sm" />}
-            <span className="text-xs text-gray-400 truncate">
+            <span className="text-xs text-slate-400 truncate">
               {currentMember.display_name.split(' ')[0]}
               {otherMember ? ` & ${otherMember.display_name.split(' ')[0]}` : ''}
             </span>
@@ -82,8 +82,8 @@ export function Sidebar() {
           className={({ isActive }) =>
             `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
               isActive
-                ? 'bg-gray-100 text-gray-900'
-                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+                ? 'bg-blue-600 text-white'
+                : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
             }`
           }
         >
@@ -92,7 +92,7 @@ export function Sidebar() {
               <Settings
                 size={16}
                 strokeWidth={isActive ? 2.25 : 1.75}
-                className={isActive ? 'text-gray-900' : 'text-gray-400'}
+                className={isActive ? 'text-white' : 'text-slate-400'}
               />
               <span className={isActive ? 'font-semibold' : ''}>Settings</span>
             </>

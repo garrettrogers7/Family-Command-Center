@@ -326,7 +326,7 @@ function MessageBubble({ msg }: { msg: Message & { streaming?: boolean } }) {
       <div
         className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
           isUser
-            ? 'bg-gray-900 text-white rounded-br-sm'
+            ? 'bg-blue-600 text-white rounded-br-sm'
             : 'bg-white border border-gray-100 text-gray-700 rounded-bl-sm shadow-sm'
         }`}
       >
@@ -535,7 +535,7 @@ export default function AssistantPage() {
           <button
             onClick={sendMessage}
             disabled={!input.trim() || chatLoading || !ctx}
-            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gray-900 text-white hover:bg-gray-700 disabled:opacity-40 transition-colors"
+            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white hover:bg-gray-700 disabled:opacity-40 transition-colors"
           >
             {chatLoading ? (
               <Loader2 size={16} className="animate-spin" />

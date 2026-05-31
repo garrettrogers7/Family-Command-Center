@@ -174,11 +174,11 @@ function ItemForm({
               <label className="mb-1 block text-xs font-medium text-gray-600">Frequency</label>
               <div className="flex gap-1.5">
                 <button type="button" onClick={() => setFreqType('repeating')}
-                  className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition-colors ${freqType === 'repeating' ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
+                  className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition-colors ${freqType === 'repeating' ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
                   Repeating
                 </button>
                 <button type="button" onClick={() => setFreqType('once')}
-                  className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition-colors ${freqType === 'once' ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
+                  className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition-colors ${freqType === 'once' ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
                   One-time
                 </button>
               </div>
@@ -255,7 +255,7 @@ function ItemForm({
             <button type="button" onClick={onClose}
               className="flex-1 rounded-lg border border-gray-200 py-2 text-sm text-gray-500 hover:bg-gray-50">Cancel</button>
             <button type="submit" disabled={saving}
-              className="flex-1 rounded-lg bg-gray-900 py-2 text-sm font-medium text-white disabled:opacity-50">
+              className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white disabled:opacity-50">
               {saving ? 'Saving…' : 'Save'}
             </button>
           </div>
@@ -850,7 +850,7 @@ function EquipmentManager({ familyId, equipment, items, history, onUpdate }: {
             <button type="button" onClick={() => setAdding(false)}
               className="flex-1 rounded-lg border border-gray-200 py-2 text-sm text-gray-500 hover:bg-gray-50">Cancel</button>
             <button type="submit" disabled={saving}
-              className="flex-1 rounded-lg bg-gray-900 py-2 text-sm font-medium text-white disabled:opacity-50">
+              className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white disabled:opacity-50">
               {saving ? 'Saving…' : 'Add'}
             </button>
           </div>
@@ -1024,7 +1024,7 @@ export default function HouseholdPage() {
                 {urgentCount === 0 ? 'Everything is on track' : `${urgentCount} item${urgentCount !== 1 ? 's' : ''} need${urgentCount === 1 ? 's' : ''} attention`}
               </p>
               <button onClick={() => setFocusMode(!focusMode)}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${focusMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${focusMode ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
                 {focusMode ? 'Show all' : 'Needs attention only'}
               </button>
             </div>

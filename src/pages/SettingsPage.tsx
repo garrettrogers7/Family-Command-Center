@@ -193,7 +193,7 @@ export default function SettingsPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
               >
                 {saved ? (
                   <span className="flex items-center gap-1.5">
@@ -293,7 +293,7 @@ export default function SettingsPage() {
                 <button
                   onClick={connect}
                   disabled={connecting}
-                  className="flex items-center gap-1.5 rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
                 >
                   {connecting
                     ? <><Loader2 size={12} className="animate-spin" /> Connecting…</>
@@ -363,7 +363,7 @@ export default function SettingsPage() {
               <button
                 onClick={downloadBackup}
                 disabled={backingUp}
-                className="flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 transition-colors"
               >
                 {backingUp ? (
                   <><Loader2 size={14} className="animate-spin" /> Preparing…</>

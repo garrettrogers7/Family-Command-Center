@@ -97,7 +97,7 @@ function ProjectForm({ initial, onSave, onCancel }: ProjectFormProps) {
           Cancel
         </button>
         <button type="submit" disabled={!title.trim() || saving}
-          className="rounded-lg bg-gray-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors disabled:opacity-40">
+          className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-40">
           {saving ? 'Saving…' : initial?.id ? 'Save changes' : 'Add project'}
         </button>
       </div>
@@ -247,7 +247,7 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
                       <button
                         onClick={() => handleToggleTask(task)}
                         className={`flex-shrink-0 h-4.5 w-4.5 rounded border transition-colors flex items-center justify-center
-                          ${task.completed ? 'bg-gray-900 border-gray-900' : 'border-gray-300 hover:border-gray-500'}`}
+                          ${task.completed ? 'bg-blue-600 border-blue-600' : 'border-gray-300 hover:border-gray-500'}`}
                         style={{ height: 18, width: 18 }}
                       >
                         {task.completed && <Check size={11} strokeWidth={3} className="text-white" />}
@@ -361,7 +361,7 @@ export default function ProjectsPage() {
                 onClick={() => setStatusFilter(s)}
                 className={`rounded-full px-3 py-1 text-xs font-medium transition-colors capitalize ${
                   statusFilter === s
-                    ? 'bg-gray-900 text-white'
+                    ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                 }`}
               >
@@ -376,7 +376,7 @@ export default function ProjectsPage() {
           </div>
           <button
             onClick={() => setShowNewForm(v => !v)}
-            className="flex items-center gap-1.5 rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800 transition-colors"
+            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 transition-colors"
           >
             <Plus size={13} /> New project
           </button>

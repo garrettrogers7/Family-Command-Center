@@ -398,7 +398,7 @@ function SortableFunRow({
             <button
               onClick={handleSave}
               disabled={!editText.trim()}
-              className="rounded-md bg-gray-900 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40"
+              className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40"
             >
               Save
             </button>
@@ -936,7 +936,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                       <p className={`mb-3 text-sm font-semibold capitalize ${isToday ? 'text-gray-900' : 'text-gray-500'}`}>
                         {day.slice(0, 3)}
                         <span className={`ml-1.5 inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium ${
-                          isToday ? 'bg-gray-900 text-white' : 'text-gray-400 font-normal'
+                          isToday ? 'bg-blue-600 text-white' : 'text-gray-400 font-normal'
                         }`}>
                           {format(date, 'd')}
                         </span>
@@ -1169,7 +1169,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                             <div
                               className={`max-w-[85%] rounded-xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
                                 isUser
-                                  ? 'bg-gray-900 text-white rounded-br-sm'
+                                  ? 'bg-blue-600 text-white rounded-br-sm'
                                   : 'bg-gray-50 border border-gray-100 text-gray-700 rounded-bl-sm'
                               }`}
                             >
@@ -1233,7 +1233,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                       <button
                         onClick={sendMessage}
                         disabled={!chatInput.trim() || chatLoading || !aiCtx}
-                        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-40 transition-colors"
+                        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40 transition-colors"
                       >
                         {chatLoading ? (
                           <Loader2 size={14} className="animate-spin" />

@@ -319,7 +319,7 @@ export default function BudgetPage() {
           {/* Actions */}
           <div className="flex items-center gap-2 flex-wrap">
             <button onClick={() => setShowBudget(b => !b)}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${showBudget ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${showBudget ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
               {showBudget ? 'Hide budget' : 'Show budget'}
             </button>
             {importResult && (
@@ -351,7 +351,7 @@ export default function BudgetPage() {
             {/* ── Category filter strip ── */}
             <div className="flex gap-1.5 flex-wrap">
               <button onClick={() => setFilterCategory('all')}
-                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${filterCategory === 'all' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${filterCategory === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
                 All categories
               </button>
               {allKnownCategories.map(cat => (
