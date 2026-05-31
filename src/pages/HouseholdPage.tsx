@@ -703,7 +703,7 @@ function EquipmentRow({ eq, items, history, onUpdate }: {
 
           {/* Upcoming maintenance */}
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Upcoming maintenance</p>
+            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-blue-800">Upcoming maintenance</p>
             {eqItems.length === 0 ? (
               <p className="text-xs text-slate-300 italic">No tasks linked to this equipment.</p>
             ) : (
@@ -739,7 +739,7 @@ function EquipmentRow({ eq, items, history, onUpdate }: {
 
           {/* Service history */}
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Service history</p>
+            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-blue-800">Service history</p>
             {eqHistory.length === 0 ? (
               <p className="text-xs text-slate-300 italic">No service history yet.</p>
             ) : (
@@ -800,7 +800,7 @@ function EquipmentManager({ familyId, equipment, items, history, onUpdate }: {
         if (catEquipment.length === 0) return null
         return (
           <section key={key}>
-            <h2 className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
+            <h2 className="mb-3 flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-blue-800">
               <Icon size={12} className={color} />{key}
             </h2>
             <div className="space-y-2">
@@ -813,7 +813,7 @@ function EquipmentManager({ familyId, equipment, items, history, onUpdate }: {
       {/* Uncategorized */}
       {equipment.filter(e => !e.category).length > 0 && (
         <section>
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Other</h2>
+          <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-blue-800">Other</h2>
           <div className="space-y-2">
             {equipment.filter(e => !e.category).map(eq => <EquipmentRow key={eq.id} eq={eq} items={items} history={history} onUpdate={onUpdate} />)}
           </div>
@@ -980,7 +980,7 @@ export default function HouseholdPage() {
         <div className="flex gap-1 rounded-lg p-1 w-fit rounded-md border border-blue-100">
           {([['log', 'Maintenance'], ['history', 'History'], ['equipment', 'Equipment']] as [View, string][]).map(([v, label]) => (
             <button key={v} onClick={() => setView(v)}
-              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${view === v ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-700'}`}>
+              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${view === v ? 'bg-[#1a6db5] text-white shadow-sm' : 'text-slate-400 hover:text-slate-700'}`}>
               {label}
             </button>
           ))}
@@ -1006,7 +1006,7 @@ export default function HouseholdPage() {
               .sort(([a], [b]) => Number(b) - Number(a))
               .map(([year, entries]) => (
                 <section key={year}>
-                  <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">{year} · {entries.length} completed</h2>
+                  <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-blue-800">{year} · {entries.length} completed</h2>
                   <div className="space-y-2">
                     {entries.map(entry => (
                       <HistoryEntryRow key={entry.id} entry={entry} familyId={family!.id} equipment={equipment} items={items} onUpdate={fetchAll} />
@@ -1033,7 +1033,7 @@ export default function HouseholdPage() {
               const catItems = sortedFor(key)
               return (
                 <section key={key}>
-                  <h2 className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  <h2 className="mb-3 flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-blue-800">
                     <Icon size={12} className={color} />{key} · {catItems.length}
                   </h2>
                   <div className="space-y-2">

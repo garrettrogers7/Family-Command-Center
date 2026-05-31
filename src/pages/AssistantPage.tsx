@@ -489,7 +489,7 @@ export default function AssistantPage() {
         {/* Suggested prompts — shown when chat is empty */}
         {messages.length === 0 && !insightLoading && (
           <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+            <p className="mb-3 text-xs font-bold uppercase tracking-widest text-blue-800">
               Ask me anything
             </p>
             <div className="flex flex-wrap gap-2">

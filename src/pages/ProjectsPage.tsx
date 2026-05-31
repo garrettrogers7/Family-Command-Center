@@ -371,7 +371,7 @@ export default function ProjectsPage() {
               onClick={() => setStatusFilter(s)}
               className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all capitalize ${
                 statusFilter === s
-                  ? 'bg-white text-slate-900 shadow-sm'
+                  ? 'bg-[#1a6db5] text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-700'
               }`}
             >

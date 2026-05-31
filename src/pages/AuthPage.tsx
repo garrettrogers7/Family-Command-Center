@@ -58,7 +58,7 @@ export default function AuthPage() {
                 onClick={() => { setMode(m); setError(null) }}
                 className={`flex-1 rounded-md py-1.5 text-sm font-medium transition-colors ${
                   mode === m
-                    ? 'bg-white text-slate-900 shadow-sm'
+                    ? 'bg-[#1a6db5] text-white shadow-sm'
                     : 'text-slate-400 hover:text-slate-700'
                 }`}
               >

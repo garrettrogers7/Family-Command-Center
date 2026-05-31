@@ -862,10 +862,10 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
         action={
           <div className="flex items-center gap-2">
             {/* Week navigation */}
-            <div className="flex items-center gap-1 rounded-lg border border-blue-100 bg-white p-0.5">
+            <div className="flex items-center gap-1 rounded-lg p-0.5" style={{ background: 'rgba(255,255,255,0.15)' }}>
               <button
                 onClick={() => setWeekOffset((o) => o - 1)}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-slate-400 hover:bg-blue-50 hover:text-slate-800 transition-colors"
+                className="flex h-7 w-7 items-center justify-center rounded-md text-white/70 hover:bg-white/20 hover:text-white transition-colors"
                 title="Previous week"
               >
                 <ChevronLeft size={14} />
@@ -873,14 +873,14 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
               {!isCurrentWeek && (
                 <button
                   onClick={() => setWeekOffset(0)}
-                  className="px-2 text-xs font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                  className="px-2 text-xs font-medium text-white/70 hover:text-white transition-colors"
                 >
                   Today
                 </button>
               )}
               <button
                 onClick={() => setWeekOffset((o) => o + 1)}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-slate-400 hover:bg-blue-50 hover:text-slate-800 transition-colors"
+                className="flex h-7 w-7 items-center justify-center rounded-md text-white/70 hover:bg-white/20 hover:text-white transition-colors"
                 title="Next week"
               >
                 <ChevronRight size={14} />
@@ -896,7 +896,8 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                 setCalRefreshing(false)
               }}
               disabled={calRefreshing}
-              className="flex items-center gap-1.5 rounded-lg border border-blue-100 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-blue-50 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-white/70 hover:bg-white/15 hover:text-white disabled:opacity-40 transition-colors"
+              style={{ border: '1px solid rgba(255,255,255,0.2)' }}
             >
               <RefreshCw size={12} className={calRefreshing ? 'animate-spin' : ''} />
               Sync calendars
@@ -912,7 +913,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
           <>
             {/* ── Day Planner ──────────────────────────────────────────── */}
             <section>
-              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+              <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-blue-800">
                 Day Planner
               </h2>
               <div className="-mx-4 px-4 md:mx-0 md:px-0 overflow-x-auto pb-2">
@@ -1021,7 +1022,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
 
             {/* ── Tasks ────────────────────────────────────────────────── */}
             <section>
-              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+              <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-blue-800">
                 Tasks this week
               </h2>
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleTaskDragEnd}>
@@ -1058,7 +1059,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
 
             {/* ── Fun & Upcoming ───────────────────────────────────────── */}
             <section>
-              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+              <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-blue-800">
                 Fun & Upcoming
               </h2>
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleFunDragEnd}>
@@ -1104,7 +1105,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
             {/* ── AI Assistant ─────────────────────────────────────────── */}
             <section>
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400 flex items-center gap-1.5">
+                <h2 className="text-xs font-bold uppercase tracking-widest text-blue-800 flex items-center gap-1.5">
                   <Sparkles size={12} className="text-slate-400" />
                   AI Assistant
                 </h2>
