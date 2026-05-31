@@ -379,7 +379,7 @@ function SortableFunRow({
         className="flex items-start gap-1"
       >
         <div className="w-6 flex-shrink-0" /> {/* spacer for grip alignment */}
-        <div className="flex-1 rounded-lg border border-white/10 bg-[#13131f] p-4 shadow-sm space-y-3">
+        <div className="flex-1 rounded-lg border border-white/10 bg-white/[0.04] p-4 shadow-sm space-y-3">
           <input
             autoFocus
             value={editText}
@@ -398,7 +398,7 @@ function SortableFunRow({
             <button
               onClick={handleSave}
               disabled={!editText.trim()}
-              className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40"
+              className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40"
             >
               Save
             </button>
@@ -426,7 +426,7 @@ function SortableFunRow({
       >
         <GripVertical size={14} />
       </button>
-      <div className="flex-1 min-w-0 rounded-lg border border-white/8 bg-[#13131f] group">
+      <div className="flex-1 min-w-0 rounded-lg border border-white/8 bg-white/[0.04] group">
         <div className="flex items-center gap-3 px-4 py-3">
           <span className="flex-1 text-sm text-white/75">{item.text}</span>
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -862,7 +862,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
         action={
           <div className="flex items-center gap-2">
             {/* Week navigation */}
-            <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-[#13131f] p-0.5">
+            <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.04] p-0.5">
               <button
                 onClick={() => setWeekOffset((o) => o - 1)}
                 className="flex h-7 w-7 items-center justify-center rounded-md text-white/45 hover:bg-white/8 hover:text-white/90 transition-colors"
@@ -896,7 +896,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                 setCalRefreshing(false)
               }}
               disabled={calRefreshing}
-              className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-[#13131f] px-3 py-1.5 text-xs font-medium text-white/60 hover:bg-white/5 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/60 hover:bg-white/5 disabled:opacity-50 transition-colors"
             >
               <RefreshCw size={12} className={calRefreshing ? 'animate-spin' : ''} />
               Sync calendars
@@ -928,7 +928,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                   return (
                     <div
                       key={day}
-                      className={`w-52 md:flex-1 md:w-auto min-w-0 rounded-lg border bg-[#13131f] p-4 ${
+                      className={`w-52 md:flex-1 md:w-auto min-w-0 rounded-lg border bg-white/[0.04] p-4 ${
                         isToday ? 'border-white/20 shadow-sm' : 'border-white/8'
                       }`}
                     >
@@ -957,7 +957,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                                   style={{ background: 'linear-gradient(to right, #eff6ff, #fff4f2)' }}
                                 >
                                   <div className="flex items-start gap-1 mb-0.5">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-blue-400 flex-shrink-0 mt-1" />
+                                    <span className="h-1.5 w-1.5 rounded-full bg-indigo-400 flex-shrink-0 mt-1" />
                                     <span className="h-1.5 w-1.5 rounded-full bg-coral-400 flex-shrink-0 mt-1" />
                                     <p className="text-xs font-medium leading-snug text-white/75 break-words min-w-0">
                                       {event.summary ?? '(No title)'}
@@ -972,15 +972,15 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                               <div
                                 key={event.id}
                                 className={`rounded-md px-2 py-1.5 border ${
-                                  isBlue ? 'bg-blue-500/10 border-blue-500/20' : 'bg-coral-50 border-coral-100'
+                                  isBlue ? 'bg-indigo-500/10 border-indigo-500/20' : 'bg-coral-50 border-coral-100'
                                 }`}
                               >
                                 <p className={`text-xs font-medium leading-snug break-words ${
-                                  isBlue ? 'text-blue-300' : 'text-coral-600'
+                                  isBlue ? 'text-indigo-300' : 'text-coral-600'
                                 }`}>
                                   {event.summary ?? '(No title)'}
                                 </p>
-                                <p className={`text-xs mt-0.5 ${isBlue ? 'text-blue-400' : 'text-coral-400'}`}>
+                                <p className={`text-xs mt-0.5 ${isBlue ? 'text-indigo-400' : 'text-coral-400'}`}>
                                   {formatStoredEventTime(event)}
                                 </p>
                               </div>
@@ -1082,7 +1082,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
               {/* Add new fun item */}
               <form
                 onSubmit={(e) => { e.preventDefault(); addFunItem() }}
-                className="mt-2 flex items-center gap-2 rounded-lg border border-dashed border-white/10 bg-[#13131f] px-4 py-2.5"
+                className="mt-2 flex items-center gap-2 rounded-lg border border-dashed border-white/10 bg-white/[0.04] px-4 py-2.5"
               >
                 <input
                   value={newFunText}
@@ -1117,7 +1117,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
               </div>
 
               {showAssistant && (
-                <div className="rounded-lg border border-white/8 bg-[#13131f] shadow-sm divide-y divide-gray-50">
+                <div className="rounded-lg border border-white/8 bg-white/[0.04] shadow-sm divide-y divide-gray-50">
                   {/* Insights */}
                   <div className="p-4">
                     <div className="flex items-center justify-between mb-3">
@@ -1222,7 +1222,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                         }}
                         placeholder="Ask a follow-up question…"
                         rows={1}
-                        className="flex-1 resize-none rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-white/20 focus:bg-[#13131f] transition-colors placeholder:text-white/20"
+                        className="flex-1 resize-none rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-white/20 focus:bg-white/[0.04] transition-colors placeholder:text-white/20"
                         style={{ minHeight: '36px', maxHeight: '100px' }}
                         onInput={(e) => {
                           const el = e.currentTarget

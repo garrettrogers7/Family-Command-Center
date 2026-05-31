@@ -110,8 +110,8 @@ export function TaskItem({ task, onUpdate }: Props) {
           onClick={toggleComplete}
           className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
             task.completed
-              ? 'border-blue-500 bg-blue-500/100'
-              : 'border-white/15 hover:border-blue-400'
+              ? 'border-blue-500 bg-indigo-500/100'
+              : 'border-white/15 hover:border-indigo-400'
           }`}
         >
           {task.completed && <Check size={10} strokeWidth={3} className="text-white" />}

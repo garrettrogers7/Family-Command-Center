@@ -9,7 +9,7 @@ import { UserAvatar } from '@/components/UserAvatar'
 import type { UserColor } from '@/lib/database.types'
 
 const COLOR_OPTIONS: { value: UserColor; label: string; dot: string }[] = [
-  { value: 'blue', label: 'Blue', dot: 'bg-blue-400' },
+  { value: 'blue', label: 'Blue', dot: 'bg-indigo-400' },
   { value: 'coral', label: 'Coral', dot: 'bg-coral-400' },
 ]
 
@@ -141,7 +141,7 @@ export default function SettingsPage() {
         {/* Profile */}
         <section>
           <h2 className="mb-4 text-sm font-semibold text-white/75">Your profile</h2>
-          <div className="rounded-xl border border-white/8 bg-[#13131f] p-6 shadow-sm">
+          <div className="rounded-xl border border-white/8 bg-white/[0.04] p-6 shadow-sm">
             <div className="mb-4 flex items-center gap-3">
               {currentMember && <UserAvatar member={currentMember} />}
               <div>
@@ -193,7 +193,7 @@ export default function SettingsPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
               >
                 {saved ? (
                   <span className="flex items-center gap-1.5">
@@ -208,7 +208,7 @@ export default function SettingsPage() {
         {/* Family */}
         <section>
           <h2 className="mb-4 text-sm font-semibold text-white/75">Family</h2>
-          <div className="rounded-xl border border-white/8 bg-[#13131f] p-6 shadow-sm space-y-5">
+          <div className="rounded-xl border border-white/8 bg-white/[0.04] p-6 shadow-sm space-y-5">
             {/* Family name */}
             <div>
               <p className="text-xs font-medium text-white/45">Family name</p>
@@ -265,10 +265,10 @@ export default function SettingsPage() {
         {/* Google Calendar */}
         <section>
           <h2 className="mb-4 text-sm font-semibold text-white/75">Integrations</h2>
-          <div className="rounded-xl border border-white/8 bg-[#13131f] p-6 shadow-sm">
+          <div className="rounded-xl border border-white/8 bg-white/[0.04] p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${connected ? 'bg-green-500/10' : 'bg-blue-500/10'}`}>
+                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${connected ? 'bg-green-500/10' : 'bg-indigo-500/10'}`}>
                   <Calendar size={20} className={connected ? 'text-green-500' : 'text-blue-500'} />
                 </div>
                 <div>
@@ -293,7 +293,7 @@ export default function SettingsPage() {
                 <button
                   onClick={connect}
                   disabled={connecting}
-                  className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
                 >
                   {connecting
                     ? <><Loader2 size={12} className="animate-spin" /> Connecting…</>
@@ -313,7 +313,7 @@ export default function SettingsPage() {
         {/* Data backup */}
         <section>
           <h2 className="mb-4 text-sm font-semibold text-white/75">Data backup</h2>
-          <div className="rounded-xl border border-white/8 bg-[#13131f] p-6 shadow-sm space-y-5">
+          <div className="rounded-xl border border-white/8 bg-white/[0.04] p-6 shadow-sm space-y-5">
 
             {/* Automated backups */}
             <div>
@@ -336,7 +336,7 @@ export default function SettingsPage() {
                     const dateStr = file.name.replace('.json', '') // YYYY-MM-DD
                     const label = new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
                     return (
-                      <div key={file.name} className="flex items-center justify-between px-3 py-2.5 bg-[#13131f] hover:bg-white/5 transition-colors">
+                      <div key={file.name} className="flex items-center justify-between px-3 py-2.5 bg-white/[0.04] hover:bg-white/5 transition-colors">
                         <span className="text-xs text-white/60">{label}</span>
                         <button
                           onClick={() => downloadAutoBackup(file.name)}
@@ -363,7 +363,7 @@ export default function SettingsPage() {
               <button
                 onClick={downloadBackup}
                 disabled={backingUp}
-                className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 transition-colors"
               >
                 {backingUp ? (
                   <><Loader2 size={14} className="animate-spin" /> Preparing…</>

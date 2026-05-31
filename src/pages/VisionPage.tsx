@@ -14,14 +14,14 @@ function uid() {
 }
 
 const TIMEFRAMES: { key: GoalTimeframe; label: string; sub: string; color: string; bg: string }[] = [
-  { key: '1year',   label: 'This Year',    sub: 'Goals for the next 12 months', color: 'text-blue-600',   bg: 'bg-blue-500/10'   },
+  { key: '1year',   label: 'This Year',    sub: 'Goals for the next 12 months', color: 'text-indigo-500',   bg: 'bg-indigo-500/10'   },
   { key: '5year',   label: 'Next 5 Years', sub: 'Where we want to be by then',  color: 'text-violet-600', bg: 'bg-violet-500/10' },
   { key: '10year',  label: '10+ Years',    sub: 'Our long-term vision',          color: 'text-rose-600',   bg: 'bg-rose-500/10'   },
   { key: 'someday', label: 'Someday',      sub: 'Dreams without a deadline',     color: 'text-amber-600',  bg: 'bg-amber-500/10'  },
 ]
 
 const VALUE_COLORS = [
-  { card: 'bg-blue-500/10   border-blue-500/20',   text: 'text-blue-300',   dot: 'bg-blue-400'   },
+  { card: 'bg-indigo-500/10   border-indigo-500/20',   text: 'text-indigo-300',   dot: 'bg-indigo-400'   },
   { card: 'bg-violet-500/10 border-violet-500/20', text: 'text-violet-300', dot: 'bg-violet-400' },
   { card: 'bg-rose-500/10   border-rose-500/20',   text: 'text-rose-300',   dot: 'bg-rose-400'   },
   { card: 'bg-amber-500/10  border-amber-500/20',  text: 'text-amber-300',  dot: 'bg-amber-400'  },
@@ -45,20 +45,20 @@ function Section({
   children: React.ReactNode
 }) {
   const accentMap: Record<string, string> = {
-    blue:   'bg-blue-600',
+    blue:   'bg-indigo-600',
     violet: 'bg-violet-600',
     rose:   'bg-rose-500/100',
     amber:  'bg-amber-500/100',
   }
   return (
-    <section className="rounded-2xl border border-white/8 bg-[#13131f] shadow-sm overflow-hidden">
+    <section className="rounded-2xl border border-white/8 bg-white/[0.04] shadow-sm overflow-hidden">
       {/* Colored top bar */}
-      <div className={`h-1 w-full ${accentMap[accent] ?? 'bg-blue-600'}`} />
+      <div className={`h-1 w-full ${accentMap[accent] ?? 'bg-indigo-600'}`} />
       <div className="p-6">
         <div className="mb-5 flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${accentMap[accent] ?? 'bg-blue-600'} bg-opacity-10`}>
-              <span className={`${accent === 'blue' ? 'text-blue-600' : accent === 'violet' ? 'text-violet-600' : accent === 'rose' ? 'text-rose-500' : 'text-amber-500'}`}>
+            <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${accentMap[accent] ?? 'bg-indigo-600'} bg-opacity-10`}>
+              <span className={`${accent === 'blue' ? 'text-indigo-500' : accent === 'violet' ? 'text-violet-600' : accent === 'rose' ? 'text-rose-500' : 'text-amber-500'}`}>
                 {icon}
               </span>
             </div>
@@ -366,7 +366,7 @@ export default function VisionPage() {
                           <button
                             onClick={() => toggleGoalDone(g.id)}
                             className={`mt-0.5 flex-shrink-0 flex items-center justify-center rounded-full border-2 transition-colors
-                              ${g.done ? 'bg-blue-500/100 border-blue-500' : 'border-white/15 hover:border-blue-400'}`}
+                              ${g.done ? 'bg-indigo-500/100 border-blue-500' : 'border-white/15 hover:border-indigo-400'}`}
                             style={{ width: 18, height: 18 }}
                           >
                             {g.done && <Check size={11} strokeWidth={3} className="text-white" />}

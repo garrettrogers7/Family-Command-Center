@@ -14,38 +14,55 @@
   }
 
   body {
-    background-color: #0d0d14;
+    background-color: #060412;
     @apply font-sans text-white;
   }
 
   h1, h2, h3 {
-    letter-spacing: -0.015em;
+    letter-spacing: -0.02em;
   }
 }
 
 /* ── Design-system component shortcuts ─────────────────────────── */
 @layer components {
 
-  /* Cards */
+  /* Cards — glassmorphism */
   .card {
-    background-color: #13131f;
+    background-color: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-radius: 1rem;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   }
   .card-lg {
-    background-color: #13131f;
+    background-color: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-radius: 1rem;
     border: 1px solid rgba(255, 255, 255, 0.10);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
 
-  /* Buttons — primary */
+  /* Buttons — primary (indigo) */
   .btn {
-    @apply inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed;
+    @apply inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed;
+    background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
+    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.4), 0 0 0 1px rgba(99, 102, 241, 0.3);
+  }
+  .btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #818cf8 0%, #8b5cf6 100%);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4), 0 0 0 1px rgba(99, 102, 241, 0.4);
+    transform: translateY(-1px);
   }
   .btn-sm {
-    @apply inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed;
+    @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed;
+    background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
+    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.4);
+  }
+  .btn-sm:hover:not(:disabled) {
+    background: linear-gradient(135deg, #818cf8 0%, #8b5cf6 100%);
+    transform: translateY(-1px);
   }
 
   /* Buttons — ghost */
@@ -54,38 +71,40 @@
     color: rgba(255, 255, 255, 0.5);
   }
   .btn-ghost:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.07);
+    color: rgba(255, 255, 255, 0.85);
   }
   .btn-ghost-sm {
     @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40;
     color: rgba(255, 255, 255, 0.5);
   }
   .btn-ghost-sm:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.07);
+    color: rgba(255, 255, 255, 0.85);
   }
 
   /* Buttons — outlined */
   .btn-outline {
     @apply inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-40;
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.65);
     background: transparent;
   }
   .btn-outline:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.20);
+    background-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.22);
+    color: rgba(255, 255, 255, 0.9);
   }
   .btn-outline-sm {
     @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40;
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.65);
     background: transparent;
   }
   .btn-outline-sm:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.20);
+    background-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.22);
+    color: rgba(255, 255, 255, 0.9);
   }
 
   /* Buttons — danger ghost */
@@ -104,8 +123,9 @@
   }
   .input::placeholder { color: rgba(255, 255, 255, 0.25); }
   .input:focus {
-    border-color: rgba(59, 130, 246, 0.8);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    border-color: rgba(99, 102, 241, 0.7);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    background-color: rgba(255, 255, 255, 0.07);
   }
   .input-sm {
     @apply w-full rounded-lg px-3 py-2 text-sm text-white transition-colors focus:outline-none;
@@ -114,8 +134,9 @@
   }
   .input-sm::placeholder { color: rgba(255, 255, 255, 0.25); }
   .input-sm:focus {
-    border-color: rgba(59, 130, 246, 0.8);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    border-color: rgba(99, 102, 241, 0.7);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    background-color: rgba(255, 255, 255, 0.07);
   }
   select.input, select.input-sm {
     @apply cursor-pointer;
@@ -125,7 +146,7 @@
   /* Section label */
   .label {
     @apply text-xs font-semibold uppercase tracking-wider;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 0.35);
   }
 
   /* Badge */
@@ -135,10 +156,10 @@
 }
 
 /* ── Scrollbar (WebKit) ─────────────────────────────────────────── */
-::-webkit-scrollbar        { width: 6px; height: 6px; }
+::-webkit-scrollbar        { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track  { background: transparent; }
-::-webkit-scrollbar-thumb  { background: rgba(255,255,255,0.10); border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.20); }
+::-webkit-scrollbar-thumb  { background: rgba(255,255,255,0.08); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.16); }
 
 /* ── Coral color utilities ──────────────────────────────────────── */
 @layer utilities {

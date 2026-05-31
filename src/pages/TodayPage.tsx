@@ -91,11 +91,11 @@ export default function TodayPage() {
                       >
                         {event.shared ? (
                           <span className="flex flex-shrink-0 items-center gap-0.5">
-                            <span className="h-2 w-2 rounded-full bg-blue-400" />
+                            <span className="h-2 w-2 rounded-full bg-indigo-400" />
                             <span className="h-2 w-2 rounded-full bg-coral-400" />
                           </span>
                         ) : (
-                          <span className={`h-2.5 w-2.5 flex-shrink-0 rounded-full ${color === 'blue' ? 'bg-blue-400' : 'bg-coral-400'}`} />
+                          <span className={`h-2.5 w-2.5 flex-shrink-0 rounded-full ${color === 'blue' ? 'bg-indigo-400' : 'bg-coral-400'}`} />
                         )}
                         <Clock size={14} className="flex-shrink-0 text-gray-400" />
                         <div className="flex-1 min-w-0">

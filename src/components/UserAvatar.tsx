@@ -1,7 +1,7 @@
 import type { FamilyMember } from '@/lib/database.types'
 
 const colorClasses = {
-  blue: 'bg-blue-100 text-blue-600 ring-blue-200',
+  blue: 'bg-blue-100 text-indigo-500 ring-blue-200',
   coral: 'bg-coral-100 text-coral-600 ring-coral-200',
 }
 

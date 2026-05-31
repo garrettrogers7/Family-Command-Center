@@ -61,10 +61,17 @@ function SectionCard({ to, label, icon, tint, border, iconColor, kpi, sub, badge
   return (
     <Link
       to={to}
-      className={`group relative flex flex-col overflow-hidden rounded-2xl border bg-[#13131f] p-5 transition-all duration-200 hover:scale-[1.02] hover:brightness-110 ${border}`}
+      className="group relative flex flex-col overflow-hidden rounded-2xl p-5 transition-all duration-200 hover:scale-[1.015]"
+      style={{
+        background: 'rgba(255,255,255,0.04)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        border: `1px solid ${border}`,
+        boxShadow: '0 4px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.06)',
+      }}
     >
       {/* Colored tint overlay */}
-      <div className={`pointer-events-none absolute inset-0 ${tint}`} />
+      <div className={`pointer-events-none absolute inset-0 rounded-2xl ${tint}`} />
 
       {/* Content */}
       <div className="relative z-10 flex flex-col h-full gap-3">
@@ -72,7 +79,7 @@ function SectionCard({ to, label, icon, tint, border, iconColor, kpi, sub, badge
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <span className={iconColor}>{icon}</span>
-            <span className="text-xs font-semibold uppercase tracking-widest text-white/50">{label}</span>
+            <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.45)' }}>{label}</span>
           </div>
           {badge != null && (
             <span className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-bold text-white ${badgeColor}`}>
@@ -84,12 +91,12 @@ function SectionCard({ to, label, icon, tint, border, iconColor, kpi, sub, badge
         {/* KPI */}
         <div className="flex-1">
           <div className="text-2xl font-bold text-white leading-tight tracking-tight">{kpi}</div>
-          <div className="mt-1 text-xs text-white/40 leading-snug">{sub}</div>
+          <div className="mt-1 text-xs leading-snug" style={{ color: 'rgba(255,255,255,0.38)' }}>{sub}</div>
         </div>
 
         {/* Arrow */}
         <div className="flex justify-end">
-          <ChevronRight size={14} className="text-white/20 transition-all group-hover:text-white/50 group-hover:translate-x-0.5" />
+          <ChevronRight size={14} style={{ color: 'rgba(255,255,255,0.18)' }} className="transition-all group-hover:translate-x-0.5 group-hover:opacity-70" />
         </div>
       </div>
     </Link>
@@ -155,23 +162,21 @@ export default function DashboardPage() {
   const firstName = currentMember?.display_name?.split(' ')[0] ?? ''
 
   return (
-    <div className="min-h-screen bg-[#0d0d14]">
+    <div className="min-h-screen">
 
-      {/* ── Subtle top gradient accent ── */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-blue-600/10 to-transparent" />
-
-      <div className="relative z-10 mx-auto max-w-2xl px-5 pt-8 pb-10 md:px-8">
+      <div className="mx-auto max-w-2xl px-5 pt-10 pb-12 md:px-8">
 
         {/* ── Greeting ── */}
-        <div className="mb-8">
-          <p className="text-xs font-medium tracking-widest text-white/30 uppercase mb-2">
+        <div className="mb-10">
+          <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'rgba(165,180,252,0.6)' }}>
             {format(today, 'EEEE, MMMM d')}
           </p>
-          <h1 className="text-3xl font-bold text-white tracking-tight">
-            {greeting}{firstName ? `, ${firstName}` : ''}
+          <h1 className="text-4xl font-bold text-white tracking-tight leading-tight">
+            {greeting}{firstName ? `,` : ''}<br />
+            {firstName && <span style={{ background: 'linear-gradient(135deg, #a5b4fc 0%, #c4b5fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{firstName}</span>}
           </h1>
           {members.length > 1 && (
-            <p className="mt-1.5 text-sm text-white/35">
+            <p className="mt-2 text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>
               {members.map(m => m.display_name.split(' ')[0]).join(' & ')}
             </p>
           )}
@@ -191,8 +196,8 @@ export default function DashboardPage() {
               to="/week"
               label="This Week"
               icon={<CalendarDays size={18} strokeWidth={1.75} />}
-              tint="bg-gradient-to-br from-violet-600/20 via-violet-900/10 to-transparent"
-              border="border-violet-500/15"
+              tint="bg-gradient-to-br from-violet-500/10 to-transparent"
+              border="rgba(139,92,246,0.22)"
               iconColor="text-violet-400"
               kpi={weekTaskCount ?? '—'}
               sub={weekTaskCount === 1 ? 'task remaining' : 'tasks remaining'}
@@ -208,8 +213,8 @@ export default function DashboardPage() {
                 ? <AlertTriangle size={18} strokeWidth={1.75} />
                 : <Home size={18} strokeWidth={1.75} />
               }
-              tint="bg-gradient-to-br from-emerald-600/20 via-emerald-900/10 to-transparent"
-              border="border-emerald-500/15"
+              tint="bg-gradient-to-br from-emerald-500/10 to-transparent"
+              border="rgba(52,211,153,0.20)"
               iconColor={overdueItems.length > 0 ? 'text-red-400' : dueSoonItems.length > 0 ? 'text-amber-400' : 'text-emerald-400'}
               kpi={
                 overdueItems.length > 0
@@ -233,8 +238,8 @@ export default function DashboardPage() {
                 ? <TrendingDown size={18} strokeWidth={1.75} />
                 : <Wallet size={18} strokeWidth={1.75} />
               }
-              tint="bg-gradient-to-br from-orange-600/20 via-orange-900/10 to-transparent"
-              border="border-orange-500/15"
+              tint="bg-gradient-to-br from-orange-500/10 to-transparent"
+              border="rgba(251,146,60,0.20)"
               iconColor={spendDelta != null && spendDelta > 5 ? 'text-red-400' : spendDelta != null && spendDelta < -5 ? 'text-emerald-400' : 'text-orange-400'}
               kpi={monthSpend != null ? usd(monthSpend) : '—'}
               sub={
@@ -250,8 +255,8 @@ export default function DashboardPage() {
               to="/projects"
               label="Projects"
               icon={<FolderKanban size={18} strokeWidth={1.75} />}
-              tint="bg-gradient-to-br from-sky-600/20 via-sky-900/10 to-transparent"
-              border="border-sky-500/15"
+              tint="bg-gradient-to-br from-sky-500/10 to-transparent"
+              border="rgba(56,189,248,0.20)"
               iconColor="text-sky-400"
               kpi={activeProjects ?? '—'}
               sub={activeProjects === 1 ? 'project in progress' : 'projects in progress'}
@@ -262,8 +267,8 @@ export default function DashboardPage() {
               to="/vision"
               label="Vision"
               icon={<Compass size={18} strokeWidth={1.75} />}
-              tint="bg-gradient-to-br from-pink-600/20 via-pink-900/10 to-transparent"
-              border="border-pink-500/15"
+              tint="bg-gradient-to-br from-pink-500/10 to-transparent"
+              border="rgba(244,114,182,0.20)"
               iconColor="text-pink-400"
               kpi="Values"
               sub="goals & traditions"
@@ -274,9 +279,9 @@ export default function DashboardPage() {
               to="/settings"
               label="Settings"
               icon={<Settings size={18} strokeWidth={1.75} />}
-              tint="bg-gradient-to-br from-slate-600/20 via-slate-800/10 to-transparent"
-              border="border-slate-500/15"
-              iconColor="text-slate-400"
+              tint="bg-gradient-to-br from-indigo-500/10 to-transparent"
+              border="rgba(99,102,241,0.20)"
+              iconColor="text-indigo-400"
               kpi={family?.name ?? '—'}
               sub={`${members.length} ${members.length === 1 ? 'member' : 'members'}`}
             />

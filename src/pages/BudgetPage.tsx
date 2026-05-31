@@ -60,7 +60,7 @@ function catColor(name: string) {
 function MonthTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-lg border border-white/8 bg-[#13131f] px-3 py-2 shadow-lg text-xs">
+    <div className="rounded-lg border border-white/8 bg-white/[0.04] px-3 py-2 shadow-lg text-xs">
       <p className="font-medium text-white/75 mb-1">{label}</p>
       <p className="text-white font-semibold">{usd(payload[0].value)}</p>
     </div>
@@ -372,7 +372,7 @@ export default function BudgetPage() {
 
             {/* ── Summary cards ── */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div className="rounded-2xl border border-white/8 bg-[#13131f] p-5 shadow-sm col-span-2 md:col-span-1">
+              <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-5 shadow-sm col-span-2 md:col-span-1">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-white/35">
                   {activeCat ? activeCat : 'This month'}
                 </p>
@@ -382,13 +382,13 @@ export default function BudgetPage() {
                   <Delta current={totalSpent} previous={lastYearTotal} label="last year" />
                 </div>
               </div>
-              <div className="rounded-2xl border border-white/8 bg-[#13131f] p-5 shadow-sm">
+              <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-5 shadow-sm">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-white/35">Transactions</p>
                 <p className="mt-1 text-2xl font-bold text-white">{monthTxns.length}</p>
                 <p className="mt-1 text-xs text-white/35">avg {usd(totalSpent / (monthTxns.length || 1))}</p>
               </div>
               {!activeCat ? (
-                <div className="rounded-2xl border border-white/8 bg-[#13131f] p-5 shadow-sm">
+                <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-5 shadow-sm">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-white/35">Top category</p>
                   {catBreakdown[0] ? (
                     <>
@@ -398,7 +398,7 @@ export default function BudgetPage() {
                   ) : <p className="mt-1 text-sm text-white/35">—</p>}
                 </div>
               ) : (
-                <div className="rounded-2xl border border-white/8 bg-[#13131f] p-5 shadow-sm">
+                <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-5 shadow-sm">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-white/35">Top subcategory</p>
                   {subcatBreakdown[0] ? (
                     <>
@@ -408,7 +408,7 @@ export default function BudgetPage() {
                   ) : <p className="mt-1 text-sm text-white/35">—</p>}
                 </div>
               )}
-              <div className="rounded-2xl border border-white/8 bg-[#13131f] p-5 shadow-sm">
+              <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-5 shadow-sm">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-white/35">Biggest purchase</p>
                 {topTxns[0] ? (
                   <>
@@ -422,7 +422,7 @@ export default function BudgetPage() {
             {/* ── Charts row ── */}
             <div className="grid md:grid-cols-5 gap-4">
               {/* Monthly trend bar chart */}
-              <div className="md:col-span-3 rounded-2xl border border-white/8 bg-[#13131f] p-5 shadow-sm">
+              <div className="md:col-span-3 rounded-2xl border border-white/8 bg-white/[0.04] p-5 shadow-sm">
                 <p className="mb-4 text-sm font-bold text-white/90">
                   Monthly spending{activeCat ? ` — ${activeCat}` : ' — all time'}
                 </p>
@@ -442,7 +442,7 @@ export default function BudgetPage() {
               </div>
 
               {/* Category donut / subcategory donut when drilled in */}
-              <div className="md:col-span-2 rounded-2xl border border-white/8 bg-[#13131f] p-5 shadow-sm">
+              <div className="md:col-span-2 rounded-2xl border border-white/8 bg-white/[0.04] p-5 shadow-sm">
                 <p className="mb-2 text-sm font-bold text-white/90">
                   {activeCat ? 'By subcategory' : 'By category'}
                 </p>
@@ -469,7 +469,7 @@ export default function BudgetPage() {
             </div>
 
             {/* ── Category / subcategory breakdown list ── */}
-            <div className="rounded-2xl border border-white/8 bg-[#13131f] p-5 shadow-sm">
+            <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-5 shadow-sm">
               <p className="mb-4 text-sm font-bold text-white/90">
                 {activeCat ? `${activeCat} — subcategories` : 'Category breakdown'}
               </p>
@@ -523,7 +523,7 @@ export default function BudgetPage() {
 
             {/* ── Top transactions ── */}
             {topTxns.length > 0 && (
-              <div className="rounded-2xl border border-white/8 bg-[#13131f] p-5 shadow-sm">
+              <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-5 shadow-sm">
                 <p className="mb-4 text-sm font-semibold text-white/75">Top transactions this month</p>
                 <div className="divide-y divide-gray-50">
                   {topTxns.map(t => (
@@ -543,7 +543,7 @@ export default function BudgetPage() {
             )}
 
             {/* ── Full transaction list ── */}
-            <div className="rounded-xl border border-white/8 bg-[#13131f] shadow-sm">
+            <div className="rounded-xl border border-white/8 bg-white/[0.04] shadow-sm">
               <button
                 onClick={() => setShowTransactions(v => !v)}
                 className="flex w-full items-center justify-between px-5 py-4 text-left"

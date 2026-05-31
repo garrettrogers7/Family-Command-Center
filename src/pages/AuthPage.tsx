@@ -40,7 +40,7 @@ export default function AuthPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600">
             <svg viewBox="0 0 32 32" className="h-7 w-7 fill-white">
               <path d="M16 5L4 14h3v12h7v-7h4v7h7V14h3L16 5z" />
             </svg>
@@ -49,7 +49,7 @@ export default function AuthPage() {
           <p className="mt-1 text-sm text-white/45">Your family command center</p>
         </div>
 
-        <div className="rounded-xl border border-white/10 bg-[#13131f] p-8 shadow-sm">
+        <div className="rounded-xl border border-white/10 bg-white/[0.04] p-8 shadow-sm">
           {/* Mode toggle */}
           <div className="mb-6 flex rounded-lg bg-white/8 p-1">
             {(['signin', 'signup'] as const).map((m) => (
@@ -58,7 +58,7 @@ export default function AuthPage() {
                 onClick={() => { setMode(m); setError(null) }}
                 className={`flex-1 rounded-md py-1.5 text-sm font-medium transition-colors ${
                   mode === m
-                    ? 'bg-[#13131f] text-white shadow-sm'
+                    ? 'bg-white/[0.04] text-white shadow-sm'
                     : 'text-white/45 hover:text-white/75'
                 }`}
               >
@@ -106,7 +106,7 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
             >
               {loading
                 ? 'Please wait…'

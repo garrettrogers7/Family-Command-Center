@@ -63,7 +63,7 @@ function EntryForm({ familyId, userId, entry, onSave, onClose }: EntryFormProps)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
-      <div className="w-full max-w-lg rounded-xl bg-[#13131f] p-6 shadow-xl">
+      <div className="w-full max-w-lg rounded-xl bg-white/[0.04] p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-semibold text-white">{entry ? 'Edit entry' : 'New vault entry'}</h2>
           <button onClick={onClose} className="text-white/35 hover:text-white/60"><X size={18} /></button>
@@ -113,7 +113,7 @@ function EntryForm({ familyId, userId, entry, onSave, onClose }: EntryFormProps)
             <button type="button" onClick={onClose} className="flex-1 rounded-lg border border-white/10 py-2 text-sm text-white/45">
               Cancel
             </button>
-            <button type="submit" disabled={saving} className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white disabled:opacity-50">
+            <button type="submit" disabled={saving} className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-white disabled:opacity-50">
               {saving ? 'Saving…' : 'Save'}
             </button>
           </div>
@@ -171,7 +171,7 @@ export default function VaultPage() {
         action={
           <button
             onClick={() => setAdding(true)}
-            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white"
+            className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white"
           >
             <Plus size={14} />
             Add entry
@@ -190,7 +190,7 @@ export default function VaultPage() {
             </p>
             <button
               onClick={() => setAdding(true)}
-              className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white"
+              className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white"
             >
               Add first entry
             </button>
@@ -200,7 +200,7 @@ export default function VaultPage() {
             {Object.entries(grouped).map(([category, catEntries]) => {
               const isCollapsed = collapsed[category]
               return (
-                <div key={category} className="rounded-lg border border-white/8 bg-[#13131f] overflow-hidden shadow-sm">
+                <div key={category} className="rounded-lg border border-white/8 bg-white/[0.04] overflow-hidden shadow-sm">
                   <button
                     onClick={() => toggleCategory(category)}
                     className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-white/5"

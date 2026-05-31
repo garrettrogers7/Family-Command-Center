@@ -8,7 +8,7 @@ import type { UserColor } from '@/lib/database.types'
 type Step = 'choose' | 'create' | 'join'
 
 const COLOR_OPTIONS: { value: UserColor; label: string; classes: string }[] = [
-  { value: 'blue', label: 'Blue', classes: 'bg-blue-100 text-blue-600 ring-blue-300' },
+  { value: 'blue', label: 'Blue', classes: 'bg-blue-100 text-indigo-500 ring-blue-300' },
   { value: 'coral', label: 'Coral', classes: 'bg-coral-100 text-coral-600 ring-coral-300' },
 ]
 
@@ -132,7 +132,7 @@ export default function OnboardingPage() {
           <p className="mt-1 text-sm text-white/45">Set up your family workspace</p>
         </div>
 
-        <div className="rounded-xl border border-white/10 bg-[#13131f] p-8 shadow-sm">
+        <div className="rounded-xl border border-white/10 bg-white/[0.04] p-8 shadow-sm">
 
           {/* Step 1: choose */}
           {step === 'choose' && (
@@ -224,7 +224,7 @@ export default function OnboardingPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white disabled:opacity-50"
+                  className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-white disabled:opacity-50"
                 >
                   {loading ? 'Creating…' : 'Create family'}
                 </button>
@@ -279,7 +279,7 @@ export default function OnboardingPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white disabled:opacity-50"
+                  className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-white disabled:opacity-50"
                 >
                   {loading ? 'Joining…' : 'Join family'}
                 </button>

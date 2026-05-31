@@ -150,7 +150,7 @@ function ItemForm({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
-      <div className="w-full max-w-md rounded-xl bg-[#13131f] p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-md rounded-xl bg-white/[0.04] p-6 shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-semibold text-white">{initial ? 'Edit item' : 'Add maintenance item'}</h2>
           <button onClick={onClose} className="text-white/35 hover:text-white/60"><X size={18} /></button>
@@ -174,11 +174,11 @@ function ItemForm({
               <label className="mb-1 block text-xs font-medium text-white/60">Frequency</label>
               <div className="flex gap-1.5">
                 <button type="button" onClick={() => setFreqType('repeating')}
-                  className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition-colors ${freqType === 'repeating' ? 'border-blue-600 bg-blue-600 text-white' : 'border-white/10 text-white/45 hover:bg-white/5'}`}>
+                  className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition-colors ${freqType === 'repeating' ? 'border-indigo-500 bg-indigo-500 text-white' : 'border-white/10 text-white/45 hover:bg-white/5'}`}>
                   Repeating
                 </button>
                 <button type="button" onClick={() => setFreqType('once')}
-                  className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition-colors ${freqType === 'once' ? 'border-blue-600 bg-blue-600 text-white' : 'border-white/10 text-white/45 hover:bg-white/5'}`}>
+                  className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition-colors ${freqType === 'once' ? 'border-indigo-500 bg-indigo-500 text-white' : 'border-white/10 text-white/45 hover:bg-white/5'}`}>
                   One-time
                 </button>
               </div>
@@ -255,7 +255,7 @@ function ItemForm({
             <button type="button" onClick={onClose}
               className="flex-1 rounded-lg border border-white/10 py-2 text-sm text-white/45 hover:bg-white/5">Cancel</button>
             <button type="submit" disabled={saving}
-              className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white disabled:opacity-50">
+              className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-white disabled:opacity-50">
               {saving ? 'Saving…' : 'Save'}
             </button>
           </div>
@@ -310,7 +310,7 @@ function MaintenanceRow({
   const isDueSoon = daysUntil !== null && daysUntil >= 0 && daysUntil <= 30
 
   return (
-    <div className={`rounded-lg border bg-[#13131f] transition-colors ${isOverdue ? 'border-red-200' : isDueSoon ? 'border-amber-200' : 'border-white/8'}`}>
+    <div className={`rounded-lg border bg-white/[0.04] transition-colors ${isOverdue ? 'border-red-200' : isDueSoon ? 'border-amber-200' : 'border-white/8'}`}>
       <div className="flex items-center gap-3 px-4 py-3">
         {/* Mark done */}
         <button onClick={markDone} disabled={markingDone} title="Mark as done today"
@@ -325,7 +325,7 @@ function MaintenanceRow({
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-medium text-white">{item.task}</span>
             {eq && (
-              <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-xs text-blue-600 font-medium">{eq.name}</span>
+              <span className="rounded-full bg-indigo-500/10 px-2 py-0.5 text-xs text-indigo-500 font-medium">{eq.name}</span>
             )}
             <span className="rounded-full bg-white/8 px-2 py-0.5 text-xs text-white/35">{item.frequency}</span>
             <DueBadge item={item} />
@@ -504,14 +504,14 @@ function HistoryEntryRow({ entry, familyId, equipment, items, onUpdate }: { entr
   }
 
   return (
-    <div className="rounded-lg border border-white/8 bg-[#13131f]">
+    <div className="rounded-lg border border-white/8 bg-white/[0.04]">
       <div className="flex items-center gap-3 px-4 py-3">
         <Icon size={13} className={`flex-shrink-0 ${color}`} />
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-sm font-medium text-white/90">{entry.task}</p>
             {eq && (
-              <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-xs text-blue-600 font-medium">{eq.name}</span>
+              <span className="rounded-full bg-indigo-500/10 px-2 py-0.5 text-xs text-indigo-500 font-medium">{eq.name}</span>
             )}
           </div>
           <p className="text-xs text-white/35">
@@ -587,7 +587,7 @@ function HistoryEntryRow({ entry, familyId, equipment, items, onUpdate }: { entr
                   return (
                     <div key={url} className="flex items-center gap-2">
                       <a href={href} target="_blank" rel="noopener noreferrer"
-                        className="flex flex-1 min-w-0 items-center gap-1.5 rounded bg-white/5 px-2 py-1.5 text-xs text-blue-600 hover:bg-white/8 transition-colors">
+                        className="flex flex-1 min-w-0 items-center gap-1.5 rounded bg-white/5 px-2 py-1.5 text-xs text-indigo-500 hover:bg-white/8 transition-colors">
                         <Paperclip size={11} className="flex-shrink-0" />
                         <span className="truncate">{fileName}</span>
                       </a>
@@ -652,7 +652,7 @@ function EquipmentRow({ eq, items, history, onUpdate }: {
 
   if (editing) {
     return (
-      <form onSubmit={save} className="rounded-lg border border-white/10 bg-[#13131f] px-4 py-3 space-y-2">
+      <form onSubmit={save} className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3 space-y-2">
         <input required autoFocus value={name} onChange={e => setName(e.target.value)}
           className="w-full rounded-lg border border-white/10 px-2 py-1.5 text-sm outline-none focus:border-white/20"
           placeholder="Name" />
@@ -678,7 +678,7 @@ function EquipmentRow({ eq, items, history, onUpdate }: {
   }
 
   return (
-    <div className="rounded-lg border border-white/8 bg-[#13131f]">
+    <div className="rounded-lg border border-white/8 bg-white/[0.04]">
       {/* Header row */}
       <div className="flex items-start gap-3 px-4 py-3">
         <button onClick={() => setExpanded(e => !e)} className="flex-1 min-w-0 text-left">
@@ -822,7 +822,7 @@ function EquipmentManager({ familyId, equipment, items, history, onUpdate }: {
 
       {/* Add form */}
       {adding ? (
-        <form onSubmit={addEquipment} className="rounded-lg border border-white/10 bg-[#13131f] p-4 space-y-3">
+        <form onSubmit={addEquipment} className="rounded-lg border border-white/10 bg-white/[0.04] p-4 space-y-3">
           <p className="text-sm font-medium text-white/75">Add equipment</p>
           <div>
             <label className="mb-1 block text-xs font-medium text-white/45">Name</label>
@@ -850,7 +850,7 @@ function EquipmentManager({ familyId, equipment, items, history, onUpdate }: {
             <button type="button" onClick={() => setAdding(false)}
               className="flex-1 rounded-lg border border-white/10 py-2 text-sm text-white/45 hover:bg-white/5">Cancel</button>
             <button type="submit" disabled={saving}
-              className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white disabled:opacity-50">
+              className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-white disabled:opacity-50">
               {saving ? 'Saving…' : 'Add'}
             </button>
           </div>
@@ -980,7 +980,7 @@ export default function HouseholdPage() {
         <div className="flex gap-1 rounded-lg bg-white/8 p-1 w-fit">
           {([['log', 'Maintenance'], ['history', 'History'], ['equipment', 'Equipment']] as [View, string][]).map(([v, label]) => (
             <button key={v} onClick={() => setView(v)}
-              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${view === v ? 'bg-[#13131f] text-white shadow-sm' : 'text-white/45 hover:text-white/75'}`}>
+              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${view === v ? 'bg-white/[0.04] text-white shadow-sm' : 'text-white/45 hover:text-white/75'}`}>
               {label}
             </button>
           ))}

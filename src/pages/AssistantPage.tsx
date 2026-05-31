@@ -327,7 +327,7 @@ function MessageBubble({ msg }: { msg: Message & { streaming?: boolean } }) {
         className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
           isUser
             ? 'bg-blue-600 text-white rounded-br-sm'
-            : 'bg-[#13131f] border border-white/8 text-white/75 rounded-bl-sm shadow-sm'
+            : 'bg-white/[0.04] border border-white/8 text-white/75 rounded-bl-sm shadow-sm'
         }`}
       >
         {msg.content}
@@ -465,7 +465,7 @@ export default function AssistantPage() {
           <button
             onClick={loadInsights}
             disabled={insightLoading}
-            className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-[#13131f] px-3 py-1.5 text-xs font-medium text-white/60 hover:bg-white/5 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/60 hover:bg-white/5 disabled:opacity-50 transition-colors"
           >
             <RefreshCw size={12} className={insightLoading ? 'animate-spin' : ''} />
             Refresh
@@ -502,7 +502,7 @@ export default function AssistantPage() {
                 <button
                   key={prompt}
                   onClick={() => { setInput(prompt); inputRef.current?.focus() }}
-                  className="rounded-full border border-white/10 bg-[#13131f] px-3 py-1.5 text-xs text-white/60 hover:bg-white/5 hover:border-white/15 transition-colors"
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/60 hover:bg-white/5 hover:border-white/15 transition-colors"
                 >
                   {prompt}
                 </button>
@@ -515,7 +515,7 @@ export default function AssistantPage() {
       </div>
 
       {/* Input bar */}
-      <div className="border-t border-white/8 bg-[#13131f] px-8 py-4">
+      <div className="border-t border-white/8 bg-white/[0.04] px-8 py-4">
         <div className="flex items-end gap-3 max-w-4xl">
           <textarea
             ref={inputRef}
@@ -524,7 +524,7 @@ export default function AssistantPage() {
             onKeyDown={handleKeyDown}
             placeholder="Ask a follow-up question…"
             rows={1}
-            className="flex-1 resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-white/20 focus:bg-[#13131f] transition-colors placeholder:text-white/35"
+            className="flex-1 resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-white/20 focus:bg-white/[0.04] transition-colors placeholder:text-white/35"
             style={{ minHeight: '44px', maxHeight: '120px' }}
             onInput={(e) => {
               const el = e.currentTarget

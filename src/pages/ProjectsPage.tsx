@@ -18,7 +18,7 @@ const STATUS_LABEL: Record<ProjectStatus, string> = {
 
 const STATUS_STYLE: Record<ProjectStatus, { badge: string; border: string; bar: string }> = {
   planning: { badge: 'bg-amber-500/10 text-amber-600',  border: 'border-l-amber-400', bar: 'bg-amber-400' },
-  active:   { badge: 'bg-blue-500/10 text-blue-600',    border: 'border-l-blue-500',  bar: 'bg-blue-500/100'  },
+  active:   { badge: 'bg-indigo-500/10 text-indigo-500',    border: 'border-l-blue-500',  bar: 'bg-indigo-500/100'  },
   done:     { badge: 'bg-green-500/10 text-green-600',  border: 'border-l-green-500', bar: 'bg-green-500/100' },
 }
 
@@ -170,7 +170,7 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
   }
 
   return (
-    <div className={`rounded-2xl border border-white/8 bg-[#13131f] shadow-sm overflow-hidden border-l-4 transition-all hover:shadow-md ${styles.border} ${project.status === 'done' ? 'opacity-70' : ''}`}>
+    <div className={`rounded-2xl border border-white/8 bg-white/[0.04] shadow-sm overflow-hidden border-l-4 transition-all hover:shadow-md ${styles.border} ${project.status === 'done' ? 'opacity-70' : ''}`}>
       {/* Card header */}
       <div
         className="flex items-center gap-3 px-5 py-4 cursor-pointer select-none"
@@ -247,7 +247,7 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
                       <button
                         onClick={() => handleToggleTask(task)}
                         className={`flex-shrink-0 flex items-center justify-center rounded border-2 transition-colors
-                          ${task.completed ? 'bg-blue-500/100 border-blue-500' : 'border-white/15 hover:border-blue-400'}`}
+                          ${task.completed ? 'bg-indigo-500/100 border-blue-500' : 'border-white/15 hover:border-indigo-400'}`}
                         style={{ height: 18, width: 18 }}
                       >
                         {task.completed && <Check size={11} strokeWidth={3} className="text-white" />}
@@ -276,7 +276,7 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
                   className="flex-1 rounded-lg border border-dashed border-white/10 px-3 py-1.5 text-sm text-white/75 placeholder-white/25 focus:border-blue-300 focus:outline-none focus:border-solid transition-colors"
                 />
                 <button type="submit" disabled={!newTask.trim() || addingTask}
-                  className="rounded-lg bg-white/8 px-2.5 py-1.5 text-white/45 hover:bg-blue-500/10 hover:text-blue-600 transition-colors disabled:opacity-40">
+                  className="rounded-lg bg-white/8 px-2.5 py-1.5 text-white/45 hover:bg-indigo-500/10 hover:text-indigo-500 transition-colors disabled:opacity-40">
                   <Plus size={14} />
                 </button>
               </form>
@@ -371,7 +371,7 @@ export default function ProjectsPage() {
               onClick={() => setStatusFilter(s)}
               className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all capitalize ${
                 statusFilter === s
-                  ? 'bg-[#13131f] text-white shadow-sm'
+                  ? 'bg-white/[0.04] text-white shadow-sm'
                   : 'text-white/45 hover:text-white/75'
               }`}
             >
@@ -387,7 +387,7 @@ export default function ProjectsPage() {
 
         {/* New project form */}
         {showNewForm && (
-          <div className="rounded-2xl border border-blue-500/20 bg-[#13131f] p-5 shadow-sm">
+          <div className="rounded-2xl border border-indigo-500/20 bg-white/[0.04] p-5 shadow-sm">
             <p className="mb-4 text-sm font-bold text-white/90">New project</p>
             <ProjectForm
               onSave={handleAddProject}
