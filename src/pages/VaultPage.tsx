@@ -181,7 +181,7 @@ export default function VaultPage() {
 
       <div className="mx-auto max-w-3xl px-4 py-4 md:px-8 md:py-6">
         {loading ? (
-          <div className="py-12 text-center text-sm text-gray-400">Loading…</div>
+          <div className="flex flex-col items-center justify-center gap-3 py-20 text-gray-400"><div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-500" /><p className="text-sm">Loading…</p></div>
         ) : entries.length === 0 ? (
           <div className="rounded-xl border border-dashed border-gray-200 py-16 text-center">
             <p className="text-sm text-gray-400">Your vault is empty.</p>

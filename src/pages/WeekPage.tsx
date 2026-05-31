@@ -907,7 +907,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
 
       <div className="px-4 py-4 md:px-8 md:py-6 space-y-8">
         {loading ? (
-          <div className="py-12 text-center text-sm text-gray-400">Loading…</div>
+          <div className="flex flex-col items-center justify-center gap-3 py-20 text-gray-400"><div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-500" /><p className="text-sm">Loading…</p></div>
         ) : (
           <>
             {/* ── Day Planner ──────────────────────────────────────────── */}

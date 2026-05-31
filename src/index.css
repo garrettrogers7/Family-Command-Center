@@ -14,7 +14,7 @@
   }
 
   body {
-    @apply bg-gray-50 font-sans text-gray-900;
+    @apply bg-slate-50 font-sans text-gray-900;
   }
 
   /* Tighter tracking on headings at display sizes */
@@ -28,7 +28,10 @@
 
   /* Cards */
   .card {
-    @apply bg-white rounded-xl border border-gray-100 shadow-sm;
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm;
+  }
+  .card-lg {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-md;
   }
 
   /* Buttons — primary */

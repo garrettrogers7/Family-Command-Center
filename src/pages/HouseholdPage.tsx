@@ -987,7 +987,7 @@ export default function HouseholdPage() {
         </div>
 
         {loading ? (
-          <div className="py-12 text-center text-sm text-gray-400">Loading…</div>
+          <div className="flex flex-col items-center justify-center gap-3 py-20 text-gray-400"><div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-500" /><p className="text-sm">Loading…</p></div>
         ) : view === 'equipment' ? (
           <EquipmentManager familyId={family!.id} equipment={equipment} items={items} history={history} onUpdate={fetchAll} />
         ) : view === 'history' ? (

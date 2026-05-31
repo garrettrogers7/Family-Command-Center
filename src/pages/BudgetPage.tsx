@@ -341,10 +341,17 @@ export default function BudgetPage() {
         </div>
 
         {loading ? (
-          <div className="py-16 text-center text-sm text-gray-400">Loading…</div>
+          <div className="flex flex-col items-center justify-center gap-3 py-20 text-gray-400">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-blue-500" />
+            <p className="text-sm">Loading transactions…</p>
+          </div>
         ) : transactions.length === 0 ? (
-          <div className="py-16 text-center text-sm text-gray-400">
-            No transactions yet — import your Excel file to get started.
+          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 py-20 text-center">
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100">
+              <Upload size={22} className="text-gray-400" />
+            </div>
+            <p className="text-sm font-semibold text-gray-500">No transactions yet</p>
+            <p className="mt-1 text-xs text-gray-400">Import your Excel file to get started.</p>
           </div>
         ) : (
           <>
@@ -365,8 +372,8 @@ export default function BudgetPage() {
 
             {/* ── Summary cards ── */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm col-span-2 md:col-span-1">
-                <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
+              <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm col-span-2 md:col-span-1">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
                   {activeCat ? activeCat : 'This month'}
                 </p>
                 <p className="mt-1 text-2xl font-bold text-gray-900">{usd(totalSpent)}</p>
@@ -375,14 +382,14 @@ export default function BudgetPage() {
                   <Delta current={totalSpent} previous={lastYearTotal} label="last year" />
                 </div>
               </div>
-              <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-                <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Transactions</p>
+              <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Transactions</p>
                 <p className="mt-1 text-2xl font-bold text-gray-900">{monthTxns.length}</p>
                 <p className="mt-1 text-xs text-gray-400">avg {usd(totalSpent / (monthTxns.length || 1))}</p>
               </div>
               {!activeCat ? (
-                <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Top category</p>
+                <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Top category</p>
                   {catBreakdown[0] ? (
                     <>
                       <p className="mt-1 text-lg font-bold text-gray-900">{catBreakdown[0].name}</p>
@@ -391,8 +398,8 @@ export default function BudgetPage() {
                   ) : <p className="mt-1 text-sm text-gray-400">—</p>}
                 </div>
               ) : (
-                <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Top subcategory</p>
+                <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Top subcategory</p>
                   {subcatBreakdown[0] ? (
                     <>
                       <p className="mt-1 text-lg font-bold text-gray-900">{subcatBreakdown[0].name}</p>
@@ -401,8 +408,8 @@ export default function BudgetPage() {
                   ) : <p className="mt-1 text-sm text-gray-400">—</p>}
                 </div>
               )}
-              <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-                <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Biggest purchase</p>
+              <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Biggest purchase</p>
                 {topTxns[0] ? (
                   <>
                     <p className="mt-1 text-lg font-bold text-gray-900">{usd(Math.abs(topTxns[0].amount))}</p>
@@ -415,8 +422,8 @@ export default function BudgetPage() {
             {/* ── Charts row ── */}
             <div className="grid md:grid-cols-5 gap-4">
               {/* Monthly trend bar chart */}
-              <div className="md:col-span-3 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-                <p className="mb-4 text-sm font-semibold text-gray-700">
+              <div className="md:col-span-3 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                <p className="mb-4 text-sm font-bold text-gray-800">
                   Monthly spending{activeCat ? ` — ${activeCat}` : ' — all time'}
                 </p>
                 <ResponsiveContainer width="100%" height={200}>
@@ -435,8 +442,8 @@ export default function BudgetPage() {
               </div>
 
               {/* Category donut / subcategory donut when drilled in */}
-              <div className="md:col-span-2 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-                <p className="mb-2 text-sm font-semibold text-gray-700">
+              <div className="md:col-span-2 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                <p className="mb-2 text-sm font-bold text-gray-800">
                   {activeCat ? 'By subcategory' : 'By category'}
                 </p>
                 {(() => {
@@ -462,8 +469,8 @@ export default function BudgetPage() {
             </div>
 
             {/* ── Category / subcategory breakdown list ── */}
-            <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-              <p className="mb-4 text-sm font-semibold text-gray-700">
+            <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+              <p className="mb-4 text-sm font-bold text-gray-800">
                 {activeCat ? `${activeCat} — subcategories` : 'Category breakdown'}
               </p>
               {(() => {
@@ -516,7 +523,7 @@ export default function BudgetPage() {
 
             {/* ── Top transactions ── */}
             {topTxns.length > 0 && (
-              <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+              <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
                 <p className="mb-4 text-sm font-semibold text-gray-700">Top transactions this month</p>
                 <div className="divide-y divide-gray-50">
                   {topTxns.map(t => (
@@ -541,7 +548,7 @@ export default function BudgetPage() {
                 onClick={() => setShowTransactions(v => !v)}
                 className="flex w-full items-center justify-between px-5 py-4 text-left"
               >
-                <span className="text-sm font-semibold text-gray-700">
+                <span className="text-sm font-bold text-gray-800">
                   All transactions{activeCat ? ` — ${activeCat}` : ''}{filteredTxns.length > 0 ? ` (${filteredTxns.length})` : ''}
                 </span>
                 <ChevronRight size={16} className={`text-gray-400 transition-transform ${showTransactions ? 'rotate-90' : ''}`} />

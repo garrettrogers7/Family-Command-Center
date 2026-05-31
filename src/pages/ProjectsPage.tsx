@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import {
-  Plus, ChevronDown, ChevronRight, Check, Trash2, Pencil, X, Calendar, Tag,
+  Plus, ChevronDown, ChevronRight, Check, Trash2, Pencil, X, Calendar, Tag, FolderOpen,
 } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { supabase } from '@/lib/supabase'
@@ -15,11 +15,13 @@ const STATUS_LABEL: Record<ProjectStatus, string> = {
   active:   'Active',
   done:     'Done',
 }
-const STATUS_STYLE: Record<ProjectStatus, string> = {
-  planning: 'bg-gray-100 text-gray-500',
-  active:   'bg-blue-50 text-blue-600',
-  done:     'bg-green-50 text-green-600',
+
+const STATUS_STYLE: Record<ProjectStatus, { badge: string; border: string; bar: string }> = {
+  planning: { badge: 'bg-amber-50 text-amber-600',  border: 'border-l-amber-400', bar: 'bg-amber-400' },
+  active:   { badge: 'bg-blue-50 text-blue-600',    border: 'border-l-blue-500',  bar: 'bg-blue-500'  },
+  done:     { badge: 'bg-green-50 text-green-600',  border: 'border-l-green-500', bar: 'bg-green-500' },
 }
+
 const STATUS_ORDER: ProjectStatus[] = ['active', 'planning', 'done']
 
 // ── Project form (add / edit) ─────────────────────────────────────
@@ -31,19 +33,19 @@ interface ProjectFormProps {
 }
 
 function ProjectForm({ initial, onSave, onCancel }: ProjectFormProps) {
-  const [title,      setTitle]      = useState(initial?.title       ?? '')
-  const [description,setDescription]= useState(initial?.description ?? '')
-  const [category,   setCategory]   = useState(initial?.category    ?? '')
-  const [status,     setStatus]     = useState<ProjectStatus>(initial?.status ?? 'planning')
-  const [targetDate, setTargetDate] = useState(initial?.target_date ?? '')
-  const [saving,     setSaving]     = useState(false)
+  const [title,       setTitle]       = useState(initial?.title       ?? '')
+  const [description, setDescription] = useState(initial?.description ?? '')
+  const [category,    setCategory]    = useState(initial?.category    ?? '')
+  const [status,      setStatus]      = useState<ProjectStatus>(initial?.status ?? 'planning')
+  const [targetDate,  setTargetDate]  = useState(initial?.target_date ?? '')
+  const [saving,      setSaving]      = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!title.trim()) return
     setSaving(true)
     await onSave({
-      title: title.trim(),
+      title:       title.trim(),
       description: description.trim() || null,
       category:    category.trim()    || null,
       status,
@@ -59,26 +61,26 @@ function ProjectForm({ initial, onSave, onCancel }: ProjectFormProps) {
         value={title}
         onChange={e => setTitle(e.target.value)}
         placeholder="Project title"
-        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0"
+        className="input"
       />
       <textarea
         value={description}
         onChange={e => setDescription(e.target.value)}
         placeholder="Description or notes (optional)"
         rows={3}
-        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:border-gray-400 focus:outline-none resize-none"
+        className="input resize-none"
       />
       <div className="flex gap-2 flex-wrap">
         <input
           value={category}
           onChange={e => setCategory(e.target.value)}
           placeholder="Category (e.g. Home, Kids)"
-          className="flex-1 min-w-0 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0"
+          className="input-sm flex-1 min-w-0"
         />
         <select
           value={status}
           onChange={e => setStatus(e.target.value as ProjectStatus)}
-          className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-gray-400 focus:outline-none bg-white"
+          className="input-sm"
         >
           {STATUS_ORDER.map(s => (
             <option key={s} value={s}>{STATUS_LABEL[s]}</option>
@@ -88,16 +90,12 @@ function ProjectForm({ initial, onSave, onCancel }: ProjectFormProps) {
           type="date"
           value={targetDate}
           onChange={e => setTargetDate(e.target.value)}
-          className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-gray-400 focus:outline-none focus:ring-0"
+          className="input-sm"
         />
       </div>
       <div className="flex justify-end gap-2">
-        <button type="button" onClick={onCancel}
-          className="rounded-lg px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-100 transition-colors">
-          Cancel
-        </button>
-        <button type="submit" disabled={!title.trim() || saving}
-          className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-40">
+        <button type="button" onClick={onCancel} className="btn-ghost-sm">Cancel</button>
+        <button type="submit" disabled={!title.trim() || saving} className="btn-sm">
           {saving ? 'Saving…' : initial?.id ? 'Save changes' : 'Add project'}
         </button>
       </div>
@@ -116,14 +114,16 @@ interface ProjectCardProps {
 }
 
 function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, familyId }: ProjectCardProps) {
-  const [expanded,  setExpanded]  = useState(defaultExpanded)
-  const [editing,   setEditing]   = useState(false)
-  const [newTask,   setNewTask]   = useState('')
-  const [addingTask,setAddingTask]= useState(false)
+  const [expanded,   setExpanded]   = useState(defaultExpanded)
+  const [editing,    setEditing]    = useState(false)
+  const [newTask,    setNewTask]    = useState('')
+  const [addingTask, setAddingTask] = useState(false)
   const taskInputRef = useRef<HTMLInputElement>(null)
 
   const done  = tasks.filter(t => t.completed)
   const total = tasks.length
+  const pct   = total > 0 ? Math.round((done.length / total) * 100) : 0
+  const styles = STATUS_STYLE[project.status]
 
   async function handleSaveEdit(data: Partial<Project>) {
     await supabase.from('projects').update({ ...data, updated_at: new Date().toISOString() }).eq('id', project.id)
@@ -170,15 +170,15 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
   }
 
   return (
-    <div className={`rounded-xl border bg-white shadow-sm transition-all ${project.status === 'done' ? 'border-gray-100 opacity-70' : 'border-gray-100'}`}>
+    <div className={`rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden border-l-4 transition-all hover:shadow-md ${styles.border} ${project.status === 'done' ? 'opacity-70' : ''}`}>
       {/* Card header */}
       <div
-        className="flex items-center gap-3 px-4 py-3.5 cursor-pointer select-none"
+        className="flex items-center gap-3 px-5 py-4 cursor-pointer select-none"
         onClick={() => { if (!editing) setExpanded(v => !v) }}
       >
         <button
           onClick={e => { e.stopPropagation(); handleStatusCycle() }}
-          className={`flex-shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors hover:opacity-80 ${STATUS_STYLE[project.status]}`}
+          className={`flex-shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors hover:opacity-80 ${styles.badge}`}
           title="Click to change status"
         >
           {STATUS_LABEL[project.status]}
@@ -205,13 +205,14 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
           </div>
         </div>
 
-        {/* Progress bar (only if tasks exist) */}
+        {/* Progress bar */}
         {total > 0 && (
-          <div className="hidden sm:block w-16 flex-shrink-0">
+          <div className="hidden sm:flex flex-col items-end gap-1 flex-shrink-0 w-20">
+            <span className="text-[10px] font-semibold text-gray-400">{pct}%</span>
             <div className="h-1.5 w-full rounded-full bg-gray-100">
               <div
-                className="h-1.5 rounded-full bg-gray-400 transition-all"
-                style={{ width: `${Math.round((done.length / total) * 100)}%`, backgroundColor: project.status === 'done' ? '#86efac' : undefined }}
+                className={`h-1.5 rounded-full transition-all ${styles.bar}`}
+                style={{ width: `${pct}%` }}
               />
             </div>
           </div>
@@ -225,7 +226,7 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
 
       {/* Expanded body */}
       {expanded && (
-        <div className="border-t border-gray-50 px-4 pb-4 pt-3 space-y-4">
+        <div className="border-t border-gray-50 px-5 pb-5 pt-4 space-y-4">
           {editing ? (
             <ProjectForm
               initial={project}
@@ -234,20 +235,19 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
             />
           ) : (
             <>
-              {/* Description */}
               {project.description && (
-                <p className="text-sm text-gray-600 whitespace-pre-wrap">{project.description}</p>
+                <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{project.description}</p>
               )}
 
               {/* Task list */}
               {tasks.length > 0 && (
-                <ul className="space-y-1.5">
+                <ul className="space-y-2">
                   {tasks.map(task => (
-                    <li key={task.id} className="group flex items-center gap-2.5">
+                    <li key={task.id} className="group flex items-center gap-3 rounded-lg px-2 py-1 hover:bg-gray-50 transition-colors">
                       <button
                         onClick={() => handleToggleTask(task)}
-                        className={`flex-shrink-0 h-4.5 w-4.5 rounded border transition-colors flex items-center justify-center
-                          ${task.completed ? 'bg-blue-600 border-blue-600' : 'border-gray-300 hover:border-gray-500'}`}
+                        className={`flex-shrink-0 flex items-center justify-center rounded border-2 transition-colors
+                          ${task.completed ? 'bg-blue-500 border-blue-500' : 'border-gray-300 hover:border-blue-400'}`}
                         style={{ height: 18, width: 18 }}
                       >
                         {task.completed && <Check size={11} strokeWidth={3} className="text-white" />}
@@ -273,16 +273,16 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
                   value={newTask}
                   onChange={e => setNewTask(e.target.value)}
                   placeholder="Add a task…"
-                  className="flex-1 rounded-lg border border-dashed border-gray-200 px-3 py-1.5 text-sm text-gray-700 placeholder-gray-400 focus:border-gray-400 focus:outline-none focus:border-solid"
+                  className="flex-1 rounded-lg border border-dashed border-gray-200 px-3 py-1.5 text-sm text-gray-700 placeholder-gray-400 focus:border-blue-300 focus:outline-none focus:border-solid transition-colors"
                 />
                 <button type="submit" disabled={!newTask.trim() || addingTask}
-                  className="rounded-lg bg-gray-100 px-2.5 py-1.5 text-gray-500 hover:bg-gray-200 transition-colors disabled:opacity-40">
+                  className="rounded-lg bg-gray-100 px-2.5 py-1.5 text-gray-500 hover:bg-blue-50 hover:text-blue-600 transition-colors disabled:opacity-40">
                   <Plus size={14} />
                 </button>
               </form>
 
               {/* Actions */}
-              <div className="flex items-center justify-end gap-1 pt-1">
+              <div className="flex items-center justify-end gap-1 pt-1 border-t border-gray-50">
                 <button onClick={() => setEditing(true)}
                   className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors">
                   <Pencil size={12} /> Edit
@@ -307,11 +307,11 @@ type StatusFilter = typeof STATUS_FILTERS[number]
 
 export default function ProjectsPage() {
   const { family } = useFamily()
-  const [projects,    setProjects]    = useState<Project[]>([])
-  const [tasks,       setTasks]       = useState<ProjectTask[]>([])
-  const [loading,     setLoading]     = useState(true)
-  const [showNewForm, setShowNewForm] = useState(false)
-  const [statusFilter,setStatusFilter]= useState<StatusFilter>('all')
+  const [projects,     setProjects]     = useState<Project[]>([])
+  const [tasks,        setTasks]        = useState<ProjectTask[]>([])
+  const [loading,      setLoading]      = useState(true)
+  const [showNewForm,  setShowNewForm]  = useState(false)
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
 
   const fetchAll = useCallback(async () => {
     if (!family) return
@@ -348,44 +348,47 @@ export default function ProjectsPage() {
 
   return (
     <div>
-      <PageHeader title="Projects" subtitle="Plans & goals" />
-
-      <div className="mx-auto max-w-2xl px-4 py-4 md:px-8 md:py-6 space-y-4">
-
-        {/* Filter tabs + New button */}
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex gap-1">
-            {STATUS_FILTERS.map(s => (
-              <button
-                key={s}
-                onClick={() => setStatusFilter(s)}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors capitalize ${
-                  statusFilter === s
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                }`}
-              >
-                {s === 'all' ? 'All' : STATUS_LABEL[s as ProjectStatus]}
-                {counts[s] > 0 && (
-                  <span className={`ml-1.5 ${statusFilter === s ? 'text-gray-400' : 'text-gray-400'}`}>
-                    {counts[s]}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
+      <PageHeader
+        title="Projects"
+        subtitle="Plans & goals"
+        action={
           <button
             onClick={() => setShowNewForm(v => !v)}
-            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 transition-colors"
+            className="btn-sm"
           >
             <Plus size={13} /> New project
           </button>
+        }
+      />
+
+      <div className="mx-auto max-w-2xl px-4 py-6 md:px-8 space-y-4">
+
+        {/* Filter tabs */}
+        <div className="flex items-center gap-1 rounded-xl bg-gray-100 p-1 w-fit">
+          {STATUS_FILTERS.map(s => (
+            <button
+              key={s}
+              onClick={() => setStatusFilter(s)}
+              className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all capitalize ${
+                statusFilter === s
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {s === 'all' ? 'All' : STATUS_LABEL[s as ProjectStatus]}
+              {counts[s] > 0 && (
+                <span className={`ml-1.5 text-[10px] font-bold ${statusFilter === s ? 'text-gray-400' : 'text-gray-400'}`}>
+                  {counts[s]}
+                </span>
+              )}
+            </button>
+          ))}
         </div>
 
         {/* New project form */}
         {showNewForm && (
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <p className="mb-3 text-sm font-semibold text-gray-700">New project</p>
+          <div className="rounded-2xl border border-blue-100 bg-white p-5 shadow-sm">
+            <p className="mb-4 text-sm font-bold text-gray-800">New project</p>
             <ProjectForm
               onSave={handleAddProject}
               onCancel={() => setShowNewForm(false)}
@@ -395,18 +398,22 @@ export default function ProjectsPage() {
 
         {/* Project list */}
         {loading ? (
-          <div className="py-16 text-center text-sm text-gray-400">Loading…</div>
+          <div className="space-y-3">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-16 rounded-2xl bg-gray-100 animate-pulse" />
+            ))}
+          </div>
         ) : filtered.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-gray-200 py-16 text-center">
-            <p className="text-sm text-gray-400">
-              {statusFilter === 'all' ? 'No projects yet.' : `No ${STATUS_LABEL[statusFilter as ProjectStatus].toLowerCase()} projects.`}
+          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 py-16 text-center">
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100">
+              <FolderOpen size={22} className="text-gray-400" />
+            </div>
+            <p className="text-sm font-semibold text-gray-500">
+              {statusFilter === 'all' ? 'No projects yet' : `No ${STATUS_LABEL[statusFilter as ProjectStatus].toLowerCase()} projects`}
             </p>
-            {statusFilter === 'all' && (
-              <button onClick={() => setShowNewForm(true)}
-                className="mt-2 text-xs text-gray-400 underline hover:text-gray-600">
-                Add your first project
-              </button>
-            )}
+            <p className="mt-1 text-xs text-gray-400">
+              {statusFilter === 'all' ? 'Start by adding your first project above.' : 'Try a different filter.'}
+            </p>
           </div>
         ) : (
           <div className="space-y-3">

@@ -62,19 +62,19 @@ function DashCard({ to, icon, iconBg, label, kpi, sub, status }: CardProps) {
   return (
     <Link
       to={to}
-      className="group relative flex flex-col rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-lg hover:-translate-y-0.5 hover:border-blue-100"
+      className="group relative flex flex-col rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-lg hover:-translate-y-1 hover:border-gray-200"
     >
       {statusDot && (
         <span className={`absolute right-4 top-4 h-2.5 w-2.5 rounded-full ${statusDot} ring-4 ring-white`} />
       )}
-      <div className={`mb-3 inline-flex items-center justify-center rounded-xl p-2.5 ${iconBg}`}>
+      <div className={`mb-4 inline-flex items-center justify-center rounded-xl p-2.5 w-fit ${iconBg}`}>
         {icon}
       </div>
-      <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">{label}</p>
-      <div className="mt-1 text-2xl font-bold text-gray-900">{kpi}</div>
-      <div className="mt-1 text-xs text-gray-400">{sub}</div>
-      <div className="mt-3 flex items-center text-xs font-medium text-blue-600 opacity-0 transition-opacity group-hover:opacity-100">
-        View <span className="ml-0.5">→</span>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{label}</p>
+      <div className="mt-1.5 text-2xl font-bold tracking-tight text-gray-900">{kpi}</div>
+      <div className="mt-1 text-xs text-gray-500 leading-snug">{sub}</div>
+      <div className="mt-auto pt-4 flex items-center gap-1 text-xs font-semibold text-blue-600 opacity-0 transition-all duration-200 group-hover:opacity-100">
+        Open <span className="transition-transform group-hover:translate-x-0.5">→</span>
       </div>
     </Link>
   )
@@ -182,7 +182,7 @@ export default function DashboardPage() {
 
       <div className="mx-auto max-w-3xl px-4 py-6 md:px-8">
         {loading ? (
-          <div className="py-16 text-center text-sm text-gray-400">Loading…</div>
+          <div className="flex flex-col items-center justify-center gap-3 py-20 text-gray-400"><div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-200 border-t-blue-500" /><p className="text-sm">Loading…</p></div>
         ) : (
           <div className="grid grid-cols-2 gap-4">
 
@@ -258,18 +258,21 @@ export default function DashboardPage() {
             {/* Settings — spans full width as a slim footer card */}
             <Link
               to="/settings"
-              className="col-span-2 flex items-center justify-between rounded-2xl border border-gray-100 bg-white px-5 py-3.5 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
+              className="col-span-2 group flex items-center justify-between rounded-2xl border border-gray-100 bg-white px-5 py-4 shadow-sm transition-all duration-200 hover:shadow-md hover:border-gray-200"
             >
               <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-gray-50 p-2">
-                  <Settings size={16} className="text-gray-400" />
+                <div className="rounded-xl bg-gray-100 p-2.5 group-hover:bg-blue-50 transition-colors">
+                  <Settings size={16} className="text-gray-400 group-hover:text-blue-500 transition-colors" />
                 </div>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Settings</p>
-                  <p className="text-sm font-semibold text-gray-900">{family?.name ?? '—'}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Family Settings</p>
+                  <p className="text-sm font-bold text-gray-900">{family?.name ?? '—'}</p>
                 </div>
               </div>
-              <p className="text-sm text-gray-400">{members.length} {members.length === 1 ? 'member' : 'members'}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-xs text-gray-400">{members.length} {members.length === 1 ? 'member' : 'members'}</p>
+                <span className="text-gray-300 group-hover:text-blue-400 transition-colors">→</span>
+              </div>
             </Link>
 
           </div>
