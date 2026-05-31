@@ -125,33 +125,33 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white/5 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold text-white">Welcome to Home Base</h1>
-          <p className="mt-1 text-sm text-white/45">Set up your family workspace</p>
+          <h1 className="text-2xl font-semibold text-slate-900">Welcome to Home Base</h1>
+          <p className="mt-1 text-sm text-slate-400">Set up your family workspace</p>
         </div>
 
-        <div className="rounded-xl border border-white/10 bg-white/[0.04] p-8 shadow-sm">
+        <div className="rounded-xl border border-slate-200 bg-white/[0.04] p-8 shadow-sm">
 
           {/* Step 1: choose */}
           {step === 'choose' && (
             <div className="space-y-3">
               <button
                 onClick={() => setStep('create')}
-                className="w-full rounded-lg border border-white/10 p-4 text-left transition-colors hover:border-white/15 hover:bg-white/5"
+                className="w-full rounded-lg border border-slate-200 p-4 text-left transition-colors hover:border-slate-200 hover:bg-slate-50"
               >
-                <p className="font-medium text-white">Create a new family</p>
-                <p className="mt-0.5 text-sm text-white/45">
+                <p className="font-medium text-slate-900">Create a new family</p>
+                <p className="mt-0.5 text-sm text-slate-400">
                   Start fresh and invite your partner with a code
                 </p>
               </button>
               <button
                 onClick={() => setStep('join')}
-                className="w-full rounded-lg border border-white/10 p-4 text-left transition-colors hover:border-white/15 hover:bg-white/5"
+                className="w-full rounded-lg border border-slate-200 p-4 text-left transition-colors hover:border-slate-200 hover:bg-slate-50"
               >
-                <p className="font-medium text-white">Join an existing family</p>
-                <p className="mt-0.5 text-sm text-white/45">
+                <p className="font-medium text-slate-900">Join an existing family</p>
+                <p className="mt-0.5 text-sm text-slate-400">
                   Enter the invite code your partner shared with you
                 </p>
               </button>
@@ -161,10 +161,10 @@ export default function OnboardingPage() {
           {/* Step 2a: create */}
           {step === 'create' && (
             <form onSubmit={handleCreate} className="space-y-5">
-              <h2 className="font-semibold text-white/90">Create your family</h2>
+              <h2 className="font-semibold text-slate-800">Create your family</h2>
 
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-white/75">
+                <label className="mb-1.5 block text-xs font-medium text-slate-700">
                   Family name
                 </label>
                 <input
@@ -172,12 +172,12 @@ export default function OnboardingPage() {
                   value={familyName}
                   onChange={(e) => setFamilyName(e.target.value)}
                   placeholder="e.g. The Rogers Family"
-                  className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-white/75">
+                <label className="mb-1.5 block text-xs font-medium text-slate-700">
                   Your name
                 </label>
                 <input
@@ -185,12 +185,12 @@ export default function OnboardingPage() {
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="e.g. Garrett"
-                  className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-white/75">
+                <label className="mb-1.5 block text-xs font-medium text-slate-700">
                   Your color
                 </label>
                 <div className="flex gap-3">
@@ -217,14 +217,14 @@ export default function OnboardingPage() {
                 <button
                   type="button"
                   onClick={() => setStep('choose')}
-                  className="rounded-lg px-4 py-2 text-sm text-white/45 hover:text-white/75"
+                  className="rounded-lg px-4 py-2 text-sm text-slate-400 hover:text-slate-700"
                 >
                   Back
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-white disabled:opacity-50"
+                  className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-slate-900 disabled:opacity-50"
                 >
                   {loading ? 'Creating…' : 'Create family'}
                 </button>
@@ -235,10 +235,10 @@ export default function OnboardingPage() {
           {/* Step 2b: join */}
           {step === 'join' && (
             <form onSubmit={handleJoin} className="space-y-5">
-              <h2 className="font-semibold text-white/90">Join your family</h2>
+              <h2 className="font-semibold text-slate-800">Join your family</h2>
 
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-white/75">
+                <label className="mb-1.5 block text-xs font-medium text-slate-700">
                   Invite code
                 </label>
                 <input
@@ -246,13 +246,13 @@ export default function OnboardingPage() {
                   value={inviteCode}
                   onChange={(e) => setInviteCode(e.target.value)}
                   placeholder="8-character code"
-                  className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm uppercase tracking-widest outline-none focus:border-white/20"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm uppercase tracking-widest outline-none focus:border-slate-300"
                   maxLength={8}
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-white/75">
+                <label className="mb-1.5 block text-xs font-medium text-slate-700">
                   Your name
                 </label>
                 <input
@@ -260,7 +260,7 @@ export default function OnboardingPage() {
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="e.g. Jordan"
-                  className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
                 />
               </div>
 
@@ -272,14 +272,14 @@ export default function OnboardingPage() {
                 <button
                   type="button"
                   onClick={() => setStep('choose')}
-                  className="rounded-lg px-4 py-2 text-sm text-white/45 hover:text-white/75"
+                  className="rounded-lg px-4 py-2 text-sm text-slate-400 hover:text-slate-700"
                 >
                   Back
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-white disabled:opacity-50"
+                  className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-slate-900 disabled:opacity-50"
                 >
                   {loading ? 'Joining…' : 'Join family'}
                 </button>

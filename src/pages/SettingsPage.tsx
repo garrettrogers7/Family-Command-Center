@@ -140,30 +140,30 @@ export default function SettingsPage() {
 
         {/* Profile */}
         <section>
-          <h2 className="mb-4 text-sm font-semibold text-white/75">Your profile</h2>
-          <div className="rounded-xl border border-white/8 bg-white/[0.04] p-6 shadow-sm">
+          <h2 className="mb-4 text-sm font-semibold text-slate-700">Your profile</h2>
+          <div className="rounded-xl border border-slate-200 bg-white/[0.04] p-6 shadow-sm">
             <div className="mb-4 flex items-center gap-3">
               {currentMember && <UserAvatar member={currentMember} />}
               <div>
-                <p className="text-sm font-medium text-white">{currentMember?.display_name}</p>
-                <p className="text-xs text-white/35">{user?.email}</p>
+                <p className="text-sm font-medium text-slate-900">{currentMember?.display_name}</p>
+                <p className="text-xs text-slate-400">{user?.email}</p>
               </div>
             </div>
 
             <form onSubmit={handleProfileSave} className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-white/75">
+                <label className="mb-1.5 block text-xs font-medium text-slate-700">
                   Display name
                 </label>
                 <input
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-white/75">
+                <label className="mb-1.5 block text-xs font-medium text-slate-700">
                   Your color
                 </label>
                 <div className="flex gap-3">
@@ -177,13 +177,13 @@ export default function SettingsPage() {
                         onClick={() => setColor(opt.value)}
                         className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm transition-all ${
                           color === opt.value
-                            ? 'border-gray-900 bg-white/5 font-medium text-white'
-                            : 'border-white/10 text-white/45 hover:border-white/15'
+                            ? 'border-gray-900 bg-slate-50 font-medium text-slate-900'
+                            : 'border-slate-200 text-slate-400 hover:border-slate-200'
                         } ${isTaken ? 'cursor-not-allowed opacity-40' : ''}`}
                       >
                         <span className={`h-3 w-3 rounded-full ${opt.dot}`} />
                         {opt.label}
-                        {isTaken && <span className="text-xs text-white/35">(taken)</span>}
+                        {isTaken && <span className="text-xs text-slate-400">(taken)</span>}
                       </button>
                     )
                   })}
@@ -193,7 +193,7 @@ export default function SettingsPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-slate-900 disabled:opacity-50"
               >
                 {saved ? (
                   <span className="flex items-center gap-1.5">
@@ -207,27 +207,27 @@ export default function SettingsPage() {
 
         {/* Family */}
         <section>
-          <h2 className="mb-4 text-sm font-semibold text-white/75">Family</h2>
-          <div className="rounded-xl border border-white/8 bg-white/[0.04] p-6 shadow-sm space-y-5">
+          <h2 className="mb-4 text-sm font-semibold text-slate-700">Family</h2>
+          <div className="rounded-xl border border-slate-200 bg-white/[0.04] p-6 shadow-sm space-y-5">
             {/* Family name */}
             <div>
-              <p className="text-xs font-medium text-white/45">Family name</p>
-              <p className="mt-0.5 text-sm font-medium text-white">{family?.name}</p>
+              <p className="text-xs font-medium text-slate-400">Family name</p>
+              <p className="mt-0.5 text-sm font-medium text-slate-900">{family?.name}</p>
             </div>
 
             {/* Invite code */}
             <div>
-              <p className="text-xs font-medium text-white/45">Invite code</p>
-              <p className="mt-0.5 mb-2 text-xs text-white/35">
+              <p className="text-xs font-medium text-slate-400">Invite code</p>
+              <p className="mt-0.5 mb-2 text-xs text-slate-400">
                 Share this code with your partner so they can join.
               </p>
               <div className="flex items-center gap-2">
-                <code className="rounded-lg bg-white/5 px-3 py-1.5 text-sm font-mono tracking-widest text-white/90 border border-white/10">
+                <code className="rounded-lg bg-slate-50 px-3 py-1.5 text-sm font-mono tracking-widest text-slate-800 border border-slate-200">
                   {family?.invite_code ?? '—'}
                 </code>
                 <button
                   onClick={copyInviteCode}
-                  className="flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-xs text-white/45 hover:text-white/75 transition-colors"
+                  className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-400 hover:text-slate-700 transition-colors"
                 >
                   {copied ? <Check size={12} /> : <Copy size={12} />}
                   {copied ? 'Copied!' : 'Copy'}
@@ -237,23 +237,23 @@ export default function SettingsPage() {
 
             {/* Members */}
             <div>
-              <p className="text-xs font-medium text-white/45 mb-2">Members</p>
+              <p className="text-xs font-medium text-slate-400 mb-2">Members</p>
               <div className="space-y-2">
                 {[currentMember, otherMember].filter(Boolean).map((member) => (
                   member && (
                     <div key={member.id} className="flex items-center gap-3">
                       <UserAvatar member={member} />
                       <div>
-                        <p className="text-sm text-white/90">{member.display_name}</p>
+                        <p className="text-sm text-slate-800">{member.display_name}</p>
                         {member.user_id === user?.id && (
-                          <p className="text-xs text-white/35">You</p>
+                          <p className="text-xs text-slate-400">You</p>
                         )}
                       </div>
                     </div>
                   )
                 ))}
                 {!otherMember && (
-                  <p className="text-xs text-white/35 italic">
+                  <p className="text-xs text-slate-400 italic">
                     Waiting for your partner to join…
                   </p>
                 )}
@@ -264,16 +264,16 @@ export default function SettingsPage() {
 
         {/* Google Calendar */}
         <section>
-          <h2 className="mb-4 text-sm font-semibold text-white/75">Integrations</h2>
-          <div className="rounded-xl border border-white/8 bg-white/[0.04] p-6 shadow-sm">
+          <h2 className="mb-4 text-sm font-semibold text-slate-700">Integrations</h2>
+          <div className="rounded-xl border border-slate-200 bg-white/[0.04] p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${connected ? 'bg-green-500/10' : 'bg-indigo-500/10'}`}>
+                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${connected ? 'bg-green-500/10' : 'bg-indigo-50'}`}>
                   <Calendar size={20} className={connected ? 'text-green-500' : 'text-blue-500'} />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-white">Google Calendar</p>
-                  <p className="text-xs text-white/35">
+                  <p className="text-sm font-medium text-slate-900">Google Calendar</p>
+                  <p className="text-xs text-slate-400">
                     {connected
                       ? 'Connected — events appear in Today and This Week'
                       : 'Sync your events to Today and This Week'}
@@ -284,7 +284,7 @@ export default function SettingsPage() {
               {connected ? (
                 <button
                   onClick={disconnect}
-                  className="flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-xs text-white/45 hover:border-red-200 hover:text-red-500 transition-colors"
+                  className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-400 hover:border-red-200 hover:text-red-500 transition-colors"
                 >
                   <Unlink size={12} />
                   Disconnect
@@ -293,7 +293,7 @@ export default function SettingsPage() {
                 <button
                   onClick={connect}
                   disabled={connecting}
-                  className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-slate-900 disabled:opacity-50"
                 >
                   {connecting
                     ? <><Loader2 size={12} className="animate-spin" /> Connecting…</>
@@ -312,35 +312,35 @@ export default function SettingsPage() {
 
         {/* Data backup */}
         <section>
-          <h2 className="mb-4 text-sm font-semibold text-white/75">Data backup</h2>
-          <div className="rounded-xl border border-white/8 bg-white/[0.04] p-6 shadow-sm space-y-5">
+          <h2 className="mb-4 text-sm font-semibold text-slate-700">Data backup</h2>
+          <div className="rounded-xl border border-slate-200 bg-white/[0.04] p-6 shadow-sm space-y-5">
 
             {/* Automated backups */}
             <div>
               <div className="flex items-center justify-between mb-1">
-                <p className="text-sm font-medium text-white">Automatic backups</p>
-                <button onClick={loadAutoBackups} className="text-white/20 hover:text-white/45 transition-colors" title="Refresh">
+                <p className="text-sm font-medium text-slate-900">Automatic backups</p>
+                <button onClick={loadAutoBackups} className="text-slate-300 hover:text-slate-400 transition-colors" title="Refresh">
                   <RefreshCw size={13} />
                 </button>
               </div>
-              <p className="mb-3 text-xs text-white/35 leading-relaxed">
+              <p className="mb-3 text-xs text-slate-400 leading-relaxed">
                 Your data is automatically backed up every Sunday. All backups are kept.
               </p>
               {backupsLoading ? (
-                <p className="text-xs text-white/35">Loading backups…</p>
+                <p className="text-xs text-slate-400">Loading backups…</p>
               ) : autoBackups.length === 0 ? (
-                <p className="text-xs text-white/35 italic">No automatic backups yet — the first one will run this Sunday.</p>
+                <p className="text-xs text-slate-400 italic">No automatic backups yet — the first one will run this Sunday.</p>
               ) : (
-                <div className="divide-y divide-gray-50 rounded-lg border border-white/8 overflow-hidden">
+                <div className="divide-y divide-slate-100 rounded-lg border border-slate-200 overflow-hidden">
                   {autoBackups.map((file) => {
                     const dateStr = file.name.replace('.json', '') // YYYY-MM-DD
                     const label = new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
                     return (
-                      <div key={file.name} className="flex items-center justify-between px-3 py-2.5 bg-white/[0.04] hover:bg-white/5 transition-colors">
-                        <span className="text-xs text-white/60">{label}</span>
+                      <div key={file.name} className="flex items-center justify-between px-3 py-2.5 bg-white/[0.04] hover:bg-slate-50 transition-colors">
+                        <span className="text-xs text-slate-500">{label}</span>
                         <button
                           onClick={() => downloadAutoBackup(file.name)}
-                          className="flex items-center gap-1 text-xs text-white/35 hover:text-white/75 transition-colors"
+                          className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-700 transition-colors"
                         >
                           <Download size={12} /> Download
                         </button>
@@ -352,18 +352,18 @@ export default function SettingsPage() {
             </div>
 
             {/* Divider */}
-            <div className="border-t border-white/8" />
+            <div className="border-t border-slate-200" />
 
             {/* Manual download */}
             <div>
-              <p className="mb-1 text-sm font-medium text-white">Download now</p>
-              <p className="mb-3 text-xs text-white/35 leading-relaxed">
+              <p className="mb-1 text-sm font-medium text-slate-900">Download now</p>
+              <p className="mb-3 text-xs text-slate-400 leading-relaxed">
                 Manually download a backup at any time.
               </p>
               <button
                 onClick={downloadBackup}
                 disabled={backingUp}
-                className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-slate-900 disabled:opacity-50 transition-colors"
               >
                 {backingUp ? (
                   <><Loader2 size={14} className="animate-spin" /> Preparing…</>
@@ -381,7 +381,7 @@ export default function SettingsPage() {
         <section>
           <button
             onClick={signOut}
-            className="flex items-center gap-2 rounded-lg border border-white/10 px-4 py-2 text-sm text-white/45 hover:border-red-200 hover:text-red-600 transition-colors"
+            className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-400 hover:border-red-200 hover:text-red-600 transition-colors"
           >
             <LogOut size={14} />
             Sign out

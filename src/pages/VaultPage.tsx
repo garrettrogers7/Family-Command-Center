@@ -65,16 +65,16 @@ function EntryForm({ familyId, userId, entry, onSave, onClose }: EntryFormProps)
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
       <div className="w-full max-w-lg rounded-xl bg-white/[0.04] p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-semibold text-white">{entry ? 'Edit entry' : 'New vault entry'}</h2>
-          <button onClick={onClose} className="text-white/35 hover:text-white/60"><X size={18} /></button>
+          <h2 className="font-semibold text-slate-900">{entry ? 'Edit entry' : 'New vault entry'}</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-500"><X size={18} /></button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-xs font-medium text-white/75">Category</label>
+            <label className="mb-1 block text-xs font-medium text-slate-700">Category</label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
             >
               {PRESET_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               <option value="custom">Custom…</option>
@@ -85,35 +85,35 @@ function EntryForm({ familyId, userId, entry, onSave, onClose }: EntryFormProps)
                 value={customCategory}
                 onChange={(e) => setCustomCategory(e.target.value)}
                 placeholder="Category name"
-                className="mt-2 w-full rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20"
+                className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
               />
             )}
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-white/75">Title</label>
+            <label className="mb-1 block text-xs font-medium text-slate-700">Title</label>
             <input
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Chase checking account"
-              className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-white/75">Content</label>
+            <label className="mb-1 block text-xs font-medium text-slate-700">Content</label>
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={5}
               placeholder="Account numbers, notes, instructions…"
-              className="w-full resize-none rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20 font-mono"
+              className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300 font-mono"
             />
           </div>
           <div className="flex gap-2 pt-1">
-            <button type="button" onClick={onClose} className="flex-1 rounded-lg border border-white/10 py-2 text-sm text-white/45">
+            <button type="button" onClick={onClose} className="flex-1 rounded-lg border border-slate-200 py-2 text-sm text-slate-400">
               Cancel
             </button>
-            <button type="submit" disabled={saving} className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-white disabled:opacity-50">
+            <button type="submit" disabled={saving} className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-slate-900 disabled:opacity-50">
               {saving ? 'Saving…' : 'Save'}
             </button>
           </div>
@@ -171,7 +171,7 @@ export default function VaultPage() {
         action={
           <button
             onClick={() => setAdding(true)}
-            className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white"
+            className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-slate-900"
           >
             <Plus size={14} />
             Add entry
@@ -181,16 +181,16 @@ export default function VaultPage() {
 
       <div className="mx-auto max-w-3xl px-4 py-4 md:px-8 md:py-6">
         {loading ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-20 text-white/35"><div className="h-7 w-7 animate-spin rounded-full border-2 border-white/10 border-t-blue-500" /><p className="text-sm">Loading…</p></div>
+          <div className="flex flex-col items-center justify-center gap-3 py-20 text-slate-400"><div className="h-7 w-7 animate-spin rounded-full border-2 border-slate-200 border-t-blue-500" /><p className="text-sm">Loading…</p></div>
         ) : entries.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-white/10 py-16 text-center">
-            <p className="text-sm text-white/35">Your vault is empty.</p>
-            <p className="mt-1 text-xs text-white/20">
+          <div className="rounded-xl border border-dashed border-slate-200 py-16 text-center">
+            <p className="text-sm text-slate-400">Your vault is empty.</p>
+            <p className="mt-1 text-xs text-slate-300">
               Store account info, insurance details, passwords, and anything else you want to share.
             </p>
             <button
               onClick={() => setAdding(true)}
-              className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white"
+              className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-slate-900"
             >
               Add first entry
             </button>
@@ -200,36 +200,36 @@ export default function VaultPage() {
             {Object.entries(grouped).map(([category, catEntries]) => {
               const isCollapsed = collapsed[category]
               return (
-                <div key={category} className="rounded-lg border border-white/8 bg-white/[0.04] overflow-hidden shadow-sm">
+                <div key={category} className="rounded-lg border border-slate-200 bg-white/[0.04] overflow-hidden shadow-sm">
                   <button
                     onClick={() => toggleCategory(category)}
-                    className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-white/5"
+                    className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-slate-50"
                   >
-                    <span className="text-sm font-semibold text-white/75">{category}</span>
-                    <div className="flex items-center gap-2 text-white/35">
+                    <span className="text-sm font-semibold text-slate-700">{category}</span>
+                    <div className="flex items-center gap-2 text-slate-400">
                       <span className="text-xs">{catEntries.length}</span>
                       {isCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
                     </div>
                   </button>
 
                   {!isCollapsed && (
-                    <div className="divide-y divide-gray-50 border-t border-white/8">
+                    <div className="divide-y divide-slate-100 border-t border-slate-200">
                       {catEntries.map((entry) => {
                         const updater = members.find((m) => m.user_id === entry.updated_by)
                         return (
                           <div key={entry.id} className="px-4 py-3">
                             <div className="flex items-start justify-between gap-3">
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-white/90">{entry.title}</p>
+                                <p className="text-sm font-medium text-slate-800">{entry.title}</p>
                                 {entry.content && (
-                                  <pre className="mt-1 whitespace-pre-wrap font-mono text-xs text-white/45 break-words">
+                                  <pre className="mt-1 whitespace-pre-wrap font-mono text-xs text-slate-400 break-words">
                                     {entry.content}
                                   </pre>
                                 )}
                                 {updater && (
                                   <div className="mt-2 flex items-center gap-1.5">
                                     <UserAvatar member={updater} size="sm" />
-                                    <span className="text-xs text-white/35">
+                                    <span className="text-xs text-slate-400">
                                       {updater.display_name} · {new Date(entry.updated_at).toLocaleDateString()}
                                     </span>
                                   </div>
@@ -238,13 +238,13 @@ export default function VaultPage() {
                               <div className="flex items-center gap-1 flex-shrink-0">
                                 <button
                                   onClick={() => setEditing(entry)}
-                                  className="rounded p-1 text-white/20 hover:text-white/60 transition-colors"
+                                  className="rounded p-1 text-slate-300 hover:text-slate-500 transition-colors"
                                 >
                                   <Pencil size={13} />
                                 </button>
                                 <button
                                   onClick={() => deleteEntry(entry.id)}
-                                  className="rounded p-1 text-white/20 hover:text-red-400 transition-colors"
+                                  className="rounded p-1 text-slate-300 hover:text-red-600 transition-colors"
                                 >
                                   <X size={13} />
                                 </button>

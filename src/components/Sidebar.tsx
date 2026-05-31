@@ -1,12 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import {
-  LayoutDashboard,
-  CalendarDays,
-  Home,
-  Wallet,
-  FolderKanban,
-  Compass,
-  Settings,
+  LayoutDashboard, CalendarDays, Home, Wallet, FolderKanban, Compass, Settings,
 } from 'lucide-react'
 import { useFamily } from '@/contexts/FamilyContext'
 import { UserAvatar } from '@/components/UserAvatar'
@@ -26,22 +20,15 @@ export function Sidebar() {
   return (
     <aside
       className="hidden md:flex h-screen w-56 flex-shrink-0 flex-col px-3 py-6"
-      style={{
-        backgroundColor: 'rgba(6, 4, 18, 0.75)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderRight: '1px solid rgba(255, 255, 255, 0.06)',
-      }}
+      style={{ backgroundColor: '#ffffff', borderRight: '1px solid #e2e8f0' }}
     >
       {/* Wordmark */}
       <div className="mb-6 px-3">
-        <span className="text-base font-bold tracking-tight text-white">
+        <span className="text-base font-bold tracking-tight" style={{ color: '#0f172a' }}>
           Home Base
         </span>
         {family && (
-          <p className="mt-0.5 text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
-            {family.name}
-          </p>
+          <p className="mt-0.5 text-xs" style={{ color: '#94a3b8' }}>{family.name}</p>
         )}
       </div>
 
@@ -51,20 +38,10 @@ export function Sidebar() {
           <NavLink
             key={to}
             to={to}
-            className={({ isActive }) =>
-              `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
-                isActive
-                  ? 'text-white'
-                  : 'hover:text-white/80'
-              }`
-            }
+            className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all"
             style={({ isActive }) => isActive
-              ? {
-                  background: 'linear-gradient(135deg, rgba(99,102,241,0.25) 0%, rgba(124,58,237,0.15) 100%)',
-                  border: '1px solid rgba(99,102,241,0.25)',
-                  color: 'white',
-                }
-              : { color: 'rgba(255,255,255,0.40)' }
+              ? { backgroundColor: '#eef2ff', color: '#4338ca' }
+              : { color: '#64748b' }
             }
           >
             {({ isActive }) => (
@@ -72,7 +49,7 @@ export function Sidebar() {
                 <Icon
                   size={16}
                   strokeWidth={isActive ? 2.25 : 1.75}
-                  style={{ color: isActive ? '#a5b4fc' : 'rgba(255,255,255,0.40)' }}
+                  color={isActive ? '#4338ca' : '#94a3b8'}
                 />
                 <span className={isActive ? 'font-semibold' : ''}>{label}</span>
               </>
@@ -82,42 +59,28 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom: members + settings */}
-      <div className="space-y-1 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        {/* Who's here */}
+      <div className="space-y-1 pt-4" style={{ borderTop: '1px solid #e2e8f0' }}>
         {currentMember && (
           <div className="flex items-center gap-2 px-3 py-2 mb-1">
             <UserAvatar member={currentMember} size="sm" />
             {otherMember && <UserAvatar member={otherMember} size="sm" />}
-            <span className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            <span className="text-xs truncate" style={{ color: '#94a3b8' }}>
               {currentMember.display_name.split(' ')[0]}
               {otherMember ? ` & ${otherMember.display_name.split(' ')[0]}` : ''}
             </span>
           </div>
         )}
-
         <NavLink
           to="/settings"
-          className={({ isActive }) =>
-            `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
-              isActive ? 'text-white' : 'hover:text-white/80'
-            }`
-          }
+          className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all"
           style={({ isActive }) => isActive
-            ? {
-                background: 'linear-gradient(135deg, rgba(99,102,241,0.25) 0%, rgba(124,58,237,0.15) 100%)',
-                border: '1px solid rgba(99,102,241,0.25)',
-                color: 'white',
-              }
-            : { color: 'rgba(255,255,255,0.40)' }
+            ? { backgroundColor: '#eef2ff', color: '#4338ca' }
+            : { color: '#64748b' }
           }
         >
           {({ isActive }) => (
             <>
-              <Settings
-                size={16}
-                strokeWidth={isActive ? 2.25 : 1.75}
-                style={{ color: isActive ? '#a5b4fc' : 'rgba(255,255,255,0.40)' }}
-              />
+              <Settings size={16} strokeWidth={isActive ? 2.25 : 1.75} color={isActive ? '#4338ca' : '#94a3b8'} />
               <span className={isActive ? 'font-semibold' : ''}>Settings</span>
             </>
           )}

@@ -36,7 +36,7 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white/5 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="mb-8 text-center">
@@ -45,21 +45,21 @@ export default function AuthPage() {
               <path d="M16 5L4 14h3v12h7v-7h4v7h7V14h3L16 5z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-semibold text-white">Home Base</h1>
-          <p className="mt-1 text-sm text-white/45">Your family command center</p>
+          <h1 className="text-2xl font-semibold text-slate-900">Home Base</h1>
+          <p className="mt-1 text-sm text-slate-400">Your family command center</p>
         </div>
 
-        <div className="rounded-xl border border-white/10 bg-white/[0.04] p-8 shadow-sm">
+        <div className="rounded-xl border border-slate-200 bg-white/[0.04] p-8 shadow-sm">
           {/* Mode toggle */}
-          <div className="mb-6 flex rounded-lg bg-white/8 p-1">
+          <div className="mb-6 flex rounded-lg bg-slate-100 p-1">
             {(['signin', 'signup'] as const).map((m) => (
               <button
                 key={m}
                 onClick={() => { setMode(m); setError(null) }}
                 className={`flex-1 rounded-md py-1.5 text-sm font-medium transition-colors ${
                   mode === m
-                    ? 'bg-white/[0.04] text-white shadow-sm'
-                    : 'text-white/45 hover:text-white/75'
+                    ? 'bg-white/[0.04] text-slate-900 shadow-sm'
+                    : 'text-slate-400 hover:text-slate-700'
                 }`}
               >
                 {m === 'signin' ? 'Sign in' : 'Sign up'}
@@ -69,7 +69,7 @@ export default function AuthPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-white/75">
+              <label className="mb-1.5 block text-xs font-medium text-slate-700">
                 Email
               </label>
               <input
@@ -78,12 +78,12 @@ export default function AuthPage() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20 focus:ring-2 focus:ring-gray-100"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300 focus:ring-2 focus:ring-gray-100"
                 placeholder="you@example.com"
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-white/75">
+              <label className="mb-1.5 block text-xs font-medium text-slate-700">
                 Password
               </label>
               <input
@@ -92,7 +92,7 @@ export default function AuthPage() {
                 autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20 focus:ring-2 focus:ring-gray-100"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300 focus:ring-2 focus:ring-gray-100"
                 placeholder="••••••••"
               />
             </div>
@@ -106,7 +106,7 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-medium text-slate-900 transition-opacity hover:opacity-90 disabled:opacity-50"
             >
               {loading
                 ? 'Please wait…'

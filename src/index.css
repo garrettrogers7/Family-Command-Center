@@ -14,139 +14,145 @@
   }
 
   body {
-    background-color: #060412;
-    @apply font-sans text-white;
+    background-color: #f6f9fc;
+    color: #1a1a2e;
+    @apply font-sans;
   }
 
   h1, h2, h3 {
     letter-spacing: -0.02em;
+    color: #0f172a;
   }
 }
 
 /* ── Design-system component shortcuts ─────────────────────────── */
 @layer components {
 
-  /* Cards — glassmorphism */
+  /* Cards */
   .card {
-    background-color: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-radius: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    background-color: #ffffff;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 8px rgba(0, 0, 0, 0.04);
   }
   .card-lg {
-    background-color: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-radius: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    background-color: #ffffff;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
   }
 
   /* Buttons — primary (indigo) */
   .btn {
-    @apply inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed;
-    background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
-    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.4), 0 0 0 1px rgba(99, 102, 241, 0.3);
+    @apply inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed;
+    background-color: #6366f1;
+    box-shadow: 0 1px 2px rgba(99, 102, 241, 0.3);
   }
   .btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, #818cf8 0%, #8b5cf6 100%);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4), 0 0 0 1px rgba(99, 102, 241, 0.4);
+    background-color: #4f46e5;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
     transform: translateY(-1px);
   }
   .btn-sm {
-    @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed;
-    background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
-    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.4);
+    @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed;
+    background-color: #6366f1;
+    box-shadow: 0 1px 2px rgba(99, 102, 241, 0.3);
   }
   .btn-sm:hover:not(:disabled) {
-    background: linear-gradient(135deg, #818cf8 0%, #8b5cf6 100%);
+    background-color: #4f46e5;
     transform: translateY(-1px);
   }
 
   /* Buttons — ghost */
   .btn-ghost {
     @apply inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-40;
-    color: rgba(255, 255, 255, 0.5);
+    color: #64748b;
   }
   .btn-ghost:hover {
-    background-color: rgba(255, 255, 255, 0.07);
-    color: rgba(255, 255, 255, 0.85);
+    background-color: #f1f5f9;
+    color: #1e293b;
   }
   .btn-ghost-sm {
     @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40;
-    color: rgba(255, 255, 255, 0.5);
+    color: #64748b;
   }
   .btn-ghost-sm:hover {
-    background-color: rgba(255, 255, 255, 0.07);
-    color: rgba(255, 255, 255, 0.85);
+    background-color: #f1f5f9;
+    color: #1e293b;
   }
 
   /* Buttons — outlined */
   .btn-outline {
     @apply inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-40;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: rgba(255, 255, 255, 0.65);
-    background: transparent;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    background: white;
   }
   .btn-outline:hover {
-    background-color: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.22);
-    color: rgba(255, 255, 255, 0.9);
+    background-color: #f8fafc;
+    border-color: #94a3b8;
+    color: #1e293b;
   }
   .btn-outline-sm {
     @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: rgba(255, 255, 255, 0.65);
-    background: transparent;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    background: white;
   }
   .btn-outline-sm:hover {
-    background-color: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.22);
-    color: rgba(255, 255, 255, 0.9);
+    background-color: #f8fafc;
+    border-color: #94a3b8;
+    color: #1e293b;
   }
 
-  /* Buttons — danger ghost */
+  /* Buttons — danger */
   .btn-danger {
-    @apply inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10 disabled:opacity-40;
+    @apply inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-40;
+    color: #dc2626;
+  }
+  .btn-danger:hover {
+    background-color: #fef2f2;
   }
   .btn-danger-sm {
-    @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/10 disabled:opacity-40;
+    @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40;
+    color: #dc2626;
+  }
+  .btn-danger-sm:hover {
+    background-color: #fef2f2;
   }
 
   /* Form inputs */
   .input {
-    @apply w-full rounded-lg px-3 py-2.5 text-sm text-white transition-colors focus:outline-none;
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    @apply w-full rounded-lg px-3 py-2.5 text-sm transition-colors focus:outline-none;
+    color: #0f172a;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
   }
-  .input::placeholder { color: rgba(255, 255, 255, 0.25); }
+  .input::placeholder { color: #94a3b8; }
   .input:focus {
-    border-color: rgba(99, 102, 241, 0.7);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
-    background-color: rgba(255, 255, 255, 0.07);
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
   }
   .input-sm {
-    @apply w-full rounded-lg px-3 py-2 text-sm text-white transition-colors focus:outline-none;
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    @apply w-full rounded-lg px-3 py-2 text-sm transition-colors focus:outline-none;
+    color: #0f172a;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
   }
-  .input-sm::placeholder { color: rgba(255, 255, 255, 0.25); }
+  .input-sm::placeholder { color: #94a3b8; }
   .input-sm:focus {
-    border-color: rgba(99, 102, 241, 0.7);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
-    background-color: rgba(255, 255, 255, 0.07);
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
   }
   select.input, select.input-sm {
     @apply cursor-pointer;
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   /* Section label */
   .label {
     @apply text-xs font-semibold uppercase tracking-wider;
-    color: rgba(255, 255, 255, 0.35);
+    color: #94a3b8;
   }
 
   /* Badge */
@@ -158,16 +164,16 @@
 /* ── Scrollbar (WebKit) ─────────────────────────────────────────── */
 ::-webkit-scrollbar        { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track  { background: transparent; }
-::-webkit-scrollbar-thumb  { background: rgba(255,255,255,0.08); border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.16); }
+::-webkit-scrollbar-thumb  { background: #cbd5e1; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
 /* ── Coral color utilities ──────────────────────────────────────── */
 @layer utilities {
-  .bg-coral-50  { background-color: rgba(249, 87, 56, 0.10); }
-  .bg-coral-100 { background-color: rgba(249, 87, 56, 0.15); }
+  .bg-coral-50  { background-color: rgba(249, 87, 56, 0.08); }
+  .bg-coral-100 { background-color: rgba(249, 87, 56, 0.12); }
   .bg-coral-400 { background-color: #ff7a61; }
   .bg-coral-500 { background-color: #f95738; }
-  .text-coral-400 { color: #ff7a61; }
-  .text-coral-600 { color: #f95738; }
+  .text-coral-400 { color: #f95738; }
+  .text-coral-600 { color: #dc4020; }
   .border-coral-100 { border-color: rgba(249, 87, 56, 0.20); }
 }

@@ -13,7 +13,7 @@ type View = 'log' | 'history' | 'equipment'
 
 const CATEGORIES: { key: Category; Icon: typeof Home; color: string }[] = [
   { key: 'Home', Icon: Home, color: 'text-blue-500' },
-  { key: 'Car',  Icon: Car,  color: 'text-white/45' },
+  { key: 'Car',  Icon: Car,  color: 'text-slate-400' },
   { key: 'Yard', Icon: Leaf, color: 'text-green-500' },
 ]
 
@@ -82,7 +82,7 @@ function calcNextDue(item: MaintenanceItem): Date | null {
 
 function DueBadge({ item }: { item: MaintenanceItem }) {
   const due = calcNextDue(item)
-  if (!due) return <span className="text-xs text-white/20">No date set</span>
+  if (!due) return <span className="text-xs text-slate-300">No date set</span>
   const days = differenceInDays(due, new Date())
   if (days < 0)
     return <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-600">{item.frequency === 'Once' ? 'Overdue' : `Overdue ${Math.abs(days)}d`}</span>
@@ -90,7 +90,7 @@ function DueBadge({ item }: { item: MaintenanceItem }) {
     return <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-600">Due today</span>
   if (days <= 30)
     return <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-600">Due in {days}d</span>
-  return <span className="rounded-full bg-white/8 px-2.5 py-0.5 text-xs text-white/45">Due {format(due, 'MMM d, yyyy')}</span>
+  return <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs text-slate-400">Due {format(due, 'MMM d, yyyy')}</span>
 }
 
 // ── Item form ─────────────────────────────────────────────────────
@@ -152,33 +152,33 @@ function ItemForm({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
       <div className="w-full max-w-md rounded-xl bg-white/[0.04] p-6 shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-semibold text-white">{initial ? 'Edit item' : 'Add maintenance item'}</h2>
-          <button onClick={onClose} className="text-white/35 hover:text-white/60"><X size={18} /></button>
+          <h2 className="font-semibold text-slate-900">{initial ? 'Edit item' : 'Add maintenance item'}</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-500"><X size={18} /></button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="mb-1 block text-xs font-medium text-white/60">Task name</label>
+            <label className="mb-1 block text-xs font-medium text-slate-500">Task name</label>
             <input required autoFocus value={task} onChange={(e) => setTask(e.target.value)}
-              className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
               placeholder="e.g. Oil Change" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-xs font-medium text-white/60">Category</label>
+              <label className="mb-1 block text-xs font-medium text-slate-500">Category</label>
               <select value={category} onChange={(e) => setCategory(e.target.value as Category)}
-                className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20">
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300">
                 <option>Home</option><option>Car</option><option>Yard</option>
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-white/60">Frequency</label>
+              <label className="mb-1 block text-xs font-medium text-slate-500">Frequency</label>
               <div className="flex gap-1.5">
                 <button type="button" onClick={() => setFreqType('repeating')}
-                  className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition-colors ${freqType === 'repeating' ? 'border-indigo-500 bg-indigo-500 text-white' : 'border-white/10 text-white/45 hover:bg-white/5'}`}>
+                  className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition-colors ${freqType === 'repeating' ? 'border-indigo-600 bg-indigo-600 text-slate-900' : 'border-slate-200 text-slate-400 hover:bg-slate-50'}`}>
                   Repeating
                 </button>
                 <button type="button" onClick={() => setFreqType('once')}
-                  className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition-colors ${freqType === 'once' ? 'border-indigo-500 bg-indigo-500 text-white' : 'border-white/10 text-white/45 hover:bg-white/5'}`}>
+                  className={`flex-1 rounded-lg border py-1.5 text-xs font-medium transition-colors ${freqType === 'once' ? 'border-indigo-600 bg-indigo-600 text-slate-900' : 'border-slate-200 text-slate-400 hover:bg-slate-50'}`}>
                   One-time
                 </button>
               </div>
@@ -186,12 +186,12 @@ function ItemForm({
           </div>
           {freqType === 'repeating' && (
             <div>
-              <label className="mb-1 block text-xs font-medium text-white/60">Repeat every</label>
+              <label className="mb-1 block text-xs font-medium text-slate-500">Repeat every</label>
               <div className="flex items-center gap-2">
                 <input type="number" min="1" max="99" value={freqCount} onChange={(e) => setFreqCount(e.target.value)}
-                  className="w-20 rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20 text-center" />
+                  className="w-20 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300 text-center" />
                 <select value={freqUnit} onChange={(e) => setFreqUnit(e.target.value as FreqUnit)}
-                  className="flex-1 rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20">
+                  className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300">
                   <option value="Days">Days</option>
                   <option value="Weeks">Weeks</option>
                   <option value="Months">Months</option>
@@ -201,49 +201,49 @@ function ItemForm({
             </div>
           )}
           <div>
-            <label className="mb-1 block text-xs font-medium text-white/60">Equipment (optional)</label>
+            <label className="mb-1 block text-xs font-medium text-slate-500">Equipment (optional)</label>
             <select value={equipmentId} onChange={(e) => setEquipmentId(e.target.value)}
-              className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20">
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300">
               <option value="">— None —</option>
               {equipment.map(eq => <option key={eq.id} value={eq.id}>{eq.name}</option>)}
             </select>
             {equipment.length === 0 && (
-              <p className="mt-1 text-xs text-white/35">Add equipment in the Equipment tab first.</p>
+              <p className="mt-1 text-xs text-slate-400">Add equipment in the Equipment tab first.</p>
             )}
           </div>
           {freqType === 'once' ? (
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 block text-xs font-medium text-white/60">Due date</label>
+                <label className="mb-1 block text-xs font-medium text-slate-500">Due date</label>
                 <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20" />
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300" />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-white/60">Cost ($)</label>
+                <label className="mb-1 block text-xs font-medium text-slate-500">Cost ($)</label>
                 <input type="number" min="0" step="0.01" value={cost} onChange={(e) => setCost(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
                   placeholder="Optional" />
               </div>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 block text-xs font-medium text-white/60">Last done</label>
+                <label className="mb-1 block text-xs font-medium text-slate-500">Last done</label>
                 <input type="date" value={lastDone} onChange={(e) => setLastDone(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20" />
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300" />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-white/60">Cost ($)</label>
+                <label className="mb-1 block text-xs font-medium text-slate-500">Cost ($)</label>
                 <input type="number" min="0" step="0.01" value={cost} onChange={(e) => setCost(e.target.value)}
-                  className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
                   placeholder="Optional" />
               </div>
             </div>
           )}
           <div>
-            <label className="mb-1 block text-xs font-medium text-white/60">Notes</label>
+            <label className="mb-1 block text-xs font-medium text-slate-500">Notes</label>
             <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3}
-              className="w-full resize-none rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20"
+              className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
               placeholder="Instructions, product links, reminders…" />
           </div>
           {saveError && (
@@ -253,9 +253,9 @@ function ItemForm({
           )}
           <div className="flex gap-2 pt-1">
             <button type="button" onClick={onClose}
-              className="flex-1 rounded-lg border border-white/10 py-2 text-sm text-white/45 hover:bg-white/5">Cancel</button>
+              className="flex-1 rounded-lg border border-slate-200 py-2 text-sm text-slate-400 hover:bg-slate-50">Cancel</button>
             <button type="submit" disabled={saving}
-              className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-white disabled:opacity-50">
+              className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-slate-900 disabled:opacity-50">
               {saving ? 'Saving…' : 'Save'}
             </button>
           </div>
@@ -310,12 +310,12 @@ function MaintenanceRow({
   const isDueSoon = daysUntil !== null && daysUntil >= 0 && daysUntil <= 30
 
   return (
-    <div className={`rounded-lg border bg-white/[0.04] transition-colors ${isOverdue ? 'border-red-200' : isDueSoon ? 'border-amber-200' : 'border-white/8'}`}>
+    <div className={`rounded-lg border bg-white/[0.04] transition-colors ${isOverdue ? 'border-red-200' : isDueSoon ? 'border-amber-200' : 'border-slate-200'}`}>
       <div className="flex items-center gap-3 px-4 py-3">
         {/* Mark done */}
         <button onClick={markDone} disabled={markingDone} title="Mark as done today"
           className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-            isOverdue ? 'border-red-300 hover:bg-red-500/10' : isDueSoon ? 'border-amber-300 hover:bg-amber-500/10' : 'border-white/15 hover:bg-white/5'
+            isOverdue ? 'border-red-300 hover:bg-red-50' : isDueSoon ? 'border-amber-300 hover:bg-amber-50' : 'border-slate-200 hover:bg-slate-50'
           }`}>
           {markingDone && <span className="h-2 w-2 rounded-full bg-gray-300" />}
         </button>
@@ -323,22 +323,22 @@ function MaintenanceRow({
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-medium text-white">{item.task}</span>
+            <span className="text-sm font-medium text-slate-900">{item.task}</span>
             {eq && (
-              <span className="rounded-full bg-indigo-500/10 px-2 py-0.5 text-xs text-indigo-500 font-medium">{eq.name}</span>
+              <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-500 font-medium">{eq.name}</span>
             )}
-            <span className="rounded-full bg-white/8 px-2 py-0.5 text-xs text-white/35">{item.frequency}</span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-400">{item.frequency}</span>
             <DueBadge item={item} />
           </div>
           {item.frequency === 'Once' ? (
             item.due_date && (
-              <p className="mt-0.5 text-xs text-white/35">
+              <p className="mt-0.5 text-xs text-slate-400">
                 One-time reminder{item.cost ? ` · $${item.cost}` : ''}
               </p>
             )
           ) : (
             item.last_done && (
-              <p className="mt-0.5 text-xs text-white/35">
+              <p className="mt-0.5 text-xs text-slate-400">
                 Last done {format(parseISO(item.last_done), 'MMM d, yyyy')}{item.cost ? ` · $${item.cost}` : ''}
               </p>
             )
@@ -347,19 +347,19 @@ function MaintenanceRow({
 
         {/* Actions */}
         <div className="flex items-center gap-1 flex-shrink-0">
-          <button onClick={() => onEdit(item)} title="Edit" className="rounded p-1 text-white/20 hover:text-white/45 transition-colors"><Pencil size={13} /></button>
-          <button onClick={() => onDuplicate(item)} title="Duplicate" className="rounded p-1 text-white/20 hover:text-white/45 transition-colors"><Copy size={13} /></button>
+          <button onClick={() => onEdit(item)} title="Edit" className="rounded p-1 text-slate-300 hover:text-slate-400 transition-colors"><Pencil size={13} /></button>
+          <button onClick={() => onDuplicate(item)} title="Duplicate" className="rounded p-1 text-slate-300 hover:text-slate-400 transition-colors"><Copy size={13} /></button>
           {confirmDelete ? (
             <span className="flex items-center gap-1.5 ml-1">
-              <span className="text-xs text-white/45">Delete?</span>
-              <button onClick={() => onDelete(item.id)} className="text-xs font-medium text-red-500 hover:text-red-400">Yes</button>
-              <button onClick={() => setConfirmDelete(false)} className="text-xs text-white/35 hover:text-white/60">Cancel</button>
+              <span className="text-xs text-slate-400">Delete?</span>
+              <button onClick={() => onDelete(item.id)} className="text-xs font-medium text-red-500 hover:text-red-600">Yes</button>
+              <button onClick={() => setConfirmDelete(false)} className="text-xs text-slate-400 hover:text-slate-500">Cancel</button>
             </span>
           ) : (
-            <button onClick={() => setConfirmDelete(true)} title="Delete" className="rounded p-1 text-white/20 hover:text-red-400 transition-colors"><X size={13} /></button>
+            <button onClick={() => setConfirmDelete(true)} title="Delete" className="rounded p-1 text-slate-300 hover:text-red-600 transition-colors"><X size={13} /></button>
           )}
           {item.notes && (
-            <button onClick={() => setExpanded(!expanded)} className="rounded p-1 text-white/20 hover:text-white/45 transition-colors">
+            <button onClick={() => setExpanded(!expanded)} className="rounded p-1 text-slate-300 hover:text-slate-400 transition-colors">
               {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             </button>
           )}
@@ -368,7 +368,7 @@ function MaintenanceRow({
 
       {expanded && item.notes && (
         <div className="border-t border-gray-50 px-4 pb-3 pt-2">
-          <p className="whitespace-pre-wrap text-xs text-white/45 leading-relaxed">{item.notes}</p>
+          <p className="whitespace-pre-wrap text-xs text-slate-400 leading-relaxed">{item.notes}</p>
         </div>
       )}
     </div>
@@ -401,7 +401,7 @@ function HistoryEntryRow({ entry, familyId, equipment, items, onUpdate }: { entr
 
   const catDef = CATEGORIES.find(c => c.key === entry.category)
   const Icon = catDef?.Icon ?? Home
-  const color = catDef?.color ?? 'text-white/35'
+  const color = catDef?.color ?? 'text-slate-400'
   const receipts: string[] = entry.receipt_urls ?? []
 
   // Extract the bare storage path from either a full URL or a stored path
@@ -504,34 +504,34 @@ function HistoryEntryRow({ entry, familyId, equipment, items, onUpdate }: { entr
   }
 
   return (
-    <div className="rounded-lg border border-white/8 bg-white/[0.04]">
+    <div className="rounded-lg border border-slate-200 bg-white/[0.04]">
       <div className="flex items-center gap-3 px-4 py-3">
         <Icon size={13} className={`flex-shrink-0 ${color}`} />
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-sm font-medium text-white/90">{entry.task}</p>
+            <p className="text-sm font-medium text-slate-800">{entry.task}</p>
             {eq && (
-              <span className="rounded-full bg-indigo-500/10 px-2 py-0.5 text-xs text-indigo-500 font-medium">{eq.name}</span>
+              <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-500 font-medium">{eq.name}</span>
             )}
           </div>
-          <p className="text-xs text-white/35">
+          <p className="text-xs text-slate-400">
             {entry.category}{entry.cost != null ? ` · $${entry.cost}` : ''}
             {receipts.length > 0 && <span className="ml-2 inline-flex items-center gap-0.5"><Paperclip size={10} />{receipts.length}</span>}
           </p>
         </div>
-        <span className="flex-shrink-0 text-xs text-white/35">{format(parseISO(entry.completed_on), 'MMM d')}</span>
+        <span className="flex-shrink-0 text-xs text-slate-400">{format(parseISO(entry.completed_on), 'MMM d')}</span>
         <div className="flex items-center gap-1 flex-shrink-0">
-          <button onClick={() => { setEditing(!editing); setExpanded(true) }} className="rounded p-1 text-white/20 hover:text-white/45 transition-colors"><Pencil size={13} /></button>
+          <button onClick={() => { setEditing(!editing); setExpanded(true) }} className="rounded p-1 text-slate-300 hover:text-slate-400 transition-colors"><Pencil size={13} /></button>
           {confirmDelete ? (
             <span className="flex items-center gap-1.5 ml-1">
-              <span className="text-xs text-white/45">Delete?</span>
-              <button onClick={deleteEntry} className="text-xs font-medium text-red-500 hover:text-red-400">Yes</button>
-              <button onClick={() => setConfirmDelete(false)} className="text-xs text-white/35 hover:text-white/60">Cancel</button>
+              <span className="text-xs text-slate-400">Delete?</span>
+              <button onClick={deleteEntry} className="text-xs font-medium text-red-500 hover:text-red-600">Yes</button>
+              <button onClick={() => setConfirmDelete(false)} className="text-xs text-slate-400 hover:text-slate-500">Cancel</button>
             </span>
           ) : (
-            <button onClick={() => setConfirmDelete(true)} className="rounded p-1 text-white/20 hover:text-red-400 transition-colors"><X size={13} /></button>
+            <button onClick={() => setConfirmDelete(true)} className="rounded p-1 text-slate-300 hover:text-red-600 transition-colors"><X size={13} /></button>
           )}
-          <button onClick={() => setExpanded(!expanded)} className="rounded p-1 text-white/20 hover:text-white/45 transition-colors">
+          <button onClick={() => setExpanded(!expanded)} className="rounded p-1 text-slate-300 hover:text-slate-400 transition-colors">
             {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
         </div>
@@ -544,41 +544,41 @@ function HistoryEntryRow({ entry, familyId, equipment, items, onUpdate }: { entr
             <div className="space-y-2">
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-white/45">Date completed</label>
+                  <label className="mb-1 block text-xs font-medium text-slate-400">Date completed</label>
                   <input type="date" value={editCompletedOn} onChange={(e) => setEditCompletedOn(e.target.value)}
-                    className="w-full rounded-lg border border-white/10 p-2 text-xs outline-none focus:border-white/20" />
+                    className="w-full rounded-lg border border-slate-200 p-2 text-xs outline-none focus:border-slate-300" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-white/45">Cost ($)</label>
+                  <label className="mb-1 block text-xs font-medium text-slate-400">Cost ($)</label>
                   <input type="number" min="0" step="0.01" value={editCost} onChange={(e) => setEditCost(e.target.value)}
-                    className="w-full rounded-lg border border-white/10 p-2 text-xs outline-none focus:border-white/20" placeholder="0.00" />
+                    className="w-full rounded-lg border border-slate-200 p-2 text-xs outline-none focus:border-slate-300" placeholder="0.00" />
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-white/45">Notes</label>
+                <label className="mb-1 block text-xs font-medium text-slate-400">Notes</label>
                 <textarea autoFocus value={editNotes} onChange={(e) => setEditNotes(e.target.value)} rows={3}
-                  className="w-full resize-none rounded border border-white/10 p-2 text-xs outline-none focus:border-white/20"
+                  className="w-full resize-none rounded border border-slate-200 p-2 text-xs outline-none focus:border-slate-300"
                   placeholder="Add notes about this service…" />
               </div>
               {saveError && (
                 <p className="text-xs text-red-500">Save failed: {saveError}</p>
               )}
               <div className="flex gap-2">
-                <button onClick={saveEdits} disabled={saving} className="text-xs font-medium text-white/75 hover:underline disabled:opacity-50">
+                <button onClick={saveEdits} disabled={saving} className="text-xs font-medium text-slate-700 hover:underline disabled:opacity-50">
                   {saving ? 'Saving…' : 'Save'}
                 </button>
-                <button onClick={() => { setEditing(false); setSaveError(null) }} className="text-xs text-white/35 hover:underline">Cancel</button>
+                <button onClick={() => { setEditing(false); setSaveError(null) }} className="text-xs text-slate-400 hover:underline">Cancel</button>
               </div>
             </div>
           ) : (
             entry.notes
-              ? <p className="whitespace-pre-wrap text-xs text-white/45 leading-relaxed">{entry.notes}</p>
-              : <p className="text-xs text-white/20 italic">No notes — click the pencil to add some.</p>
+              ? <p className="whitespace-pre-wrap text-xs text-slate-400 leading-relaxed">{entry.notes}</p>
+              : <p className="text-xs text-slate-300 italic">No notes — click the pencil to add some.</p>
           )}
 
           {/* Receipts section */}
           <div>
-            <p className="mb-2 text-xs font-medium text-white/45">Receipts</p>
+            <p className="mb-2 text-xs font-medium text-slate-400">Receipts</p>
             {receipts.length > 0 && (
               <div className="mb-2 space-y-1">
                 {receipts.map((url) => {
@@ -587,11 +587,11 @@ function HistoryEntryRow({ entry, familyId, equipment, items, onUpdate }: { entr
                   return (
                     <div key={url} className="flex items-center gap-2">
                       <a href={href} target="_blank" rel="noopener noreferrer"
-                        className="flex flex-1 min-w-0 items-center gap-1.5 rounded bg-white/5 px-2 py-1.5 text-xs text-indigo-500 hover:bg-white/8 transition-colors">
+                        className="flex flex-1 min-w-0 items-center gap-1.5 rounded bg-slate-50 px-2 py-1.5 text-xs text-indigo-500 hover:bg-slate-100 transition-colors">
                         <Paperclip size={11} className="flex-shrink-0" />
                         <span className="truncate">{fileName}</span>
                       </a>
-                      <button onClick={() => deleteReceipt(url)} className="text-white/20 hover:text-red-400 transition-colors">
+                      <button onClick={() => deleteReceipt(url)} className="text-slate-300 hover:text-red-600 transition-colors">
                         <Trash2 size={12} />
                       </button>
                     </div>
@@ -602,7 +602,7 @@ function HistoryEntryRow({ entry, familyId, equipment, items, onUpdate }: { entr
             <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileUpload}
               accept="image/*,.pdf,.jpg,.jpeg,.png,.heic" />
             <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
-              className="flex items-center gap-1.5 text-xs text-white/35 hover:text-white/60 transition-colors disabled:opacity-50">
+              className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-500 transition-colors disabled:opacity-50">
               <Paperclip size={12} />
               {uploading ? 'Uploading…' : 'Attach receipt'}
             </button>
@@ -652,46 +652,46 @@ function EquipmentRow({ eq, items, history, onUpdate }: {
 
   if (editing) {
     return (
-      <form onSubmit={save} className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3 space-y-2">
+      <form onSubmit={save} className="rounded-lg border border-slate-200 bg-white/[0.04] px-4 py-3 space-y-2">
         <input required autoFocus value={name} onChange={e => setName(e.target.value)}
-          className="w-full rounded-lg border border-white/10 px-2 py-1.5 text-sm outline-none focus:border-white/20"
+          className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm outline-none focus:border-slate-300"
           placeholder="Name" />
         <div className="grid grid-cols-2 gap-2">
           <select value={category} onChange={e => setCategory(e.target.value as Category | '')}
-            className="rounded-lg border border-white/10 px-2 py-1.5 text-sm outline-none focus:border-white/20">
+            className="rounded-lg border border-slate-200 px-2 py-1.5 text-sm outline-none focus:border-slate-300">
             <option value="">— No category —</option>
             <option>Home</option><option>Car</option><option>Yard</option>
           </select>
           <input value={notes} onChange={e => setNotes(e.target.value)}
-            className="rounded-lg border border-white/10 px-2 py-1.5 text-sm outline-none focus:border-white/20"
+            className="rounded-lg border border-slate-200 px-2 py-1.5 text-sm outline-none focus:border-slate-300"
             placeholder="Notes (VIN, serial #…)" />
         </div>
         <div className="flex gap-2">
-          <button type="submit" disabled={saving} className="text-xs font-medium text-white/75 hover:underline disabled:opacity-50">
+          <button type="submit" disabled={saving} className="text-xs font-medium text-slate-700 hover:underline disabled:opacity-50">
             {saving ? 'Saving…' : 'Save'}
           </button>
           <button type="button" onClick={() => { setEditing(false); setName(eq.name); setCategory(eq.category ?? ''); setNotes(eq.notes ?? '') }}
-            className="text-xs text-white/35 hover:underline">Cancel</button>
+            className="text-xs text-slate-400 hover:underline">Cancel</button>
         </div>
       </form>
     )
   }
 
   return (
-    <div className="rounded-lg border border-white/8 bg-white/[0.04]">
+    <div className="rounded-lg border border-slate-200 bg-white/[0.04]">
       {/* Header row */}
       <div className="flex items-start gap-3 px-4 py-3">
         <button onClick={() => setExpanded(e => !e)} className="flex-1 min-w-0 text-left">
-          <p className="text-sm font-medium text-white/90">{eq.name}</p>
-          {eq.notes && <p className="mt-0.5 text-xs text-white/35">{eq.notes}</p>}
-          <p className="mt-0.5 text-xs text-white/20">
+          <p className="text-sm font-medium text-slate-800">{eq.name}</p>
+          {eq.notes && <p className="mt-0.5 text-xs text-slate-400">{eq.notes}</p>}
+          <p className="mt-0.5 text-xs text-slate-300">
             {eqItems.length} task{eqItems.length !== 1 ? 's' : ''} · {eqHistory.length} service record{eqHistory.length !== 1 ? 's' : ''}
           </p>
         </button>
         <div className="flex items-center gap-1 flex-shrink-0">
-          <button onClick={() => setEditing(true)} className="rounded p-1 text-white/20 hover:text-white/45 transition-colors"><Pencil size={13} /></button>
-          <button onClick={remove} className="rounded p-1 text-white/20 hover:text-red-400 transition-colors"><X size={14} /></button>
-          <button onClick={() => setExpanded(e => !e)} className="rounded p-1 text-white/20 hover:text-white/45 transition-colors">
+          <button onClick={() => setEditing(true)} className="rounded p-1 text-slate-300 hover:text-slate-400 transition-colors"><Pencil size={13} /></button>
+          <button onClick={remove} className="rounded p-1 text-slate-300 hover:text-red-600 transition-colors"><X size={14} /></button>
+          <button onClick={() => setExpanded(e => !e)} className="rounded p-1 text-slate-300 hover:text-slate-400 transition-colors">
             {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
         </div>
@@ -703,9 +703,9 @@ function EquipmentRow({ eq, items, history, onUpdate }: {
 
           {/* Upcoming maintenance */}
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-white/35">Upcoming maintenance</p>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Upcoming maintenance</p>
             {eqItems.length === 0 ? (
-              <p className="text-xs text-white/20 italic">No tasks linked to this equipment.</p>
+              <p className="text-xs text-slate-300 italic">No tasks linked to this equipment.</p>
             ) : (
               <div className="space-y-1.5">
                 {eqItems
@@ -722,11 +722,11 @@ function EquipmentRow({ eq, items, history, onUpdate }: {
                     const isOverdue = days !== null && days < 0
                     const isDueSoon = days !== null && days >= 0 && days <= 30
                     return (
-                      <div key={item.id} className="flex items-center justify-between gap-3 rounded-md bg-white/5 px-3 py-2">
+                      <div key={item.id} className="flex items-center justify-between gap-3 rounded-md bg-slate-50 px-3 py-2">
                         <div>
-                          <p className="text-xs font-medium text-white/75">{item.task}</p>
+                          <p className="text-xs font-medium text-slate-700">{item.task}</p>
                           {item.last_done && (
-                            <p className="text-xs text-white/35">Last done {format(parseISO(item.last_done), 'MMM d, yyyy')}</p>
+                            <p className="text-xs text-slate-400">Last done {format(parseISO(item.last_done), 'MMM d, yyyy')}</p>
                           )}
                         </div>
                         <DueBadge item={item} />
@@ -739,20 +739,20 @@ function EquipmentRow({ eq, items, history, onUpdate }: {
 
           {/* Service history */}
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-white/35">Service history</p>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Service history</p>
             {eqHistory.length === 0 ? (
-              <p className="text-xs text-white/20 italic">No service history yet.</p>
+              <p className="text-xs text-slate-300 italic">No service history yet.</p>
             ) : (
               <div className="space-y-1.5">
                 {eqHistory.map(h => (
-                  <div key={h.id} className="flex items-start justify-between gap-3 rounded-md bg-white/5 px-3 py-2">
+                  <div key={h.id} className="flex items-start justify-between gap-3 rounded-md bg-slate-50 px-3 py-2">
                     <div className="min-w-0">
-                      <p className="text-xs font-medium text-white/75">{h.task}</p>
-                      {h.notes && <p className="mt-0.5 text-xs text-white/35 truncate">{h.notes}</p>}
+                      <p className="text-xs font-medium text-slate-700">{h.task}</p>
+                      {h.notes && <p className="mt-0.5 text-xs text-slate-400 truncate">{h.notes}</p>}
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className="text-xs text-white/45">{format(parseISO(h.completed_on), 'MMM d, yyyy')}</p>
-                      {h.cost != null && <p className="text-xs text-white/35">${h.cost}</p>}
+                      <p className="text-xs text-slate-400">{format(parseISO(h.completed_on), 'MMM d, yyyy')}</p>
+                      {h.cost != null && <p className="text-xs text-slate-400">${h.cost}</p>}
                     </div>
                   </div>
                 ))}
@@ -800,7 +800,7 @@ function EquipmentManager({ familyId, equipment, items, history, onUpdate }: {
         if (catEquipment.length === 0) return null
         return (
           <section key={key}>
-            <h2 className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-white/35">
+            <h2 className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
               <Icon size={12} className={color} />{key}
             </h2>
             <div className="space-y-2">
@@ -813,7 +813,7 @@ function EquipmentManager({ familyId, equipment, items, history, onUpdate }: {
       {/* Uncategorized */}
       {equipment.filter(e => !e.category).length > 0 && (
         <section>
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-white/35">Other</h2>
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Other</h2>
           <div className="space-y-2">
             {equipment.filter(e => !e.category).map(eq => <EquipmentRow key={eq.id} eq={eq} items={items} history={history} onUpdate={onUpdate} />)}
           </div>
@@ -822,42 +822,42 @@ function EquipmentManager({ familyId, equipment, items, history, onUpdate }: {
 
       {/* Add form */}
       {adding ? (
-        <form onSubmit={addEquipment} className="rounded-lg border border-white/10 bg-white/[0.04] p-4 space-y-3">
-          <p className="text-sm font-medium text-white/75">Add equipment</p>
+        <form onSubmit={addEquipment} className="rounded-lg border border-slate-200 bg-white/[0.04] p-4 space-y-3">
+          <p className="text-sm font-medium text-slate-700">Add equipment</p>
           <div>
-            <label className="mb-1 block text-xs font-medium text-white/45">Name</label>
+            <label className="mb-1 block text-xs font-medium text-slate-400">Name</label>
             <input required autoFocus value={newName} onChange={(e) => setNewName(e.target.value)}
-              className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
               placeholder="e.g. Ford F-150, HVAC Unit, Lawn Mower" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-xs font-medium text-white/45">Category (optional)</label>
+              <label className="mb-1 block text-xs font-medium text-slate-400">Category (optional)</label>
               <select value={newCategory} onChange={(e) => setNewCategory(e.target.value as Category | '')}
-                className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20">
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300">
                 <option value="">— None —</option>
                 <option>Home</option><option>Car</option><option>Yard</option>
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-white/45">Notes (optional)</label>
+              <label className="mb-1 block text-xs font-medium text-slate-400">Notes (optional)</label>
               <input value={newNotes} onChange={(e) => setNewNotes(e.target.value)}
-                className="w-full rounded-lg border border-white/10 px-3 py-2 text-sm outline-none focus:border-white/20"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-300"
                 placeholder="e.g. 2021, VIN, serial #" />
             </div>
           </div>
           <div className="flex gap-2">
             <button type="button" onClick={() => setAdding(false)}
-              className="flex-1 rounded-lg border border-white/10 py-2 text-sm text-white/45 hover:bg-white/5">Cancel</button>
+              className="flex-1 rounded-lg border border-slate-200 py-2 text-sm text-slate-400 hover:bg-slate-50">Cancel</button>
             <button type="submit" disabled={saving}
-              className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-white disabled:opacity-50">
+              className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-slate-900 disabled:opacity-50">
               {saving ? 'Saving…' : 'Add'}
             </button>
           </div>
         </form>
       ) : (
         <button onClick={() => setAdding(true)}
-          className="flex w-full items-center gap-2 rounded-lg border border-dashed border-white/10 px-4 py-3 text-sm text-white/35 transition-colors hover:border-white/15 hover:text-white/45">
+          className="flex w-full items-center gap-2 rounded-lg border border-dashed border-slate-200 px-4 py-3 text-sm text-slate-400 transition-colors hover:border-slate-200 hover:text-slate-400">
           <Plus size={13} />Add equipment
         </button>
       )}
@@ -977,27 +977,27 @@ export default function HouseholdPage() {
 
       <div className="mx-auto max-w-4xl px-4 py-4 md:px-8 md:py-6 space-y-8">
         {/* Tab switcher */}
-        <div className="flex gap-1 rounded-lg bg-white/8 p-1 w-fit">
+        <div className="flex gap-1 rounded-lg bg-slate-100 p-1 w-fit">
           {([['log', 'Maintenance'], ['history', 'History'], ['equipment', 'Equipment']] as [View, string][]).map(([v, label]) => (
             <button key={v} onClick={() => setView(v)}
-              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${view === v ? 'bg-white/[0.04] text-white shadow-sm' : 'text-white/45 hover:text-white/75'}`}>
+              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${view === v ? 'bg-white/[0.04] text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-700'}`}>
               {label}
             </button>
           ))}
         </div>
 
         {loading ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-20 text-white/35"><div className="h-7 w-7 animate-spin rounded-full border-2 border-white/10 border-t-blue-500" /><p className="text-sm">Loading…</p></div>
+          <div className="flex flex-col items-center justify-center gap-3 py-20 text-slate-400"><div className="h-7 w-7 animate-spin rounded-full border-2 border-slate-200 border-t-blue-500" /><p className="text-sm">Loading…</p></div>
         ) : view === 'equipment' ? (
           <EquipmentManager familyId={family!.id} equipment={equipment} items={items} history={history} onUpdate={fetchAll} />
         ) : view === 'history' ? (
           history.length === 0 ? (
-            <div className="py-12 text-center text-sm text-white/35">No history yet. Mark items as done to start tracking.</div>
+            <div className="py-12 text-center text-sm text-slate-400">No history yet. Mark items as done to start tracking.</div>
           ) : (
             <>
               <div className="flex justify-end">
                 <button onClick={exportHistory}
-                  className="flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-white/45 hover:bg-white/5 transition-colors">
+                  className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-400 hover:bg-slate-50 transition-colors">
                   <Download size={13} />
                   Export to Excel
                 </button>
@@ -1006,7 +1006,7 @@ export default function HouseholdPage() {
               .sort(([a], [b]) => Number(b) - Number(a))
               .map(([year, entries]) => (
                 <section key={year}>
-                  <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-white/35">{year} · {entries.length} completed</h2>
+                  <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">{year} · {entries.length} completed</h2>
                   <div className="space-y-2">
                     {entries.map(entry => (
                       <HistoryEntryRow key={entry.id} entry={entry} familyId={family!.id} equipment={equipment} items={items} onUpdate={fetchAll} />
@@ -1020,11 +1020,11 @@ export default function HouseholdPage() {
         ) : (
           <>
             <div className="flex items-center justify-between">
-              <p className="text-sm text-white/35">
+              <p className="text-sm text-slate-400">
                 {urgentCount === 0 ? 'Everything is on track' : `${urgentCount} item${urgentCount !== 1 ? 's' : ''} need${urgentCount === 1 ? 's' : ''} attention`}
               </p>
               <button onClick={() => setFocusMode(!focusMode)}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${focusMode ? 'bg-blue-600 text-white' : 'bg-white/8 text-white/45 hover:bg-white/12'}`}>
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${focusMode ? 'bg-blue-600 text-slate-900' : 'bg-slate-100 text-slate-400 hover:bg-slate-100'}`}>
                 {focusMode ? 'Show all' : 'Needs attention only'}
               </button>
             </div>
@@ -1033,7 +1033,7 @@ export default function HouseholdPage() {
               const catItems = sortedFor(key)
               return (
                 <section key={key}>
-                  <h2 className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-white/35">
+                  <h2 className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
                     <Icon size={12} className={color} />{key} · {catItems.length}
                   </h2>
                   <div className="space-y-2">
@@ -1042,7 +1042,7 @@ export default function HouseholdPage() {
                         onUpdate={fetchAll} onEdit={setEditing} onDuplicate={duplicateItem} onDelete={deleteItem} />
                     ))}
                     <button onClick={() => setAddingCategory(key)}
-                      className="flex w-full items-center gap-2 rounded-lg border border-dashed border-white/10 px-4 py-2.5 text-sm text-white/35 transition-colors hover:border-white/15 hover:text-white/45">
+                      className="flex w-full items-center gap-2 rounded-lg border border-dashed border-slate-200 px-4 py-2.5 text-sm text-slate-400 transition-colors hover:border-slate-200 hover:text-slate-400">
                       <Plus size={13} />Add {key.toLowerCase()} item
                     </button>
                   </div>

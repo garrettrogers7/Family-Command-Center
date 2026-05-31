@@ -286,12 +286,12 @@ function InsightCard({ text, loading }: { text: string; loading: boolean }) {
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 flex-shrink-0">
           <Sparkles size={16} className="text-amber-500 mt-0.5" />
-          <span className="text-sm font-semibold text-amber-400">Proactive Insights</span>
+          <span className="text-sm font-semibold text-amber-600">Proactive Insights</span>
         </div>
         {!loading && text && (
           <button
             onClick={() => setCollapsed((c) => !c)}
-            className="text-amber-400 hover:text-amber-600 transition-colors"
+            className="text-amber-600 hover:text-amber-600 transition-colors"
           >
             {collapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
           </button>
@@ -299,7 +299,7 @@ function InsightCard({ text, loading }: { text: string; loading: boolean }) {
       </div>
 
       {!collapsed && (
-        <div className="mt-3 text-sm text-white/75 leading-relaxed whitespace-pre-wrap">
+        <div className="mt-3 text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
           {loading && !text ? (
             <div className="flex items-center gap-2 text-amber-500">
               <Loader2 size={14} className="animate-spin" />
@@ -326,13 +326,13 @@ function MessageBubble({ msg }: { msg: Message & { streaming?: boolean } }) {
       <div
         className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
           isUser
-            ? 'bg-blue-600 text-white rounded-br-sm'
-            : 'bg-white/[0.04] border border-white/8 text-white/75 rounded-bl-sm shadow-sm'
+            ? 'bg-blue-600 text-slate-900 rounded-br-sm'
+            : 'bg-white/[0.04] border border-slate-200 text-slate-700 rounded-bl-sm shadow-sm'
         }`}
       >
         {msg.content}
         {(msg as { streaming?: boolean }).streaming && (
-          <span className="inline-block w-1.5 h-4 bg-gray-400 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
+          <span className="inline-block w-1.5 h-4 bg-slate-400 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
         )}
       </div>
     </div>
@@ -465,7 +465,7 @@ export default function AssistantPage() {
           <button
             onClick={loadInsights}
             disabled={insightLoading}
-            className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/60 hover:bg-white/5 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-50 disabled:opacity-50 transition-colors"
           >
             <RefreshCw size={12} className={insightLoading ? 'animate-spin' : ''} />
             Refresh
@@ -489,7 +489,7 @@ export default function AssistantPage() {
         {/* Suggested prompts — shown when chat is empty */}
         {messages.length === 0 && !insightLoading && (
           <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-white/35">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
               Ask me anything
             </p>
             <div className="flex flex-wrap gap-2">
@@ -502,7 +502,7 @@ export default function AssistantPage() {
                 <button
                   key={prompt}
                   onClick={() => { setInput(prompt); inputRef.current?.focus() }}
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/60 hover:bg-white/5 hover:border-white/15 transition-colors"
+                  className="rounded-full border border-slate-200 bg-white/[0.04] px-3 py-1.5 text-xs text-slate-500 hover:bg-slate-50 hover:border-slate-200 transition-colors"
                 >
                   {prompt}
                 </button>
@@ -515,7 +515,7 @@ export default function AssistantPage() {
       </div>
 
       {/* Input bar */}
-      <div className="border-t border-white/8 bg-white/[0.04] px-8 py-4">
+      <div className="border-t border-slate-200 bg-white/[0.04] px-8 py-4">
         <div className="flex items-end gap-3 max-w-4xl">
           <textarea
             ref={inputRef}
@@ -524,7 +524,7 @@ export default function AssistantPage() {
             onKeyDown={handleKeyDown}
             placeholder="Ask a follow-up question…"
             rows={1}
-            className="flex-1 resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-white/20 focus:bg-white/[0.04] transition-colors placeholder:text-white/35"
+            className="flex-1 resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-slate-300 focus:bg-white/[0.04] transition-colors placeholder:text-slate-400"
             style={{ minHeight: '44px', maxHeight: '120px' }}
             onInput={(e) => {
               const el = e.currentTarget
@@ -535,7 +535,7 @@ export default function AssistantPage() {
           <button
             onClick={sendMessage}
             disabled={!input.trim() || chatLoading || !ctx}
-            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white hover:bg-gray-700 disabled:opacity-40 transition-colors"
+            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-blue-600 text-slate-900 hover:bg-gray-700 disabled:opacity-40 transition-colors"
           >
             {chatLoading ? (
               <Loader2 size={16} className="animate-spin" />
@@ -544,7 +544,7 @@ export default function AssistantPage() {
             )}
           </button>
         </div>
-        <p className="mt-2 text-xs text-white/20">Press Enter to send · Shift+Enter for new line</p>
+        <p className="mt-2 text-xs text-slate-300">Press Enter to send · Shift+Enter for new line</p>
       </div>
     </div>
   )

@@ -60,9 +60,9 @@ function catColor(name: string) {
 function MonthTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-lg border border-white/8 bg-white/[0.04] px-3 py-2 shadow-lg text-xs">
-      <p className="font-medium text-white/75 mb-1">{label}</p>
-      <p className="text-white font-semibold">{usd(payload[0].value)}</p>
+    <div className="rounded-lg border border-slate-200 bg-white/[0.04] px-3 py-2 shadow-lg text-xs">
+      <p className="font-medium text-slate-700 mb-1">{label}</p>
+      <p className="text-slate-900 font-semibold">{usd(payload[0].value)}</p>
     </div>
   )
 }
@@ -76,7 +76,7 @@ function Delta({ current, previous, label }: { current: number; previous: number
   const same = Math.abs(diff) < 5
 
   return (
-    <div className={`flex items-center gap-1 text-xs font-medium ${same ? 'text-white/35' : up ? 'text-red-500' : 'text-green-600'}`}>
+    <div className={`flex items-center gap-1 text-xs font-medium ${same ? 'text-slate-400' : up ? 'text-red-500' : 'text-green-600'}`}>
       {same ? <Minus size={12} /> : up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
       <span>{same ? 'Same as' : `${pct}% ${up ? 'more' : 'less'} than`} {label}</span>
     </div>
@@ -293,7 +293,7 @@ export default function BudgetPage() {
           const expenseTxns = transactions.filter(t => t.amount < 0)
           const dates = expenseTxns.map(t => t.date).sort()
           return (
-            <p className="text-xs text-white/35">
+            <p className="text-xs text-slate-400">
               {transactions.length} transactions loaded · expenses: {expenseTxns.length} · earliest: {dates[0] ?? '—'} · latest: {dates[dates.length - 1] ?? '—'}
             </p>
           )
@@ -304,14 +304,14 @@ export default function BudgetPage() {
           {/* Month nav */}
           <div className="flex items-center gap-2">
             <button onClick={() => setSelectedMonth(m => subMonths(m, 1))}
-              className="rounded-lg border border-white/10 p-1.5 text-white/35 hover:text-white/75 transition-colors">
+              className="rounded-lg border border-slate-200 p-1.5 text-slate-400 hover:text-slate-700 transition-colors">
               <ChevronLeft size={16} />
             </button>
-            <span className="w-32 text-center text-sm font-medium text-white">
+            <span className="w-32 text-center text-sm font-medium text-slate-900">
               {format(selectedMonth, 'MMMM yyyy')}
             </span>
             <button onClick={() => setSelectedMonth(m => addMonths(m, 1))}
-              className="rounded-lg border border-white/10 p-1.5 text-white/35 hover:text-white/75 transition-colors">
+              className="rounded-lg border border-slate-200 p-1.5 text-slate-400 hover:text-slate-700 transition-colors">
               <ChevronRight size={16} />
             </button>
           </div>
@@ -319,51 +319,51 @@ export default function BudgetPage() {
           {/* Actions */}
           <div className="flex items-center gap-2 flex-wrap">
             <button onClick={() => setShowBudget(b => !b)}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${showBudget ? 'bg-blue-600 text-white' : 'bg-white/8 text-white/45 hover:bg-white/12'}`}>
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${showBudget ? 'bg-blue-600 text-slate-900' : 'bg-slate-100 text-slate-400 hover:bg-slate-100'}`}>
               {showBudget ? 'Hide budget' : 'Show budget'}
             </button>
             {importResult && (
-              <span className={`text-xs ${importResult.error ? 'text-red-500' : 'text-white/35'}`}>
+              <span className={`text-xs ${importResult.error ? 'text-red-500' : 'text-slate-400'}`}>
                 {importResult.error ? `Import failed: ${importResult.error}` : `✓ ${importResult.imported} imported, ${importResult.skipped} skipped`}
               </span>
             )}
             <input ref={fileInputRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={e => handleImport(e, false)} />
             <input ref={replaceFileInputRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={e => handleImport(e, true)} />
             <button onClick={() => { setImportResult(null); fileInputRef.current?.click() }} disabled={importing}
-              className="flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-white/45 hover:bg-white/5 transition-colors disabled:opacity-50">
+              className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-400 hover:bg-slate-50 transition-colors disabled:opacity-50">
               <Upload size={12} />{importing ? 'Importing…' : 'Import Excel'}
             </button>
             <button onClick={() => { setImportResult(null); replaceFileInputRef.current?.click() }} disabled={importing}
-              className="flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-red-400 hover:bg-red-500/10 hover:border-red-200 transition-colors disabled:opacity-50">
+              className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 hover:border-red-200 transition-colors disabled:opacity-50">
               <Upload size={12} />Replace all
             </button>
           </div>
         </div>
 
         {loading ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-20 text-white/35">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-blue-500" />
+          <div className="flex flex-col items-center justify-center gap-3 py-20 text-slate-400">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-blue-500" />
             <p className="text-sm">Loading transactions…</p>
           </div>
         ) : transactions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-white/10 py-20 text-center">
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/8">
-              <Upload size={22} className="text-white/35" />
+          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 py-20 text-center">
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100">
+              <Upload size={22} className="text-slate-400" />
             </div>
-            <p className="text-sm font-semibold text-white/45">No transactions yet</p>
-            <p className="mt-1 text-xs text-white/35">Import your Excel file to get started.</p>
+            <p className="text-sm font-semibold text-slate-400">No transactions yet</p>
+            <p className="mt-1 text-xs text-slate-400">Import your Excel file to get started.</p>
           </div>
         ) : (
           <>
             {/* ── Category filter strip ── */}
             <div className="flex gap-1.5 flex-wrap">
               <button onClick={() => setFilterCategory('all')}
-                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${filterCategory === 'all' ? 'bg-blue-600 text-white' : 'bg-white/8 text-white/45 hover:bg-white/12'}`}>
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${filterCategory === 'all' ? 'bg-blue-600 text-slate-900' : 'bg-slate-100 text-slate-400 hover:bg-slate-100'}`}>
                 All categories
               </button>
               {allKnownCategories.map(cat => (
                 <button key={cat} onClick={() => setFilterCategory(filterCategory === cat ? 'all' : cat)}
-                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${filterCategory === cat ? 'text-white' : 'bg-white/8 text-white/45 hover:bg-white/12'}`}
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${filterCategory === cat ? 'text-slate-900' : 'bg-slate-100 text-slate-400 hover:bg-slate-100'}`}
                   style={filterCategory === cat ? { backgroundColor: catColor(cat) } : {}}>
                   {cat}
                 </button>
@@ -372,58 +372,58 @@ export default function BudgetPage() {
 
             {/* ── Summary cards ── */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-5 shadow-sm col-span-2 md:col-span-1">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-white/35">
+              <div className="rounded-2xl border border-slate-200 bg-white/[0.04] p-5 shadow-sm col-span-2 md:col-span-1">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
                   {activeCat ? activeCat : 'This month'}
                 </p>
-                <p className="mt-1 text-2xl font-bold text-white">{usd(totalSpent)}</p>
+                <p className="mt-1 text-2xl font-bold text-slate-900">{usd(totalSpent)}</p>
                 <div className="mt-1 space-y-0.5">
                   <Delta current={totalSpent} previous={lastMonthTotal} label="last month" />
                   <Delta current={totalSpent} previous={lastYearTotal} label="last year" />
                 </div>
               </div>
-              <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-5 shadow-sm">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-white/35">Transactions</p>
-                <p className="mt-1 text-2xl font-bold text-white">{monthTxns.length}</p>
-                <p className="mt-1 text-xs text-white/35">avg {usd(totalSpent / (monthTxns.length || 1))}</p>
+              <div className="rounded-2xl border border-slate-200 bg-white/[0.04] p-5 shadow-sm">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Transactions</p>
+                <p className="mt-1 text-2xl font-bold text-slate-900">{monthTxns.length}</p>
+                <p className="mt-1 text-xs text-slate-400">avg {usd(totalSpent / (monthTxns.length || 1))}</p>
               </div>
               {!activeCat ? (
-                <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-5 shadow-sm">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-white/35">Top category</p>
+                <div className="rounded-2xl border border-slate-200 bg-white/[0.04] p-5 shadow-sm">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Top category</p>
                   {catBreakdown[0] ? (
                     <>
-                      <p className="mt-1 text-lg font-bold text-white">{catBreakdown[0].name}</p>
-                      <p className="mt-0.5 text-xs text-white/35">{usd(catBreakdown[0].amount)} · {Math.round(catBreakdown[0].amount / totalSpent * 100)}% of total</p>
+                      <p className="mt-1 text-lg font-bold text-slate-900">{catBreakdown[0].name}</p>
+                      <p className="mt-0.5 text-xs text-slate-400">{usd(catBreakdown[0].amount)} · {Math.round(catBreakdown[0].amount / totalSpent * 100)}% of total</p>
                     </>
-                  ) : <p className="mt-1 text-sm text-white/35">—</p>}
+                  ) : <p className="mt-1 text-sm text-slate-400">—</p>}
                 </div>
               ) : (
-                <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-5 shadow-sm">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-white/35">Top subcategory</p>
+                <div className="rounded-2xl border border-slate-200 bg-white/[0.04] p-5 shadow-sm">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Top subcategory</p>
                   {subcatBreakdown[0] ? (
                     <>
-                      <p className="mt-1 text-lg font-bold text-white">{subcatBreakdown[0].name}</p>
-                      <p className="mt-0.5 text-xs text-white/35">{usd(subcatBreakdown[0].amount)} · {Math.round(subcatBreakdown[0].amount / totalSpent * 100)}%</p>
+                      <p className="mt-1 text-lg font-bold text-slate-900">{subcatBreakdown[0].name}</p>
+                      <p className="mt-0.5 text-xs text-slate-400">{usd(subcatBreakdown[0].amount)} · {Math.round(subcatBreakdown[0].amount / totalSpent * 100)}%</p>
                     </>
-                  ) : <p className="mt-1 text-sm text-white/35">—</p>}
+                  ) : <p className="mt-1 text-sm text-slate-400">—</p>}
                 </div>
               )}
-              <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-5 shadow-sm">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-white/35">Biggest purchase</p>
+              <div className="rounded-2xl border border-slate-200 bg-white/[0.04] p-5 shadow-sm">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Biggest purchase</p>
                 {topTxns[0] ? (
                   <>
-                    <p className="mt-1 text-lg font-bold text-white">{usd(Math.abs(topTxns[0].amount))}</p>
-                    <p className="mt-0.5 text-xs text-white/35 truncate">{topTxns[0].description}</p>
+                    <p className="mt-1 text-lg font-bold text-slate-900">{usd(Math.abs(topTxns[0].amount))}</p>
+                    <p className="mt-0.5 text-xs text-slate-400 truncate">{topTxns[0].description}</p>
                   </>
-                ) : <p className="mt-1 text-sm text-white/35">—</p>}
+                ) : <p className="mt-1 text-sm text-slate-400">—</p>}
               </div>
             </div>
 
             {/* ── Charts row ── */}
             <div className="grid md:grid-cols-5 gap-4">
               {/* Monthly trend bar chart */}
-              <div className="md:col-span-3 rounded-2xl border border-white/8 bg-white/[0.04] p-5 shadow-sm">
-                <p className="mb-4 text-sm font-bold text-white/90">
+              <div className="md:col-span-3 rounded-2xl border border-slate-200 bg-white/[0.04] p-5 shadow-sm">
+                <p className="mb-4 text-sm font-bold text-slate-800">
                   Monthly spending{activeCat ? ` — ${activeCat}` : ' — all time'}
                 </p>
                 <ResponsiveContainer width="100%" height={200}>
@@ -442,14 +442,14 @@ export default function BudgetPage() {
               </div>
 
               {/* Category donut / subcategory donut when drilled in */}
-              <div className="md:col-span-2 rounded-2xl border border-white/8 bg-white/[0.04] p-5 shadow-sm">
-                <p className="mb-2 text-sm font-bold text-white/90">
+              <div className="md:col-span-2 rounded-2xl border border-slate-200 bg-white/[0.04] p-5 shadow-sm">
+                <p className="mb-2 text-sm font-bold text-slate-800">
                   {activeCat ? 'By subcategory' : 'By category'}
                 </p>
                 {(() => {
                   const pieData = activeCat ? subcatBreakdown : catBreakdown
                   if (pieData.length === 0) return (
-                    <div className="flex h-48 items-center justify-center text-xs text-white/35">No data for this month</div>
+                    <div className="flex h-48 items-center justify-center text-xs text-slate-400">No data for this month</div>
                   )
                   return (
                     <ResponsiveContainer width="100%" height={200}>
@@ -469,13 +469,13 @@ export default function BudgetPage() {
             </div>
 
             {/* ── Category / subcategory breakdown list ── */}
-            <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-5 shadow-sm">
-              <p className="mb-4 text-sm font-bold text-white/90">
+            <div className="rounded-2xl border border-slate-200 bg-white/[0.04] p-5 shadow-sm">
+              <p className="mb-4 text-sm font-bold text-slate-800">
                 {activeCat ? `${activeCat} — subcategories` : 'Category breakdown'}
               </p>
               {(() => {
                 const rows = activeCat ? subcatBreakdown : catBreakdown
-                if (rows.length === 0) return <p className="text-sm text-white/35 italic">No transactions this month.</p>
+                if (rows.length === 0) return <p className="text-sm text-slate-400 italic">No transactions this month.</p>
                 return (
                   <div className="space-y-3">
                     {rows.map(row => {
@@ -489,23 +489,23 @@ export default function BudgetPage() {
                               <span className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: row.color }} />
                               <button
                                 onClick={() => !activeCat && setFilterCategory(row.name)}
-                                className={`text-sm text-white/75 ${!activeCat ? 'hover:text-white hover:underline cursor-pointer' : ''}`}>
+                                className={`text-sm text-slate-700 ${!activeCat ? 'hover:text-slate-900 hover:underline cursor-pointer' : ''}`}>
                                 {row.name}
                               </button>
                             </div>
                             <div className="flex items-center gap-3">
-                              <span className="text-xs text-white/35">{Math.round(pct)}% of total</span>
+                              <span className="text-xs text-slate-400">{Math.round(pct)}% of total</span>
                               {showBudget && !activeCat && budget && budget > 0 && (
-                                <span className={`text-xs font-medium ${overBudget ? 'text-red-500' : 'text-white/35'}`}>
+                                <span className={`text-xs font-medium ${overBudget ? 'text-red-500' : 'text-slate-400'}`}>
                                   / {usd(budget)}
                                 </span>
                               )}
-                              <span className="text-sm font-semibold text-white w-16 text-right tabular-nums">
+                              <span className="text-sm font-semibold text-slate-900 w-16 text-right tabular-nums">
                                 {usd(row.amount)}
                               </span>
                             </div>
                           </div>
-                          <div className="h-1.5 w-full rounded-full bg-white/8">
+                          <div className="h-1.5 w-full rounded-full bg-slate-100">
                             <div className="h-1.5 rounded-full transition-all"
                               style={{
                                 width: `${pct}%`,
@@ -523,17 +523,17 @@ export default function BudgetPage() {
 
             {/* ── Top transactions ── */}
             {topTxns.length > 0 && (
-              <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-5 shadow-sm">
-                <p className="mb-4 text-sm font-semibold text-white/75">Top transactions this month</p>
-                <div className="divide-y divide-gray-50">
+              <div className="rounded-2xl border border-slate-200 bg-white/[0.04] p-5 shadow-sm">
+                <p className="mb-4 text-sm font-semibold text-slate-700">Top transactions this month</p>
+                <div className="divide-y divide-slate-100">
                   {topTxns.map(t => (
                     <div key={t.id} className="flex items-center gap-3 py-2.5">
                       <span className="h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: catColor(t.category ?? '') }} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-white/90 truncate">{t.description}</p>
-                        <p className="text-xs text-white/35">{format(parseISO(t.date), 'MMM d')} · {t.category}{t.subcategory ? ` · ${t.subcategory}` : ''}</p>
+                        <p className="text-sm text-slate-800 truncate">{t.description}</p>
+                        <p className="text-xs text-slate-400">{format(parseISO(t.date), 'MMM d')} · {t.category}{t.subcategory ? ` · ${t.subcategory}` : ''}</p>
                       </div>
-                      <span className="text-sm font-semibold text-white tabular-nums flex-shrink-0">
+                      <span className="text-sm font-semibold text-slate-900 tabular-nums flex-shrink-0">
                         {usd(Math.abs(t.amount))}
                       </span>
                     </div>
@@ -543,30 +543,30 @@ export default function BudgetPage() {
             )}
 
             {/* ── Full transaction list ── */}
-            <div className="rounded-xl border border-white/8 bg-white/[0.04] shadow-sm">
+            <div className="rounded-xl border border-slate-200 bg-white/[0.04] shadow-sm">
               <button
                 onClick={() => setShowTransactions(v => !v)}
                 className="flex w-full items-center justify-between px-5 py-4 text-left"
               >
-                <span className="text-sm font-bold text-white/90">
+                <span className="text-sm font-bold text-slate-800">
                   All transactions{activeCat ? ` — ${activeCat}` : ''}{filteredTxns.length > 0 ? ` (${filteredTxns.length})` : ''}
                 </span>
-                <ChevronRight size={16} className={`text-white/35 transition-transform ${showTransactions ? 'rotate-90' : ''}`} />
+                <ChevronRight size={16} className={`text-slate-400 transition-transform ${showTransactions ? 'rotate-90' : ''}`} />
               </button>
               {showTransactions && (
-                <div className="border-t border-white/8 px-5 pb-5">
+                <div className="border-t border-slate-200 px-5 pb-5">
                   {filteredTxns.length === 0 ? (
-                    <p className="py-8 text-center text-sm text-white/35">No transactions this month.</p>
+                    <p className="py-8 text-center text-sm text-slate-400">No transactions this month.</p>
                   ) : (
-                    <div className="divide-y divide-gray-50">
+                    <div className="divide-y divide-slate-100">
                       {filteredTxns.map(t => (
-                        <div key={t.id} className="flex items-center gap-3 py-2.5 hover:bg-white/5 -mx-2 px-2 rounded transition-colors">
+                        <div key={t.id} className="flex items-center gap-3 py-2.5 hover:bg-slate-50 -mx-2 px-2 rounded transition-colors">
                           <span className="h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: catColor(t.category ?? '') }} />
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm text-white/90 truncate">{t.description}</p>
-                            <p className="text-xs text-white/35">{format(parseISO(t.date), 'MMM d')} · {t.category}{t.subcategory ? ` · ${t.subcategory}` : ''}</p>
+                            <p className="text-sm text-slate-800 truncate">{t.description}</p>
+                            <p className="text-xs text-slate-400">{format(parseISO(t.date), 'MMM d')} · {t.category}{t.subcategory ? ` · ${t.subcategory}` : ''}</p>
                           </div>
-                          <span className="text-sm font-medium text-white tabular-nums flex-shrink-0">
+                          <span className="text-sm font-medium text-slate-900 tabular-nums flex-shrink-0">
                             {usd(Math.abs(t.amount))}
                           </span>
                         </div>

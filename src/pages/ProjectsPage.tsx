@@ -18,7 +18,7 @@ const STATUS_LABEL: Record<ProjectStatus, string> = {
 
 const STATUS_STYLE: Record<ProjectStatus, { badge: string; border: string; bar: string }> = {
   planning: { badge: 'bg-amber-500/10 text-amber-600',  border: 'border-l-amber-400', bar: 'bg-amber-400' },
-  active:   { badge: 'bg-indigo-500/10 text-indigo-500',    border: 'border-l-blue-500',  bar: 'bg-indigo-500/100'  },
+  active:   { badge: 'bg-indigo-50 text-indigo-500',    border: 'border-l-blue-500',  bar: 'bg-indigo-500'  },
   done:     { badge: 'bg-green-500/10 text-green-600',  border: 'border-l-green-500', bar: 'bg-green-500/100' },
 }
 
@@ -170,7 +170,7 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
   }
 
   return (
-    <div className={`rounded-2xl border border-white/8 bg-white/[0.04] shadow-sm overflow-hidden border-l-4 transition-all hover:shadow-md ${styles.border} ${project.status === 'done' ? 'opacity-70' : ''}`}>
+    <div className={`rounded-2xl border border-slate-200 bg-white/[0.04] shadow-sm overflow-hidden border-l-4 transition-all hover:shadow-md ${styles.border} ${project.status === 'done' ? 'opacity-70' : ''}`}>
       {/* Card header */}
       <div
         className="flex items-center gap-3 px-5 py-4 cursor-pointer select-none"
@@ -185,22 +185,22 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
         </button>
 
         <div className="flex-1 min-w-0">
-          <p className={`text-sm font-semibold text-white truncate ${project.status === 'done' ? 'line-through text-white/35' : ''}`}>
+          <p className={`text-sm font-semibold text-slate-900 truncate ${project.status === 'done' ? 'line-through text-slate-400' : ''}`}>
             {project.title}
           </p>
           <div className="flex items-center gap-3 mt-0.5 flex-wrap">
             {project.category && (
-              <span className="flex items-center gap-1 text-xs text-white/35">
+              <span className="flex items-center gap-1 text-xs text-slate-400">
                 <Tag size={10} />{project.category}
               </span>
             )}
             {project.target_date && (
-              <span className="flex items-center gap-1 text-xs text-white/35">
+              <span className="flex items-center gap-1 text-xs text-slate-400">
                 <Calendar size={10} />{format(parseISO(project.target_date), 'MMM d, yyyy')}
               </span>
             )}
             {total > 0 && (
-              <span className="text-xs text-white/35">{done.length}/{total} tasks</span>
+              <span className="text-xs text-slate-400">{done.length}/{total} tasks</span>
             )}
           </div>
         </div>
@@ -208,8 +208,8 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
         {/* Progress bar */}
         {total > 0 && (
           <div className="hidden sm:flex flex-col items-end gap-1 flex-shrink-0 w-20">
-            <span className="text-[10px] font-semibold text-white/35">{pct}%</span>
-            <div className="h-1.5 w-full rounded-full bg-white/8">
+            <span className="text-[10px] font-semibold text-slate-400">{pct}%</span>
+            <div className="h-1.5 w-full rounded-full bg-slate-100">
               <div
                 className={`h-1.5 rounded-full transition-all ${styles.bar}`}
                 style={{ width: `${pct}%` }}
@@ -219,8 +219,8 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
         )}
 
         {expanded
-          ? <ChevronDown size={15} className="flex-shrink-0 text-white/20" />
-          : <ChevronRight size={15} className="flex-shrink-0 text-white/20" />
+          ? <ChevronDown size={15} className="flex-shrink-0 text-slate-300" />
+          : <ChevronRight size={15} className="flex-shrink-0 text-slate-300" />
         }
       </div>
 
@@ -236,28 +236,28 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
           ) : (
             <>
               {project.description && (
-                <p className="text-sm text-white/60 leading-relaxed whitespace-pre-wrap">{project.description}</p>
+                <p className="text-sm text-slate-500 leading-relaxed whitespace-pre-wrap">{project.description}</p>
               )}
 
               {/* Task list */}
               {tasks.length > 0 && (
                 <ul className="space-y-2">
                   {tasks.map(task => (
-                    <li key={task.id} className="group flex items-center gap-3 rounded-lg px-2 py-1 hover:bg-white/5 transition-colors">
+                    <li key={task.id} className="group flex items-center gap-3 rounded-lg px-2 py-1 hover:bg-slate-50 transition-colors">
                       <button
                         onClick={() => handleToggleTask(task)}
                         className={`flex-shrink-0 flex items-center justify-center rounded border-2 transition-colors
-                          ${task.completed ? 'bg-indigo-500/100 border-blue-500' : 'border-white/15 hover:border-indigo-400'}`}
+                          ${task.completed ? 'bg-indigo-500 border-blue-500' : 'border-slate-200 hover:border-indigo-400'}`}
                         style={{ height: 18, width: 18 }}
                       >
-                        {task.completed && <Check size={11} strokeWidth={3} className="text-white" />}
+                        {task.completed && <Check size={11} strokeWidth={3} className="text-slate-900" />}
                       </button>
-                      <span className={`flex-1 text-sm ${task.completed ? 'line-through text-white/35' : 'text-white/75'}`}>
+                      <span className={`flex-1 text-sm ${task.completed ? 'line-through text-slate-400' : 'text-slate-700'}`}>
                         {task.text}
                       </span>
                       <button
                         onClick={() => handleDeleteTask(task.id)}
-                        className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all"
+                        className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-600 transition-all"
                       >
                         <X size={13} />
                       </button>
@@ -273,10 +273,10 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
                   value={newTask}
                   onChange={e => setNewTask(e.target.value)}
                   placeholder="Add a task…"
-                  className="flex-1 rounded-lg border border-dashed border-white/10 px-3 py-1.5 text-sm text-white/75 placeholder-white/25 focus:border-blue-300 focus:outline-none focus:border-solid transition-colors"
+                  className="flex-1 rounded-lg border border-dashed border-slate-200 px-3 py-1.5 text-sm text-slate-700 placeholder-white/25 focus:border-blue-300 focus:outline-none focus:border-solid transition-colors"
                 />
                 <button type="submit" disabled={!newTask.trim() || addingTask}
-                  className="rounded-lg bg-white/8 px-2.5 py-1.5 text-white/45 hover:bg-indigo-500/10 hover:text-indigo-500 transition-colors disabled:opacity-40">
+                  className="rounded-lg bg-slate-100 px-2.5 py-1.5 text-slate-400 hover:bg-indigo-50 hover:text-indigo-500 transition-colors disabled:opacity-40">
                   <Plus size={14} />
                 </button>
               </form>
@@ -284,11 +284,11 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
               {/* Actions */}
               <div className="flex items-center justify-end gap-1 pt-1 border-t border-gray-50">
                 <button onClick={() => setEditing(true)}
-                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-white/35 hover:bg-white/8 hover:text-white/60 transition-colors">
+                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-slate-400 hover:bg-slate-100 hover:text-slate-500 transition-colors">
                   <Pencil size={12} /> Edit
                 </button>
                 <button onClick={handleDelete}
-                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-white/35 hover:bg-red-500/10 hover:text-red-500 transition-colors">
+                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors">
                   <Trash2 size={12} /> Delete
                 </button>
               </div>
@@ -364,20 +364,20 @@ export default function ProjectsPage() {
       <div className="mx-auto max-w-2xl px-4 py-6 md:px-8 space-y-4">
 
         {/* Filter tabs */}
-        <div className="flex items-center gap-1 rounded-xl bg-white/8 p-1 w-fit">
+        <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1 w-fit">
           {STATUS_FILTERS.map(s => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
               className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all capitalize ${
                 statusFilter === s
-                  ? 'bg-white/[0.04] text-white shadow-sm'
-                  : 'text-white/45 hover:text-white/75'
+                  ? 'bg-white/[0.04] text-slate-900 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-700'
               }`}
             >
               {s === 'all' ? 'All' : STATUS_LABEL[s as ProjectStatus]}
               {counts[s] > 0 && (
-                <span className={`ml-1.5 text-[10px] font-bold ${statusFilter === s ? 'text-white/35' : 'text-white/35'}`}>
+                <span className={`ml-1.5 text-[10px] font-bold ${statusFilter === s ? 'text-slate-400' : 'text-slate-400'}`}>
                   {counts[s]}
                 </span>
               )}
@@ -387,8 +387,8 @@ export default function ProjectsPage() {
 
         {/* New project form */}
         {showNewForm && (
-          <div className="rounded-2xl border border-indigo-500/20 bg-white/[0.04] p-5 shadow-sm">
-            <p className="mb-4 text-sm font-bold text-white/90">New project</p>
+          <div className="rounded-2xl border border-indigo-200 bg-white/[0.04] p-5 shadow-sm">
+            <p className="mb-4 text-sm font-bold text-slate-800">New project</p>
             <ProjectForm
               onSave={handleAddProject}
               onCancel={() => setShowNewForm(false)}
@@ -400,18 +400,18 @@ export default function ProjectsPage() {
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-16 rounded-2xl bg-white/8 animate-pulse" />
+              <div key={i} className="h-16 rounded-2xl bg-slate-100 animate-pulse" />
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-white/10 py-16 text-center">
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/8">
-              <FolderOpen size={22} className="text-white/35" />
+          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 py-16 text-center">
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100">
+              <FolderOpen size={22} className="text-slate-400" />
             </div>
-            <p className="text-sm font-semibold text-white/45">
+            <p className="text-sm font-semibold text-slate-400">
               {statusFilter === 'all' ? 'No projects yet' : `No ${STATUS_LABEL[statusFilter as ProjectStatus].toLowerCase()} projects`}
             </p>
-            <p className="mt-1 text-xs text-white/35">
+            <p className="mt-1 text-xs text-slate-400">
               {statusFilter === 'all' ? 'Start by adding your first project above.' : 'Try a different filter.'}
             </p>
           </div>

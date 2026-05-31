@@ -110,22 +110,22 @@ export function TaskItem({ task, onUpdate }: Props) {
           onClick={toggleComplete}
           className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
             task.completed
-              ? 'border-blue-500 bg-indigo-500/100'
-              : 'border-white/15 hover:border-indigo-400'
+              ? 'border-blue-500 bg-indigo-500'
+              : 'border-slate-200 hover:border-indigo-400'
           }`}
         >
-          {task.completed && <Check size={10} strokeWidth={3} className="text-white" />}
+          {task.completed && <Check size={10} strokeWidth={3} className="text-slate-900" />}
         </button>
 
         {/* Title */}
-        <span className={`flex-1 text-sm ${task.completed ? 'text-white/35 line-through' : 'text-white/90'}`}>
+        <span className={`flex-1 text-sm ${task.completed ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
           {task.title}
         </span>
 
         {/* Assignee + due date */}
         {assignee && <UserAvatar member={assignee} size="sm" />}
         {task.due_date && (
-          <span className="text-xs text-white/35 flex-shrink-0">
+          <span className="text-xs text-slate-400 flex-shrink-0">
             {new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
           </span>
         )}
@@ -134,16 +134,16 @@ export function TaskItem({ task, onUpdate }: Props) {
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           {confirmDelete ? (
             <span className="flex items-center gap-1.5 text-xs">
-              <span className="text-white/45">Delete?</span>
-              <button onClick={deleteTask} className="font-medium text-red-500 hover:text-red-400">Yes</button>
-              <button onClick={() => setConfirmDelete(false)} className="text-white/35 hover:text-white/60">No</button>
+              <span className="text-slate-400">Delete?</span>
+              <button onClick={deleteTask} className="font-medium text-red-500 hover:text-red-600">Yes</button>
+              <button onClick={() => setConfirmDelete(false)} className="text-slate-400 hover:text-slate-500">No</button>
             </span>
           ) : (
             <>
-              <button onClick={openEdit} className="rounded p-1 text-white/20 hover:bg-white/8 hover:text-white/60 transition-colors" title="Edit">
+              <button onClick={openEdit} className="rounded p-1 text-slate-300 hover:bg-slate-100 hover:text-slate-500 transition-colors" title="Edit">
                 <Pencil size={13} />
               </button>
-              <button onClick={() => setConfirmDelete(true)} className="rounded p-1 text-white/20 hover:bg-red-500/10 hover:text-red-400 transition-colors" title="Delete">
+              <button onClick={() => setConfirmDelete(true)} className="rounded p-1 text-slate-300 hover:bg-red-50 hover:text-red-600 transition-colors" title="Delete">
                 <Trash2 size={13} />
               </button>
             </>
@@ -153,8 +153,8 @@ export function TaskItem({ task, onUpdate }: Props) {
 
       {/* Notes */}
       {task.notes && (
-        <div className="border-t border-white/8 px-4 py-2.5">
-          <p className="text-xs text-white/35 leading-relaxed">{task.notes}</p>
+        <div className="border-t border-slate-200 px-4 py-2.5">
+          <p className="text-xs text-slate-400 leading-relaxed">{task.notes}</p>
         </div>
       )}
     </div>

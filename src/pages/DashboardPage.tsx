@@ -61,16 +61,14 @@ function SectionCard({ to, label, icon, tint, border, iconColor, kpi, sub, badge
   return (
     <Link
       to={to}
-      className="group relative flex flex-col overflow-hidden rounded-2xl p-5 transition-all duration-200 hover:scale-[1.015]"
+      className="group relative flex flex-col overflow-hidden rounded-2xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
       style={{
-        background: 'rgba(255,255,255,0.04)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
+        background: '#ffffff',
         border: `1px solid ${border}`,
-        boxShadow: '0 4px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.06)',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04)',
       }}
     >
-      {/* Colored tint overlay */}
+      {/* Subtle tint overlay */}
       <div className={`pointer-events-none absolute inset-0 rounded-2xl ${tint}`} />
 
       {/* Content */}
@@ -79,10 +77,10 @@ function SectionCard({ to, label, icon, tint, border, iconColor, kpi, sub, badge
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <span className={iconColor}>{icon}</span>
-            <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.45)' }}>{label}</span>
+            <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#94a3b8' }}>{label}</span>
           </div>
           {badge != null && (
-            <span className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-bold text-white ${badgeColor}`}>
+            <span className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-bold text-slate-900 ${badgeColor}`}>
               {badge}
             </span>
           )}
@@ -90,13 +88,13 @@ function SectionCard({ to, label, icon, tint, border, iconColor, kpi, sub, badge
 
         {/* KPI */}
         <div className="flex-1">
-          <div className="text-2xl font-bold text-white leading-tight tracking-tight">{kpi}</div>
-          <div className="mt-1 text-xs leading-snug" style={{ color: 'rgba(255,255,255,0.38)' }}>{sub}</div>
+          <div className="text-2xl font-bold leading-tight tracking-tight" style={{ color: '#0f172a' }}>{kpi}</div>
+          <div className="mt-1 text-xs leading-snug" style={{ color: '#94a3b8' }}>{sub}</div>
         </div>
 
         {/* Arrow */}
         <div className="flex justify-end">
-          <ChevronRight size={14} style={{ color: 'rgba(255,255,255,0.18)' }} className="transition-all group-hover:translate-x-0.5 group-hover:opacity-70" />
+          <ChevronRight size={14} style={{ color: '#cbd5e1' }} className="transition-all group-hover:translate-x-0.5 group-hover:text-slate-400" />
         </div>
       </div>
     </Link>
@@ -168,15 +166,14 @@ export default function DashboardPage() {
 
         {/* ── Greeting ── */}
         <div className="mb-10">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'rgba(165,180,252,0.6)' }}>
+          <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: '#94a3b8' }}>
             {format(today, 'EEEE, MMMM d')}
           </p>
-          <h1 className="text-4xl font-bold text-white tracking-tight leading-tight">
-            {greeting}{firstName ? `,` : ''}<br />
-            {firstName && <span style={{ background: 'linear-gradient(135deg, #a5b4fc 0%, #c4b5fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{firstName}</span>}
+          <h1 className="text-4xl font-bold tracking-tight leading-tight" style={{ color: '#0f172a' }}>
+            {greeting}{firstName ? `, ${firstName}` : ''}
           </h1>
           {members.length > 1 && (
-            <p className="mt-2 text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            <p className="mt-2 text-sm" style={{ color: '#94a3b8' }}>
               {members.map(m => m.display_name.split(' ')[0]).join(' & ')}
             </p>
           )}
@@ -184,8 +181,8 @@ export default function DashboardPage() {
 
         {/* ── Section grid ── */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-20 text-white/30">
-            <div className="h-7 w-7 animate-spin rounded-full border-2 border-white/10 border-t-white/50" />
+          <div className="flex flex-col items-center justify-center gap-3 py-20" style={{ color: '#94a3b8' }}>
+            <div className="h-7 w-7 animate-spin rounded-full border-2 border-slate-200 border-t-slate-400" />
             <p className="text-sm">Loading…</p>
           </div>
         ) : (
@@ -196,13 +193,13 @@ export default function DashboardPage() {
               to="/week"
               label="This Week"
               icon={<CalendarDays size={18} strokeWidth={1.75} />}
-              tint="bg-gradient-to-br from-violet-500/10 to-transparent"
-              border="rgba(139,92,246,0.22)"
-              iconColor="text-violet-400"
+              tint="bg-gradient-to-br from-violet-50 to-transparent"
+              border="#e9d5ff"
+              iconColor="text-violet-500"
               kpi={weekTaskCount ?? '—'}
               sub={weekTaskCount === 1 ? 'task remaining' : 'tasks remaining'}
               badge={weekTaskCount ? weekTaskCount : undefined}
-              badgeColor="bg-red-500/90"
+              badgeColor="bg-red-500"
             />
 
             {/* Household */}
@@ -213,19 +210,19 @@ export default function DashboardPage() {
                 ? <AlertTriangle size={18} strokeWidth={1.75} />
                 : <Home size={18} strokeWidth={1.75} />
               }
-              tint="bg-gradient-to-br from-emerald-500/10 to-transparent"
-              border="rgba(52,211,153,0.20)"
-              iconColor={overdueItems.length > 0 ? 'text-red-400' : dueSoonItems.length > 0 ? 'text-amber-400' : 'text-emerald-400'}
+              tint="bg-gradient-to-br from-emerald-50 to-transparent"
+              border="#a7f3d0"
+              iconColor={overdueItems.length > 0 ? 'text-red-500' : dueSoonItems.length > 0 ? 'text-amber-500' : 'text-emerald-500'}
               kpi={
                 overdueItems.length > 0
-                  ? <span className="text-red-400">{overdueItems.length} overdue</span>
+                  ? <span className="text-red-600">{overdueItems.length} overdue</span>
                   : dueSoonItems.length > 0
-                  ? <span className="text-amber-300">{dueSoonItems.length} due soon</span>
-                  : <span className="flex items-center gap-2 text-emerald-400"><ShieldCheck size={22} strokeWidth={2} />All clear</span>
+                  ? <span className="text-amber-600">{dueSoonItems.length} due soon</span>
+                  : <span className="flex items-center gap-2 text-emerald-600"><ShieldCheck size={22} strokeWidth={2} />All clear</span>
               }
               sub="maintenance status"
               badge={overdueItems.length > 0 ? overdueItems.length : undefined}
-              badgeColor="bg-red-500/90"
+              badgeColor="bg-red-500"
             />
 
             {/* Spending */}
@@ -238,9 +235,9 @@ export default function DashboardPage() {
                 ? <TrendingDown size={18} strokeWidth={1.75} />
                 : <Wallet size={18} strokeWidth={1.75} />
               }
-              tint="bg-gradient-to-br from-orange-500/10 to-transparent"
-              border="rgba(251,146,60,0.20)"
-              iconColor={spendDelta != null && spendDelta > 5 ? 'text-red-400' : spendDelta != null && spendDelta < -5 ? 'text-emerald-400' : 'text-orange-400'}
+              tint="bg-gradient-to-br from-orange-50 to-transparent"
+              border="#fed7aa"
+              iconColor={spendDelta != null && spendDelta > 5 ? 'text-red-500' : spendDelta != null && spendDelta < -5 ? 'text-emerald-500' : 'text-orange-500'}
               kpi={monthSpend != null ? usd(monthSpend) : '—'}
               sub={
                 spendDelta == null ? format(today, 'MMMM')
@@ -255,9 +252,9 @@ export default function DashboardPage() {
               to="/projects"
               label="Projects"
               icon={<FolderKanban size={18} strokeWidth={1.75} />}
-              tint="bg-gradient-to-br from-sky-500/10 to-transparent"
-              border="rgba(56,189,248,0.20)"
-              iconColor="text-sky-400"
+              tint="bg-gradient-to-br from-sky-50 to-transparent"
+              border="#bae6fd"
+              iconColor="text-sky-500"
               kpi={activeProjects ?? '—'}
               sub={activeProjects === 1 ? 'project in progress' : 'projects in progress'}
             />
@@ -267,9 +264,9 @@ export default function DashboardPage() {
               to="/vision"
               label="Vision"
               icon={<Compass size={18} strokeWidth={1.75} />}
-              tint="bg-gradient-to-br from-pink-500/10 to-transparent"
-              border="rgba(244,114,182,0.20)"
-              iconColor="text-pink-400"
+              tint="bg-gradient-to-br from-pink-50 to-transparent"
+              border="#fbcfe8"
+              iconColor="text-pink-500"
               kpi="Values"
               sub="goals & traditions"
             />
@@ -279,9 +276,9 @@ export default function DashboardPage() {
               to="/settings"
               label="Settings"
               icon={<Settings size={18} strokeWidth={1.75} />}
-              tint="bg-gradient-to-br from-indigo-500/10 to-transparent"
-              border="rgba(99,102,241,0.20)"
-              iconColor="text-indigo-400"
+              tint="bg-gradient-to-br from-indigo-50 to-transparent"
+              border="#c7d2fe"
+              iconColor="text-indigo-500"
               kpi={family?.name ?? '—'}
               sub={`${members.length} ${members.length === 1 ? 'member' : 'members'}`}
             />
