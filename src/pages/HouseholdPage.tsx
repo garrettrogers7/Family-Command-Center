@@ -14,7 +14,7 @@ type View = 'log' | 'history' | 'equipment'
 const CATEGORIES: { key: Category; Icon: typeof Home; color: string }[] = [
   { key: 'Home', Icon: Home, color: 'text-blue-500' },
   { key: 'Car',  Icon: Car,  color: 'text-blue-300' },
-  { key: 'Yard', Icon: Leaf, color: 'text-green-500' },
+  { key: 'Yard', Icon: Leaf, color: 'text-slate-500' },
 ]
 
 type FreqUnit = 'Days' | 'Weeks' | 'Months' | 'Years'
@@ -87,9 +87,9 @@ function DueBadge({ item }: { item: MaintenanceItem }) {
   if (days < 0)
     return <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-600">{item.frequency === 'Once' ? 'Overdue' : `Overdue ${Math.abs(days)}d`}</span>
   if (days === 0)
-    return <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-600">Due today</span>
+    return <span className="rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-semibold text-orange-600">Due today</span>
   if (days <= 30)
-    return <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-600">Due in {days}d</span>
+    return <span className="rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-semibold text-orange-600">Due in {days}d</span>
   return <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs text-slate-400">Due {format(due, 'MMM d, yyyy')}</span>
 }
 
@@ -315,7 +315,7 @@ function MaintenanceRow({
         {/* Mark done */}
         <button onClick={markDone} disabled={markingDone} title="Mark as done today"
           className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-            isOverdue ? 'border-red-300 hover:bg-red-50' : isDueSoon ? 'border-amber-300 hover:bg-amber-50' : 'border-blue-100 hover:bg-blue-50'
+            isOverdue ? 'border-red-300 hover:bg-red-50' : isDueSoon ? 'border-orange-300 hover:bg-orange-50' : 'border-blue-100 hover:bg-blue-50'
           }`}>
           {markingDone && <span className="h-2 w-2 rounded-full bg-gray-300" />}
         </button>
@@ -325,7 +325,7 @@ function MaintenanceRow({
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-medium text-slate-900">{item.task}</span>
             {eq && (
-              <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-500 font-medium">{eq.name}</span>
+              <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600 font-medium">{eq.name}</span>
             )}
             <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-400">{item.frequency}</span>
             <DueBadge item={item} />
@@ -511,7 +511,7 @@ function HistoryEntryRow({ entry, familyId, equipment, items, onUpdate }: { entr
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-sm font-medium text-slate-800">{entry.task}</p>
             {eq && (
-              <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-500 font-medium">{eq.name}</span>
+              <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600 font-medium">{eq.name}</span>
             )}
           </div>
           <p className="text-xs text-slate-400">
@@ -587,7 +587,7 @@ function HistoryEntryRow({ entry, familyId, equipment, items, onUpdate }: { entr
                   return (
                     <div key={url} className="flex items-center gap-2">
                       <a href={href} target="_blank" rel="noopener noreferrer"
-                        className="flex flex-1 min-w-0 items-center gap-1.5 rounded bg-slate-50 px-2 py-1.5 text-xs text-indigo-500 hover:bg-blue-50 transition-colors">
+                        className="flex flex-1 min-w-0 items-center gap-1.5 rounded bg-slate-50 px-2 py-1.5 text-xs text-blue-600 hover:bg-blue-50 transition-colors">
                         <Paperclip size={11} className="flex-shrink-0" />
                         <span className="truncate">{fileName}</span>
                       </a>

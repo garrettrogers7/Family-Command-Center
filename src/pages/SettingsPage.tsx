@@ -268,8 +268,8 @@ export default function SettingsPage() {
           <div className="rounded-xl border border-blue-100 bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${connected ? 'bg-green-500/10' : 'bg-indigo-50'}`}>
-                  <Calendar size={20} className={connected ? 'text-green-500' : 'text-blue-500'} />
+                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${connected ? 'bg-slate-400/10' : 'bg-blue-50'}`}>
+                  <Calendar size={20} className={connected ? 'text-slate-500' : 'text-blue-500'} />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-slate-900">Google Calendar</p>
@@ -303,7 +303,7 @@ export default function SettingsPage() {
             </div>
 
             {connected && (
-              <p className="mt-3 rounded-lg bg-green-500/10 px-3 py-2 text-xs text-green-400">
+              <p className="mt-3 rounded-lg bg-slate-400/10 px-3 py-2 text-xs text-green-400">
                 ✓ Your Google Calendar is connected. Events refresh automatically each session.
               </p>
             )}

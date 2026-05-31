@@ -8,7 +8,7 @@ import type { UserColor } from '@/lib/database.types'
 type Step = 'choose' | 'create' | 'join'
 
 const COLOR_OPTIONS: { value: UserColor; label: string; classes: string }[] = [
-  { value: 'blue', label: 'Blue', classes: 'bg-blue-100 text-indigo-500 ring-blue-300' },
+  { value: 'blue', label: 'Blue', classes: 'bg-blue-100 text-blue-600 ring-blue-300' },
   { value: 'coral', label: 'Coral', classes: 'bg-coral-100 text-coral-600 ring-coral-300' },
 ]
 

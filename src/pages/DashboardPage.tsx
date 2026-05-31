@@ -199,8 +199,8 @@ export default function DashboardPage() {
                 overdueItems.length > 0
                   ? <span className="text-red-600">{overdueItems.length} overdue</span>
                   : dueSoonItems.length > 0
-                  ? <span className="text-amber-600">{dueSoonItems.length} due soon</span>
-                  : <span className="flex items-center gap-2 text-emerald-700"><ShieldCheck size={18} strokeWidth={2} />All clear</span>
+                  ? <span className="text-orange-600">{dueSoonItems.length} due soon</span>
+                  : <span className="flex items-center gap-2 text-blue-700"><ShieldCheck size={18} strokeWidth={2} />All clear</span>
               }
               sub="maintenance status"
               badge={overdueItems.length > 0 ? overdueItems.length : undefined}

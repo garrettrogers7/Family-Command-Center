@@ -972,15 +972,15 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                               <div
                                 key={event.id}
                                 className={`rounded-md px-2 py-1.5 border ${
-                                  isBlue ? 'bg-indigo-50 border-indigo-200' : 'bg-coral-50 border-coral-100'
+                                  isBlue ? 'bg-blue-50 border-blue-200' : 'bg-coral-50 border-coral-100'
                                 }`}
                               >
                                 <p className={`text-xs font-medium leading-snug break-words ${
-                                  isBlue ? 'text-indigo-600' : 'text-coral-600'
+                                  isBlue ? 'text-blue-700' : 'text-coral-600'
                                 }`}>
                                   {event.summary ?? '(No title)'}
                                 </p>
-                                <p className={`text-xs mt-0.5 ${isBlue ? 'text-indigo-600' : 'text-coral-400'}`}>
+                                <p className={`text-xs mt-0.5 ${isBlue ? 'text-blue-700' : 'text-coral-400'}`}>
                                   {formatStoredEventTime(event)}
                                 </p>
                               </div>

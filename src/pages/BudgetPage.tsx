@@ -76,7 +76,7 @@ function Delta({ current, previous, label }: { current: number; previous: number
   const same = Math.abs(diff) < 5
 
   return (
-    <div className={`flex items-center gap-1 text-xs font-medium ${same ? 'text-blue-300' : up ? 'text-red-500' : 'text-green-600'}`}>
+    <div className={`flex items-center gap-1 text-xs font-medium ${same ? 'text-blue-300' : up ? 'text-red-500' : 'text-slate-600'}`}>
       {same ? <Minus size={12} /> : up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
       <span>{same ? 'Same as' : `${pct}% ${up ? 'more' : 'less'} than`} {label}</span>
     </div>

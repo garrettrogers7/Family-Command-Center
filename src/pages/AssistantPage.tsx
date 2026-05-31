@@ -285,13 +285,13 @@ function InsightCard({ text, loading }: { text: string; loading: boolean }) {
     <div className="rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-50 to-orange-50 p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 flex-shrink-0">
-          <Sparkles size={16} className="text-amber-500 mt-0.5" />
-          <span className="text-sm font-semibold text-amber-600">Proactive Insights</span>
+          <Sparkles size={16} className="text-orange-500 mt-0.5" />
+          <span className="text-sm font-semibold text-orange-600">Proactive Insights</span>
         </div>
         {!loading && text && (
           <button
             onClick={() => setCollapsed((c) => !c)}
-            className="text-amber-600 hover:text-amber-600 transition-colors"
+            className="text-orange-600 hover:text-orange-600 transition-colors"
           >
             {collapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
           </button>
@@ -301,14 +301,14 @@ function InsightCard({ text, loading }: { text: string; loading: boolean }) {
       {!collapsed && (
         <div className="mt-3 text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
           {loading && !text ? (
-            <div className="flex items-center gap-2 text-amber-500">
+            <div className="flex items-center gap-2 text-orange-500">
               <Loader2 size={14} className="animate-spin" />
               <span>Reviewing your schedule and home…</span>
             </div>
           ) : (
             <>
               {text}
-              {loading && <span className="inline-block w-1.5 h-4 bg-amber-400 animate-pulse ml-0.5 align-text-bottom rounded-sm" />}
+              {loading && <span className="inline-block w-1.5 h-4 bg-orange-400 animate-pulse ml-0.5 align-text-bottom rounded-sm" />}
             </>
           )}
         </div>

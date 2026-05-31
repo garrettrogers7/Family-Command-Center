@@ -17,9 +17,9 @@ const STATUS_LABEL: Record<ProjectStatus, string> = {
 }
 
 const STATUS_STYLE: Record<ProjectStatus, { badge: string; border: string; bar: string }> = {
-  planning: { badge: 'bg-amber-500/10 text-amber-600',  border: 'border-l-amber-400', bar: 'bg-amber-400' },
-  active:   { badge: 'bg-indigo-50 text-indigo-500',    border: 'border-l-blue-500',  bar: 'bg-indigo-500'  },
-  done:     { badge: 'bg-green-500/10 text-green-600',  border: 'border-l-green-500', bar: 'bg-green-500/100' },
+  planning: { badge: 'bg-orange-50 text-orange-700',   border: 'border-l-orange-400', bar: 'bg-orange-400' },
+  active:   { badge: 'bg-blue-50 text-blue-700',       border: 'border-l-blue-500',   bar: 'bg-blue-500'   },
+  done:     { badge: 'bg-slate-100 text-slate-500',    border: 'border-l-slate-400',  bar: 'bg-slate-400'  },
 }
 
 const STATUS_ORDER: ProjectStatus[] = ['active', 'planning', 'done']
@@ -247,7 +247,7 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
                       <button
                         onClick={() => handleToggleTask(task)}
                         className={`flex-shrink-0 flex items-center justify-center rounded border-2 transition-colors
-                          ${task.completed ? 'bg-indigo-500 border-blue-500' : 'border-blue-100 hover:border-indigo-400'}`}
+                          ${task.completed ? 'bg-blue-500 border-blue-500' : 'border-blue-100 hover:border-indigo-400'}`}
                         style={{ height: 18, width: 18 }}
                       >
                         {task.completed && <Check size={11} strokeWidth={3} className="text-slate-900" />}
@@ -276,7 +276,7 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
                   className="flex-1 rounded-lg border border-dashed border-blue-100 px-3 py-1.5 text-sm text-slate-700 placeholder-white/25 focus:border-blue-300 focus:outline-none focus:border-solid transition-colors"
                 />
                 <button type="submit" disabled={!newTask.trim() || addingTask}
-                  className="rounded-lg bg-slate-100 px-2.5 py-1.5 text-slate-400 hover:bg-indigo-50 hover:text-indigo-500 transition-colors disabled:opacity-40">
+                  className="rounded-lg bg-slate-100 px-2.5 py-1.5 text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-colors disabled:opacity-40">
                   <Plus size={14} />
                 </button>
               </form>
@@ -387,7 +387,7 @@ export default function ProjectsPage() {
 
         {/* New project form */}
         {showNewForm && (
-          <div className="rounded-2xl border border-indigo-200 bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-blue-200 bg-white p-5 shadow-sm">
             <p className="mb-4 text-sm font-bold text-slate-800">New project</p>
             <ProjectForm
               onSave={handleAddProject}
