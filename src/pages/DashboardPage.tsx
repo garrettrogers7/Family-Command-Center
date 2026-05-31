@@ -184,7 +184,7 @@ export default function DashboardPage() {
             <SectionCard
               to="/week"
               label="This Week"
-              accentColor="#7c3aed"
+              accentColor="#1a6db5"
               kpi={weekTaskCount ?? '—'}
               sub={weekTaskCount === 1 ? 'task remaining' : 'tasks remaining'}
               badge={weekTaskCount ? weekTaskCount : undefined}
@@ -194,7 +194,7 @@ export default function DashboardPage() {
             <SectionCard
               to="/household"
               label="Household"
-              accentColor="#059669"
+              accentColor="#e07b2a"
               kpi={
                 overdueItems.length > 0
                   ? <span className="text-red-600">{overdueItems.length} overdue</span>
@@ -210,7 +210,7 @@ export default function DashboardPage() {
             <SectionCard
               to="/budget"
               label="Spending"
-              accentColor="#d97706"
+              accentColor="#e07b2a"
               kpi={monthSpend != null ? usd(monthSpend) : '—'}
               sub={
                 spendDelta == null ? format(today, 'MMMM')
@@ -224,7 +224,7 @@ export default function DashboardPage() {
             <SectionCard
               to="/projects"
               label="Projects"
-              accentColor="#1a6db5"
+              accentColor="#3d8fc4"
               kpi={activeProjects ?? '—'}
               sub={activeProjects === 1 ? 'project in progress' : 'projects in progress'}
             />
@@ -233,7 +233,7 @@ export default function DashboardPage() {
             <SectionCard
               to="/vision"
               label="Vision"
-              accentColor="#db2777"
+              accentColor="#6b8eae"
               kpi="Values"
               sub="goals & traditions"
             />
@@ -242,7 +242,7 @@ export default function DashboardPage() {
             <SectionCard
               to="/settings"
               label="Settings"
-              accentColor="#1a6db5"
+              accentColor="#8fa8bf"
               kpi={family?.name ?? '—'}
               sub={`${members.length} ${members.length === 1 ? 'member' : 'members'}`}
             />
