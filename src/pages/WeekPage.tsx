@@ -384,7 +384,7 @@ function SortableFunRow({
             autoFocus
             value={editText}
             onChange={(e) => setEditText(e.target.value)}
-            className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400"
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400"
             placeholder="Event title"
           />
           <textarea
@@ -392,7 +392,7 @@ function SortableFunRow({
             onChange={(e) => setEditNotes(e.target.value)}
             placeholder="Add notes…"
             rows={2}
-            className="w-full resize-none rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400 placeholder:text-gray-300"
+            className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400 placeholder:text-gray-300"
           />
           <div className="flex gap-2">
             <button
@@ -1233,7 +1233,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                       <button
                         onClick={sendMessage}
                         disabled={!chatInput.trim() || chatLoading || !aiCtx}
-                        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-gray-900 text-white hover:bg-gray-700 disabled:opacity-40 transition-colors"
+                        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-40 transition-colors"
                       >
                         {chatLoading ? (
                           <Loader2 size={14} className="animate-spin" />

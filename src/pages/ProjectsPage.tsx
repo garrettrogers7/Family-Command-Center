@@ -59,7 +59,7 @@ function ProjectForm({ initial, onSave, onCancel }: ProjectFormProps) {
         value={title}
         onChange={e => setTitle(e.target.value)}
         placeholder="Project title"
-        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-400 focus:outline-none"
+        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0"
       />
       <textarea
         value={description}
@@ -73,7 +73,7 @@ function ProjectForm({ initial, onSave, onCancel }: ProjectFormProps) {
           value={category}
           onChange={e => setCategory(e.target.value)}
           placeholder="Category (e.g. Home, Kids)"
-          className="flex-1 min-w-0 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:border-gray-400 focus:outline-none"
+          className="flex-1 min-w-0 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0"
         />
         <select
           value={status}
@@ -88,7 +88,7 @@ function ProjectForm({ initial, onSave, onCancel }: ProjectFormProps) {
           type="date"
           value={targetDate}
           onChange={e => setTargetDate(e.target.value)}
-          className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-gray-400 focus:outline-none"
+          className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:border-gray-400 focus:outline-none focus:ring-0"
         />
       </div>
       <div className="flex justify-end gap-2">
@@ -97,7 +97,7 @@ function ProjectForm({ initial, onSave, onCancel }: ProjectFormProps) {
           Cancel
         </button>
         <button type="submit" disabled={!title.trim() || saving}
-          className="rounded-lg bg-gray-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-gray-700 transition-colors disabled:opacity-40">
+          className="rounded-lg bg-gray-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors disabled:opacity-40">
           {saving ? 'Saving…' : initial?.id ? 'Save changes' : 'Add project'}
         </button>
       </div>
@@ -376,7 +376,7 @@ export default function ProjectsPage() {
           </div>
           <button
             onClick={() => setShowNewForm(v => !v)}
-            className="flex items-center gap-1.5 rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-700 transition-colors"
+            className="flex items-center gap-1.5 rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800 transition-colors"
           >
             <Plus size={13} /> New project
           </button>

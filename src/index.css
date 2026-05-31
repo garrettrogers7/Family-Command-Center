@@ -10,16 +10,90 @@
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   body {
     @apply bg-gray-50 font-sans text-gray-900;
   }
+
+  /* Tighter tracking on headings at display sizes */
+  h1, h2, h3 {
+    letter-spacing: -0.015em;
+  }
 }
 
-/* Coral color utilities (not built-in to Tailwind) */
+/* ── Design-system component shortcuts ─────────────────────────── */
+@layer components {
+
+  /* Cards */
+  .card {
+    @apply bg-white rounded-xl border border-gray-100 shadow-sm;
+  }
+
+  /* Buttons — primary */
+  .btn {
+    @apply inline-flex items-center gap-1.5 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-sm {
+    @apply inline-flex items-center gap-1.5 rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  /* Buttons — ghost */
+  .btn-ghost {
+    @apply inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:opacity-40;
+  }
+  .btn-ghost-sm {
+    @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:opacity-40;
+  }
+
+  /* Buttons — outlined */
+  .btn-outline {
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 bg-white transition-colors hover:bg-gray-50 hover:border-gray-300 disabled:opacity-40;
+  }
+  .btn-outline-sm {
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 bg-white transition-colors hover:bg-gray-50 hover:border-gray-300 disabled:opacity-40;
+  }
+
+  /* Buttons — danger ghost */
+  .btn-danger {
+    @apply inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-red-500 transition-colors hover:bg-red-50 disabled:opacity-40;
+  }
+  .btn-danger-sm {
+    @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-red-500 transition-colors hover:bg-red-50 disabled:opacity-40;
+  }
+
+  /* Form inputs */
+  .input {
+    @apply w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-gray-400 focus:outline-none focus:ring-0;
+  }
+  .input-sm {
+    @apply w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-gray-400 focus:outline-none focus:ring-0;
+  }
+  select.input, select.input-sm {
+    @apply cursor-pointer;
+  }
+
+  /* Section label (ALL CAPS meta label) */
+  .label {
+    @apply text-xs font-semibold uppercase tracking-wider text-gray-400;
+  }
+
+  /* Badge / status chip */
+  .badge {
+    @apply inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium;
+  }
+}
+
+/* ── Scrollbar (WebKit) ─────────────────────────────────────────── */
+::-webkit-scrollbar        { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: #e5e7eb; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #d1d5db; }
+
+/* ── Coral color utilities (not built-in to Tailwind) ─────────── */
 @layer utilities {
-  .bg-coral-50 { background-color: #fff4f2; }
+  .bg-coral-50  { background-color: #fff4f2; }
   .bg-coral-100 { background-color: #ffe4de; }
   .bg-coral-200 { background-color: #ffc5b8; }
   .bg-coral-400 { background-color: #ff7a61; }

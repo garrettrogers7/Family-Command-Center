@@ -45,10 +45,10 @@ export function TaskItem({ task, onUpdate }: Props) {
     if (!editTitle.trim()) return
     setSaving(true)
     await supabase.from('tasks').update({
-      title: editTitle.trim(),
+      title:       editTitle.trim(),
       assigned_to: editAssignedTo || null,
-      due_date: editDueDate || null,
-      notes: editNotes.trim() || null,
+      due_date:    editDueDate || null,
+      notes:       editNotes.trim() || null,
     }).eq('id', task.id)
     setSaving(false)
     setEditing(false)
@@ -57,22 +57,19 @@ export function TaskItem({ task, onUpdate }: Props) {
 
   if (editing) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-3">
-        {/* Title */}
+      <div className="card p-4 space-y-3">
         <input
           autoFocus
           value={editTitle}
           onChange={(e) => setEditTitle(e.target.value)}
-          className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400"
+          className="input"
           placeholder="Task title"
         />
-
-        {/* Assignment + Due date */}
         <div className="flex gap-2">
           <select
             value={editAssignedTo}
             onChange={(e) => setEditAssignedTo(e.target.value)}
-            className="flex-1 rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-600 outline-none focus:border-gray-400"
+            className="input-sm flex-1"
           >
             <option value="">Unassigned</option>
             {members.map((m) => (
@@ -83,32 +80,21 @@ export function TaskItem({ task, onUpdate }: Props) {
             type="date"
             value={editDueDate}
             onChange={(e) => setEditDueDate(e.target.value)}
-            className="flex-1 rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-600 outline-none focus:border-gray-400"
+            className="input-sm flex-1"
           />
         </div>
-
-        {/* Notes */}
         <textarea
           value={editNotes}
           onChange={(e) => setEditNotes(e.target.value)}
           placeholder="Add notes…"
           rows={2}
-          className="w-full resize-none rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400 placeholder:text-gray-300"
+          className="input resize-none"
         />
-
-        {/* Actions */}
         <div className="flex gap-2">
-          <button
-            onClick={saveEdit}
-            disabled={saving || !editTitle.trim()}
-            className="rounded-md bg-gray-900 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40"
-          >
+          <button onClick={saveEdit} disabled={saving || !editTitle.trim()} className="btn-sm">
             {saving ? 'Saving…' : 'Save'}
           </button>
-          <button
-            onClick={() => setEditing(false)}
-            className="rounded-md px-3 py-1.5 text-xs text-gray-500 hover:text-gray-700"
-          >
+          <button onClick={() => setEditing(false)} className="btn-ghost-sm">
             Cancel
           </button>
         </div>
@@ -117,15 +103,15 @@ export function TaskItem({ task, onUpdate }: Props) {
   }
 
   return (
-    <div className="rounded-lg border border-gray-100 bg-white shadow-sm group">
+    <div className="card group">
       <div className="flex items-center gap-3 px-4 py-3">
         {/* Checkbox */}
         <button
           onClick={toggleComplete}
           className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
             task.completed
-              ? 'border-green-400 bg-green-400'
-              : 'border-gray-300 hover:border-gray-400'
+              ? 'border-gray-400 bg-gray-400'
+              : 'border-gray-300 hover:border-gray-500'
           }`}
         >
           {task.completed && <Check size={10} strokeWidth={3} className="text-white" />}
@@ -154,10 +140,10 @@ export function TaskItem({ task, onUpdate }: Props) {
             </span>
           ) : (
             <>
-              <button onClick={openEdit} className="text-gray-300 hover:text-gray-500 p-0.5" title="Edit">
+              <button onClick={openEdit} className="rounded p-1 text-gray-300 hover:bg-gray-100 hover:text-gray-600 transition-colors" title="Edit">
                 <Pencil size={13} />
               </button>
-              <button onClick={() => setConfirmDelete(true)} className="text-gray-300 hover:text-red-400 p-0.5" title="Delete">
+              <button onClick={() => setConfirmDelete(true)} className="rounded p-1 text-gray-300 hover:bg-red-50 hover:text-red-400 transition-colors" title="Delete">
                 <Trash2 size={13} />
               </button>
             </>
@@ -165,9 +151,9 @@ export function TaskItem({ task, onUpdate }: Props) {
         </div>
       </div>
 
-      {/* Notes preview (when not editing) */}
+      {/* Notes */}
       {task.notes && (
-        <div className="border-t border-gray-50 px-4 py-2">
+        <div className="border-t border-gray-50 px-4 py-2.5">
           <p className="text-xs text-gray-400 leading-relaxed">{task.notes}</p>
         </div>
       )}

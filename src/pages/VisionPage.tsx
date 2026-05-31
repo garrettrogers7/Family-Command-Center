@@ -220,7 +220,7 @@ export default function VisionPage() {
                       Cancel
                     </button>
                     <button onClick={saveMission}
-                      className="rounded-lg bg-gray-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-gray-700 transition-colors">
+                      className="rounded-lg bg-gray-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors">
                       Save
                     </button>
                   </div>
@@ -254,13 +254,13 @@ export default function VisionPage() {
                           value={v.name}
                           onChange={e => updateDraftValue(v.id, 'name', e.target.value)}
                           placeholder="Value (e.g. Faith)"
-                          className="col-span-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+                          className="col-span-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none focus:ring-0"
                         />
                         <input
                           value={v.description}
                           onChange={e => updateDraftValue(v.id, 'description', e.target.value)}
                           placeholder="Short description"
-                          className="col-span-2 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+                          className="col-span-2 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none focus:ring-0"
                         />
                       </div>
                       <button onClick={() => removeDraftValue(v.id)}
@@ -279,7 +279,7 @@ export default function VisionPage() {
                       Cancel
                     </button>
                     <button onClick={saveValues}
-                      className="rounded-lg bg-gray-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-gray-700 transition-colors">
+                      className="rounded-lg bg-gray-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors">
                       Save
                     </button>
                   </div>
@@ -326,7 +326,7 @@ export default function VisionPage() {
                                 value={g.text}
                                 onChange={e => updateDraftGoal(g.id, e.target.value)}
                                 placeholder="Goal…"
-                                className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+                                className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none focus:ring-0"
                               />
                               <button onClick={() => removeDraftGoal(g.id)}
                                 className="text-gray-300 hover:text-red-400 transition-colors flex-shrink-0">
@@ -348,7 +348,7 @@ export default function VisionPage() {
                       Cancel
                     </button>
                     <button onClick={saveGoals}
-                      className="rounded-lg bg-gray-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-gray-700 transition-colors">
+                      className="rounded-lg bg-gray-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors">
                       Save
                     </button>
                   </div>
@@ -406,7 +406,7 @@ export default function VisionPage() {
                         value={t.text}
                         onChange={e => updateDraftTradition(t.id, e.target.value)}
                         placeholder="Tradition…"
-                        className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+                        className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none focus:ring-0"
                       />
                       <button onClick={() => removeDraftTradition(t.id)}
                         className="text-gray-300 hover:text-red-400 transition-colors flex-shrink-0">
@@ -424,7 +424,7 @@ export default function VisionPage() {
                       Cancel
                     </button>
                     <button onClick={saveTraditions}
-                      className="rounded-lg bg-gray-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-gray-700 transition-colors">
+                      className="rounded-lg bg-gray-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors">
                       Save
                     </button>
                   </div>

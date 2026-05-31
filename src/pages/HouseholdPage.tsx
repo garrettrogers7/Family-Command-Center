@@ -546,12 +546,12 @@ function HistoryEntryRow({ entry, familyId, equipment, items, onUpdate }: { entr
                 <div>
                   <label className="mb-1 block text-xs font-medium text-gray-500">Date completed</label>
                   <input type="date" value={editCompletedOn} onChange={(e) => setEditCompletedOn(e.target.value)}
-                    className="w-full rounded border border-gray-200 p-2 text-xs outline-none focus:border-gray-400" />
+                    className="w-full rounded-lg border border-gray-200 p-2 text-xs outline-none focus:border-gray-400" />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-gray-500">Cost ($)</label>
                   <input type="number" min="0" step="0.01" value={editCost} onChange={(e) => setEditCost(e.target.value)}
-                    className="w-full rounded border border-gray-200 p-2 text-xs outline-none focus:border-gray-400" placeholder="0.00" />
+                    className="w-full rounded-lg border border-gray-200 p-2 text-xs outline-none focus:border-gray-400" placeholder="0.00" />
                 </div>
               </div>
               <div>
@@ -654,16 +654,16 @@ function EquipmentRow({ eq, items, history, onUpdate }: {
     return (
       <form onSubmit={save} className="rounded-lg border border-gray-200 bg-white px-4 py-3 space-y-2">
         <input required autoFocus value={name} onChange={e => setName(e.target.value)}
-          className="w-full rounded border border-gray-200 px-2 py-1.5 text-sm outline-none focus:border-gray-400"
+          className="w-full rounded-lg border border-gray-200 px-2 py-1.5 text-sm outline-none focus:border-gray-400"
           placeholder="Name" />
         <div className="grid grid-cols-2 gap-2">
           <select value={category} onChange={e => setCategory(e.target.value as Category | '')}
-            className="rounded border border-gray-200 px-2 py-1.5 text-sm outline-none focus:border-gray-400">
+            className="rounded-lg border border-gray-200 px-2 py-1.5 text-sm outline-none focus:border-gray-400">
             <option value="">— No category —</option>
             <option>Home</option><option>Car</option><option>Yard</option>
           </select>
           <input value={notes} onChange={e => setNotes(e.target.value)}
-            className="rounded border border-gray-200 px-2 py-1.5 text-sm outline-none focus:border-gray-400"
+            className="rounded-lg border border-gray-200 px-2 py-1.5 text-sm outline-none focus:border-gray-400"
             placeholder="Notes (VIN, serial #…)" />
         </div>
         <div className="flex gap-2">
