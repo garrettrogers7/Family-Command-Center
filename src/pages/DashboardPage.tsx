@@ -57,16 +57,28 @@ interface AppIconProps {
 function AppIcon({ to, label, gradient, glow, icon, badge, badgeBg = 'bg-red-500' }: AppIconProps) {
   return (
     <Link to={to} className="flex flex-col items-center gap-2.5 group select-none">
-      <div className={`relative flex h-[76px] w-[76px] items-center justify-center rounded-[22px] ${gradient} ${glow} shadow-lg transition-all duration-150 group-hover:scale-110 group-hover:shadow-xl active:scale-95`}>
+      <div className={`relative flex h-[72px] w-[72px] items-center justify-center rounded-[22px] ${gradient} ${glow} shadow-xl transition-all duration-200 group-hover:scale-110 group-hover:-translate-y-1 active:scale-95`}>
         {icon}
         {badge != null && (
-          <span className={`absolute -top-1.5 -right-1.5 flex h-5 min-w-[20px] items-center justify-center rounded-full ${badgeBg} px-1.5 text-[10px] font-bold leading-none text-white shadow-sm ring-2 ring-white`}>
+          <span className={`absolute -top-1.5 -right-1.5 flex h-5 min-w-[20px] items-center justify-center rounded-full ${badgeBg} px-1.5 text-[10px] font-bold leading-none text-white shadow ring-2 ring-white/20`}>
             {badge}
           </span>
         )}
       </div>
-      <span className="text-[11px] font-semibold text-gray-600 text-center leading-tight">{label}</span>
+      <span className="text-[11px] font-semibold text-white/80 text-center leading-tight drop-shadow">{label}</span>
     </Link>
+  )
+}
+
+// ── Stat card (glass) ─────────────────────────────────────────────
+
+function StatCard({ label, value, sub }: { label: string; value: React.ReactNode; sub: string }) {
+  return (
+    <div className="rounded-2xl border border-white/15 bg-white/10 backdrop-blur-md px-4 py-3.5">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">{label}</p>
+      <p className="mt-1 text-xl font-bold text-white leading-tight">{value}</p>
+      <p className="text-[11px] text-white/50 mt-0.5">{sub}</p>
+    </div>
   )
 }
 
@@ -85,10 +97,10 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!family) return
     const today = new Date()
-    const ms  = format(startOfMonth(today),              'yyyy-MM-dd')
-    const me  = format(endOfMonth(today),                'yyyy-MM-dd')
-    const lms = format(startOfMonth(subMonths(today, 1)),'yyyy-MM-dd')
-    const lme = format(endOfMonth(subMonths(today, 1)),  'yyyy-MM-dd')
+    const ms  = format(startOfMonth(today),               'yyyy-MM-dd')
+    const me  = format(endOfMonth(today),                 'yyyy-MM-dd')
+    const lms = format(startOfMonth(subMonths(today, 1)), 'yyyy-MM-dd')
+    const lme = format(endOfMonth(subMonths(today, 1)),   'yyyy-MM-dd')
 
     Promise.all([
       supabase.from('tasks').select('id').eq('family_id', family.id).eq('module', 'weekly').eq('completed', false),
@@ -114,21 +126,15 @@ export default function DashboardPage() {
 
   const today = new Date()
 
-  const overdueItems = maintenance.filter(item => {
-    const due = calcNextDue(item)
-    return due && due < today
-  })
+  const overdueItems = maintenance.filter(item => { const due = calcNextDue(item); return due && due < today })
   const dueSoonItems = maintenance.filter(item => {
     const due = calcNextDue(item)
     if (!due) return false
-    const days = Math.ceil((due.getTime() - today.getTime()) / 86400000)
-    return days >= 0 && days <= 14
+    return Math.ceil((due.getTime() - today.getTime()) / 86400000) <= 14
   })
 
   const spendTrend = lastMonthSpend > 0 && monthSpend !== null
-    ? monthSpend > lastMonthSpend * 1.05 ? 'up'
-    : monthSpend < lastMonthSpend * 0.95 ? 'down'
-    : 'flat'
+    ? monthSpend > lastMonthSpend * 1.05 ? 'up' : monthSpend < lastMonthSpend * 0.95 ? 'down' : 'flat'
     : null
 
   const greeting = (() => {
@@ -137,45 +143,60 @@ export default function DashboardPage() {
   })()
   const firstName = currentMember?.display_name?.split(' ')[0] ?? ''
 
-  // ── Badge values ──────────────────────────────────────────────
-
-  const weekBadge = !loading && weekTaskCount != null && weekTaskCount > 0 ? weekTaskCount : null
-  const householdBadge = !loading && overdueItems.length > 0
-    ? overdueItems.length
-    : !loading && dueSoonItems.length > 0
-    ? '!'
-    : null
+  const weekBadge      = !loading && weekTaskCount ? weekTaskCount : null
+  const householdBadge = !loading && overdueItems.length > 0 ? overdueItems.length : !loading && dueSoonItems.length > 0 ? '!' : null
   const householdBadgeBg = overdueItems.length > 0 ? 'bg-red-500' : 'bg-amber-400'
-  const spendBadge = !loading && monthSpend != null ? usd(monthSpend) : null
-  const projectsBadge = !loading && activeProjects != null && activeProjects > 0 ? activeProjects : null
+  const spendBadge     = !loading && monthSpend ? usd(monthSpend) : null
+  const projectsBadge  = !loading && activeProjects ? activeProjects : null
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* ── Greeting header ── */}
-      <div className="bg-gradient-to-br from-blue-600 via-blue-600 to-indigo-700 px-6 pt-8 pb-10 md:px-10">
-        <p className="text-sm font-medium text-blue-200 mb-1">{format(today, 'EEEE, MMMM d')}</p>
-        <h1 className="text-3xl font-bold text-white tracking-tight">
-          {greeting}{firstName ? `,` : ''}<br />
-          {firstName || 'Welcome back'}
-        </h1>
-        {members.length > 1 && (
-          <p className="mt-2 text-sm text-blue-200">
-            {members.map(m => m.display_name.split(' ')[0]).join(' & ')}
-          </p>
-        )}
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900">
+
+      {/* ── Decorative background blobs ── */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-indigo-400/25 blur-3xl" />
+        <div className="absolute top-48 -left-16 h-72 w-72 rounded-full bg-blue-400/20 blur-3xl" />
+        <div className="absolute bottom-32 right-8 h-80 w-80 rounded-full bg-violet-500/20 blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 h-56 w-56 rounded-full bg-cyan-400/15 blur-3xl" />
+        {/* Subtle dot grid overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+          }}
+        />
       </div>
 
-      {/* ── Icon grid ── */}
-      <div className="px-6 md:px-10 -mt-6">
-        <div className="rounded-3xl bg-white shadow-xl border border-gray-100 px-6 py-8">
-          <div className="grid grid-cols-3 gap-y-8 gap-x-4 place-items-center">
+      {/* ── Content ── */}
+      <div className="relative z-10 flex flex-col px-6 pt-8 pb-10 md:px-10 max-w-lg mx-auto">
+
+        {/* Greeting */}
+        <div className="mb-8">
+          <p className="text-sm font-medium text-blue-200/80 mb-1 tracking-wide">
+            {format(today, 'EEEE, MMMM d')}
+          </p>
+          <h1 className="text-3xl font-bold text-white tracking-tight leading-tight">
+            {greeting}{firstName ? ',' : ''}<br />
+            <span className="text-white">{firstName || 'Welcome back'}</span>
+          </h1>
+          {members.length > 1 && (
+            <p className="mt-2 text-sm text-blue-200/70">
+              {members.map(m => m.display_name.split(' ')[0]).join(' & ')}
+            </p>
+          )}
+        </div>
+
+        {/* Icon grid panel */}
+        <div className="rounded-3xl border border-white/15 bg-white/10 backdrop-blur-md p-6 mb-5 shadow-2xl">
+          <div className="grid grid-cols-3 gap-y-7 gap-x-4 place-items-center">
 
             <AppIcon
               to="/week"
               label="This Week"
-              gradient="bg-gradient-to-br from-violet-500 to-purple-600"
-              glow="shadow-violet-200"
-              icon={<CalendarDays size={34} className="text-white" strokeWidth={1.75} />}
+              gradient="bg-gradient-to-br from-violet-400 to-purple-600"
+              glow="shadow-violet-500/40"
+              icon={<CalendarDays size={32} className="text-white" strokeWidth={1.75} />}
               badge={weekBadge}
               badgeBg="bg-red-500"
             />
@@ -183,12 +204,11 @@ export default function DashboardPage() {
             <AppIcon
               to="/household"
               label="Household"
-              gradient="bg-gradient-to-br from-emerald-400 to-green-600"
-              glow="shadow-emerald-200"
-              icon={
-                overdueItems.length > 0
-                  ? <AlertTriangle size={34} className="text-white" strokeWidth={1.75} />
-                  : <Home size={34} className="text-white" strokeWidth={1.75} />
+              gradient="bg-gradient-to-br from-emerald-400 to-teal-600"
+              glow="shadow-emerald-500/40"
+              icon={overdueItems.length > 0
+                ? <AlertTriangle size={32} className="text-white" strokeWidth={1.75} />
+                : <Home size={32} className="text-white" strokeWidth={1.75} />
               }
               badge={householdBadge}
               badgeBg={householdBadgeBg}
@@ -198,13 +218,12 @@ export default function DashboardPage() {
               to="/budget"
               label="Spending"
               gradient="bg-gradient-to-br from-orange-400 to-rose-500"
-              glow="shadow-orange-200"
-              icon={
-                spendTrend === 'up'
-                  ? <TrendingUp size={34} className="text-white" strokeWidth={1.75} />
-                  : spendTrend === 'down'
-                  ? <TrendingDown size={34} className="text-white" strokeWidth={1.75} />
-                  : <Wallet size={34} className="text-white" strokeWidth={1.75} />
+              glow="shadow-orange-500/40"
+              icon={spendTrend === 'up'
+                ? <TrendingUp size={32} className="text-white" strokeWidth={1.75} />
+                : spendTrend === 'down'
+                ? <TrendingDown size={32} className="text-white" strokeWidth={1.75} />
+                : <Wallet size={32} className="text-white" strokeWidth={1.75} />
               }
               badge={spendBadge}
               badgeBg="bg-rose-600"
@@ -213,72 +232,69 @@ export default function DashboardPage() {
             <AppIcon
               to="/projects"
               label="Projects"
-              gradient="bg-gradient-to-br from-blue-500 to-indigo-600"
-              glow="shadow-blue-200"
-              icon={<FolderKanban size={34} className="text-white" strokeWidth={1.75} />}
+              gradient="bg-gradient-to-br from-sky-400 to-blue-600"
+              glow="shadow-sky-500/40"
+              icon={<FolderKanban size={32} className="text-white" strokeWidth={1.75} />}
               badge={projectsBadge}
-              badgeBg="bg-indigo-600"
+              badgeBg="bg-blue-700"
             />
 
             <AppIcon
               to="/vision"
               label="Vision"
               gradient="bg-gradient-to-br from-pink-400 to-fuchsia-600"
-              glow="shadow-pink-200"
-              icon={<Compass size={34} className="text-white" strokeWidth={1.75} />}
+              glow="shadow-pink-500/40"
+              icon={<Compass size={32} className="text-white" strokeWidth={1.75} />}
             />
 
             <AppIcon
               to="/settings"
               label="Settings"
               gradient="bg-gradient-to-br from-slate-400 to-slate-600"
-              glow="shadow-slate-200"
-              icon={<Settings size={34} className="text-white" strokeWidth={1.75} />}
+              glow="shadow-slate-500/40"
+              icon={<Settings size={32} className="text-white" strokeWidth={1.75} />}
             />
 
           </div>
         </div>
-      </div>
 
-      {/* ── Quick status strip ── */}
-      {!loading && (
-        <div className="px-6 md:px-10 mt-5 mb-8">
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {/* Quick stats strip */}
+        {!loading && (
+          <div className="grid grid-cols-2 gap-3">
 
-            <div className="rounded-2xl bg-white border border-gray-100 shadow-sm px-4 py-3.5">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Tasks left</p>
-              <p className="mt-1 text-xl font-bold text-gray-900">{weekTaskCount ?? '—'}</p>
-              <p className="text-[11px] text-gray-400">this week</p>
-            </div>
+            <StatCard
+              label="Tasks left"
+              value={weekTaskCount ?? '—'}
+              sub="this week"
+            />
 
-            <div className="rounded-2xl bg-white border border-gray-100 shadow-sm px-4 py-3.5">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Household</p>
-              <p className="mt-1 text-xl font-bold text-gray-900">
-                {overdueItems.length > 0
-                  ? <span className="text-red-500">{overdueItems.length} overdue</span>
+            <StatCard
+              label="Household"
+              value={
+                overdueItems.length > 0
+                  ? <span className="text-red-300">{overdueItems.length} overdue</span>
                   : dueSoonItems.length > 0
-                  ? <span className="text-amber-500">{dueSoonItems.length} due soon</span>
-                  : <span className="flex items-center gap-1.5 text-emerald-600"><ShieldCheck size={18} /> All clear</span>
-                }
-              </p>
-              <p className="text-[11px] text-gray-400">maintenance</p>
-            </div>
+                  ? <span className="text-amber-300">{dueSoonItems.length} due soon</span>
+                  : <span className="flex items-center gap-1.5 text-emerald-300"><ShieldCheck size={16} />All clear</span>
+              }
+              sub="maintenance"
+            />
 
-            <div className="rounded-2xl bg-white border border-gray-100 shadow-sm px-4 py-3.5">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Spending</p>
-              <p className="mt-1 text-xl font-bold text-gray-900">{monthSpend != null ? usd(monthSpend) : '—'}</p>
-              <p className="text-[11px] text-gray-400">{format(today, 'MMMM')}</p>
-            </div>
+            <StatCard
+              label="Spending"
+              value={monthSpend != null ? usd(monthSpend) : '—'}
+              sub={format(today, 'MMMM')}
+            />
 
-            <div className="rounded-2xl bg-white border border-gray-100 shadow-sm px-4 py-3.5">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Projects</p>
-              <p className="mt-1 text-xl font-bold text-gray-900">{activeProjects ?? '—'}</p>
-              <p className="text-[11px] text-gray-400">in progress</p>
-            </div>
+            <StatCard
+              label="Projects"
+              value={activeProjects ?? '—'}
+              sub="in progress"
+            />
 
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
