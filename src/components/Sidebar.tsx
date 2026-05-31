@@ -5,6 +5,7 @@ import {
   Home,
   Wallet,
   FolderKanban,
+  Compass,
   Settings,
 } from 'lucide-react'
 import { useFamily } from '@/contexts/FamilyContext'
@@ -16,6 +17,7 @@ const navItems = [
   { to: '/household', label: 'Household', icon: Home },
   { to: '/budget',    label: 'Spending',  icon: Wallet },
   { to: '/projects',  label: 'Projects',  icon: FolderKanban },
+  { to: '/vision',    label: 'Vision',    icon: Compass },
 ]
 
 export function Sidebar() {

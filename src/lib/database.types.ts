@@ -118,6 +118,41 @@ export interface BudgetTransaction {
   created_at: string
 }
 
+export interface VisionValue {
+  id: string
+  name: string
+  description: string
+}
+
+export type GoalTimeframe = '1year' | '5year' | '10year' | 'someday'
+
+export interface VisionGoal {
+  id: string
+  text: string
+  timeframe: GoalTimeframe
+  done: boolean
+}
+
+export interface VisionTradition {
+  id: string
+  text: string
+}
+
+export interface VisionContent {
+  mission?: string
+  values?: VisionValue[]
+  goals?: VisionGoal[]
+  traditions?: VisionTradition[]
+}
+
+export interface FamilyVision {
+  id: string
+  family_id: string
+  content: VisionContent
+  updated_by: string | null
+  updated_at: string
+}
+
 export type ProjectStatus = 'planning' | 'active' | 'done'
 
 export interface Project {
