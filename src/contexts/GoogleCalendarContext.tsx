@@ -77,9 +77,16 @@ export function GoogleCalendarProvider({ children }: { children: ReactNode }) {
         .eq('user_id', user.id)
       scheduleRefresh(refreshed.expires_in)
       return refreshed.access_token
-    } catch {
-      await supabase.from('google_tokens').delete().eq('user_id', user.id)
-      setConnected(false)
+    } catch (err) {
+      // Only permanently disconnect if Google explicitly revoked the token.
+      // Transient errors (network failure, Google 500) should NOT delete the
+      // token — the next sync attempt will retry automatically.
+      const code = (err as Error & { code?: string }).code
+      if (code === 'invalid_grant' || code === 'invalid_client') {
+        await supabase.from('google_tokens').delete().eq('user_id', user.id)
+        setConnected(false)
+      }
+      // For all other errors: keep the token, return null, try again next poll.
       return null
     }
   }

@@ -67,7 +67,16 @@ export async function refreshAccessToken(
       grant_type: 'refresh_token',
     }),
   })
-  if (!res.ok) throw new Error('Token refresh failed')
+  if (!res.ok) {
+    // Parse the error so callers can distinguish a genuinely revoked token
+    // (invalid_grant) from a transient network/server error.
+    const body = await res.json().catch(() => ({}))
+    const code = body?.error ?? 'unknown'
+    const err = new Error(`Token refresh failed: ${code}`)
+    // Attach the Google error code so callers can check err.code
+    ;(err as Error & { code: string }).code = code
+    throw err
+  }
   return res.json()
 }
 
