@@ -1,6 +1,7 @@
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import {
-  Plus, ChevronDown, ChevronRight, Check, Trash2, Pencil, X, Calendar, Tag, FolderOpen,
+  Plus, ChevronRight, Calendar, Tag, FolderOpen,
 } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { supabase } from '@/lib/supabase'
@@ -24,20 +25,19 @@ const STATUS_STYLE: Record<ProjectStatus, { badge: string; border: string; bar: 
 
 const STATUS_ORDER: ProjectStatus[] = ['active', 'planning', 'done']
 
-// ── Project form (add / edit) ─────────────────────────────────────
+// ── New project form ──────────────────────────────────────────────
 
 interface ProjectFormProps {
-  initial?: Partial<Project>
-  onSave: (data: Partial<Project>) => Promise<void>
+  onSave:   (data: Partial<Project>) => Promise<void>
   onCancel: () => void
 }
 
-function ProjectForm({ initial, onSave, onCancel }: ProjectFormProps) {
-  const [title,       setTitle]       = useState(initial?.title       ?? '')
-  const [description, setDescription] = useState(initial?.description ?? '')
-  const [category,    setCategory]    = useState(initial?.category    ?? '')
-  const [status,      setStatus]      = useState<ProjectStatus>(initial?.status ?? 'planning')
-  const [targetDate,  setTargetDate]  = useState(initial?.target_date ?? '')
+function ProjectForm({ onSave, onCancel }: ProjectFormProps) {
+  const [title,       setTitle]       = useState('')
+  const [description, setDescription] = useState('')
+  const [category,    setCategory]    = useState('')
+  const [status,      setStatus]      = useState<ProjectStatus>('planning')
+  const [targetDate,  setTargetDate]  = useState('')
   const [saving,      setSaving]      = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
@@ -67,7 +67,7 @@ function ProjectForm({ initial, onSave, onCancel }: ProjectFormProps) {
         value={description}
         onChange={e => setDescription(e.target.value)}
         placeholder="Description or notes (optional)"
-        rows={3}
+        rows={2}
         className="input resize-none"
       />
       <div className="flex gap-2 flex-wrap">
@@ -96,88 +96,42 @@ function ProjectForm({ initial, onSave, onCancel }: ProjectFormProps) {
       <div className="flex justify-end gap-2">
         <button type="button" onClick={onCancel} className="btn-ghost-sm">Cancel</button>
         <button type="submit" disabled={!title.trim() || saving} className="btn-sm">
-          {saving ? 'Saving…' : initial?.id ? 'Save changes' : 'Add project'}
+          {saving ? 'Saving…' : 'Add project'}
         </button>
       </div>
     </form>
   )
 }
 
-// ── Single project card ───────────────────────────────────────────
+// ── Project card (navigates to detail page) ───────────────────────
 
 interface ProjectCardProps {
-  project: Project
-  tasks: ProjectTask[]
-  defaultExpanded?: boolean
+  project:   Project
+  tasks:     ProjectTask[]
   onUpdated: () => void
-  familyId: string
 }
 
-function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, familyId }: ProjectCardProps) {
-  const [expanded,   setExpanded]   = useState(defaultExpanded)
-  const [editing,    setEditing]    = useState(false)
-  const [newTask,    setNewTask]    = useState('')
-  const [addingTask, setAddingTask] = useState(false)
-  const taskInputRef = useRef<HTMLInputElement>(null)
-
+function ProjectCard({ project, tasks, onUpdated }: ProjectCardProps) {
   const done  = tasks.filter(t => t.completed)
   const total = tasks.length
   const pct   = total > 0 ? Math.round((done.length / total) * 100) : 0
   const styles = STATUS_STYLE[project.status]
 
-  async function handleSaveEdit(data: Partial<Project>) {
-    await supabase.from('projects').update({ ...data, updated_at: new Date().toISOString() }).eq('id', project.id)
-    setEditing(false)
-    onUpdated()
-  }
-
-  async function handleDelete() {
-    if (!confirm(`Delete "${project.title}"? This will also remove all its tasks.`)) return
-    await supabase.from('projects').delete().eq('id', project.id)
-    onUpdated()
-  }
-
-  async function handleToggleTask(task: ProjectTask) {
-    await supabase.from('project_tasks').update({ completed: !task.completed }).eq('id', task.id)
-    onUpdated()
-  }
-
-  async function handleDeleteTask(taskId: string) {
-    await supabase.from('project_tasks').delete().eq('id', taskId)
-    onUpdated()
-  }
-
-  async function handleAddTask(e: React.FormEvent) {
+  async function handleStatusCycle(e: React.MouseEvent) {
     e.preventDefault()
-    if (!newTask.trim()) return
-    setAddingTask(true)
-    await supabase.from('project_tasks').insert({
-      project_id: project.id,
-      family_id:  familyId,
-      text:       newTask.trim(),
-      sort_order: tasks.length,
-    })
-    setNewTask('')
-    setAddingTask(false)
-    onUpdated()
-    taskInputRef.current?.focus()
-  }
-
-  async function handleStatusCycle() {
     const next: Record<ProjectStatus, ProjectStatus> = { planning: 'active', active: 'done', done: 'planning' }
     await supabase.from('projects').update({ status: next[project.status], updated_at: new Date().toISOString() }).eq('id', project.id)
     onUpdated()
   }
 
   return (
-    <div className={`rounded-2xl border border-blue-100 bg-white shadow-sm overflow-hidden border-l-4 transition-all hover:shadow-md ${styles.border} ${project.status === 'done' ? 'opacity-70' : ''}`}>
-      {/* Card header */}
-      <div
-        className="flex items-center gap-3 px-5 py-4 cursor-pointer select-none"
-        onClick={() => { if (!editing) setExpanded(v => !v) }}
-      >
+    <Link
+      to={`/projects/${project.id}`}
+      className={`block rounded-2xl border border-blue-100 bg-white shadow-sm overflow-hidden border-l-4 transition-all hover:shadow-md hover:-translate-y-0.5 ${styles.border} ${project.status === 'done' ? 'opacity-70' : ''}`}
+    >
+      <div className="flex items-center gap-3 px-5 py-4">
         <button
-          onClick={e => { e.stopPropagation(); handleStatusCycle() }}
+          onClick={handleStatusCycle}
           className={`flex-shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors hover:opacity-80 ${styles.badge}`}
           title="Click to change status"
         >
@@ -205,98 +159,18 @@ function ProjectCard({ project, tasks, defaultExpanded = false, onUpdated, famil
           </div>
         </div>
 
-        {/* Progress bar */}
         {total > 0 && (
           <div className="hidden sm:flex flex-col items-end gap-1 flex-shrink-0 w-20">
             <span className="text-[10px] font-semibold text-slate-400">{pct}%</span>
             <div className="h-1.5 w-full rounded-full bg-slate-100">
-              <div
-                className={`h-1.5 rounded-full transition-all ${styles.bar}`}
-                style={{ width: `${pct}%` }}
-              />
+              <div className={`h-1.5 rounded-full transition-all ${styles.bar}`} style={{ width: `${pct}%` }} />
             </div>
           </div>
         )}
 
-        {expanded
-          ? <ChevronDown size={15} className="flex-shrink-0 text-slate-300" />
-          : <ChevronRight size={15} className="flex-shrink-0 text-slate-300" />
-        }
+        <ChevronRight size={15} className="flex-shrink-0 text-slate-300" />
       </div>
-
-      {/* Expanded body */}
-      {expanded && (
-        <div className="border-t border-gray-50 px-5 pb-5 pt-4 space-y-4">
-          {editing ? (
-            <ProjectForm
-              initial={project}
-              onSave={handleSaveEdit}
-              onCancel={() => setEditing(false)}
-            />
-          ) : (
-            <>
-              {project.description && (
-                <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{project.description}</p>
-              )}
-
-              {/* Task list */}
-              {tasks.length > 0 && (
-                <ul className="space-y-2">
-                  {tasks.map(task => (
-                    <li key={task.id} className="group flex items-center gap-3 rounded-lg px-2 py-1 hover:bg-blue-50 transition-colors">
-                      <button
-                        onClick={() => handleToggleTask(task)}
-                        className={`flex-shrink-0 flex items-center justify-center rounded border-2 transition-colors
-                          ${task.completed ? 'bg-blue-500 border-blue-500' : 'border-blue-100 hover:border-indigo-400'}`}
-                        style={{ height: 18, width: 18 }}
-                      >
-                        {task.completed && <Check size={11} strokeWidth={3} className="text-slate-900" />}
-                      </button>
-                      <span className={`flex-1 text-sm ${task.completed ? 'line-through text-slate-400' : 'text-slate-700'}`}>
-                        {task.text}
-                      </span>
-                      <button
-                        onClick={() => handleDeleteTask(task.id)}
-                        className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-600 transition-all"
-                      >
-                        <X size={13} />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              {/* Add task */}
-              <form onSubmit={handleAddTask} className="flex items-center gap-2">
-                <input
-                  ref={taskInputRef}
-                  value={newTask}
-                  onChange={e => setNewTask(e.target.value)}
-                  placeholder="Add a task…"
-                  className="flex-1 rounded-lg border border-dashed border-blue-100 px-3 py-1.5 text-sm text-slate-700 placeholder-white/25 focus:border-blue-300 focus:outline-none focus:border-solid transition-colors"
-                />
-                <button type="submit" disabled={!newTask.trim() || addingTask}
-                  className="rounded-lg bg-slate-100 px-2.5 py-1.5 text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-colors disabled:opacity-40">
-                  <Plus size={14} />
-                </button>
-              </form>
-
-              {/* Actions */}
-              <div className="flex items-center justify-end gap-1 pt-1 border-t border-gray-50">
-                <button onClick={() => setEditing(true)}
-                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-slate-400 hover:bg-blue-50 hover:text-slate-600 transition-colors">
-                  <Pencil size={12} /> Edit
-                </button>
-                <button onClick={handleDelete}
-                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors">
-                  <Trash2 size={12} /> Delete
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      )}
-    </div>
+    </Link>
   )
 }
 
@@ -352,10 +226,7 @@ export default function ProjectsPage() {
         title="Projects"
         subtitle="Plans & goals"
         action={
-          <button
-            onClick={() => setShowNewForm(v => !v)}
-            className="btn-sm"
-          >
+          <button onClick={() => setShowNewForm(v => !v)} className="btn-sm">
             <Plus size={13} /> New project
           </button>
         }
@@ -364,7 +235,7 @@ export default function ProjectsPage() {
       <div className="mx-auto max-w-2xl px-4 py-6 md:px-8 space-y-4">
 
         {/* Filter tabs */}
-        <div className="flex items-center gap-1 rounded-xl p-1 w-fit rounded-md border border-blue-100">
+        <div className="flex items-center gap-1 rounded-md border border-blue-100 p-1 w-fit">
           {STATUS_FILTERS.map(s => (
             <button
               key={s}
@@ -377,7 +248,7 @@ export default function ProjectsPage() {
             >
               {s === 'all' ? 'All' : STATUS_LABEL[s as ProjectStatus]}
               {counts[s] > 0 && (
-                <span className={`ml-1.5 text-[10px] font-bold ${statusFilter === s ? 'text-blue-300' : 'text-blue-300'}`}>
+                <span className={`ml-1.5 text-[10px] font-bold ${statusFilter === s ? 'text-blue-200' : 'text-blue-300'}`}>
                   {counts[s]}
                 </span>
               )}
@@ -389,10 +260,7 @@ export default function ProjectsPage() {
         {showNewForm && (
           <div className="rounded-2xl border border-blue-200 bg-white p-5 shadow-sm">
             <p className="mb-4 text-sm font-bold text-slate-800">New project</p>
-            <ProjectForm
-              onSave={handleAddProject}
-              onCancel={() => setShowNewForm(false)}
-            />
+            <ProjectForm onSave={handleAddProject} onCancel={() => setShowNewForm(false)} />
           </div>
         )}
 
@@ -422,7 +290,6 @@ export default function ProjectsPage() {
                 key={project.id}
                 project={project}
                 tasks={tasks.filter(t => t.project_id === project.id)}
-                familyId={family!.id}
                 onUpdated={fetchAll}
               />
             ))}

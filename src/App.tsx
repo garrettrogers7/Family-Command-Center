@@ -11,6 +11,7 @@ import HouseholdPage from '@/pages/HouseholdPage'
 import VaultPage from '@/pages/VaultPage'
 import BudgetPage from '@/pages/BudgetPage'
 import ProjectsPage from '@/pages/ProjectsPage'
+import ProjectDetailPage from '@/pages/ProjectDetailPage'
 import VisionPage from '@/pages/VisionPage'
 import SettingsPage from '@/pages/SettingsPage'
 
@@ -79,6 +80,7 @@ export default function App() {
         <Route path="vault" element={<VaultPage />} />
         <Route path="budget" element={<BudgetPage />} />
         <Route path="projects" element={<ProjectsPage />} />
+        <Route path="projects/:id" element={<ProjectDetailPage />} />
         <Route path="vision" element={<VisionPage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="assistant" element={<Navigate to="/week" replace />} />

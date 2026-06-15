@@ -164,6 +164,7 @@ export interface Project {
   status: ProjectStatus
   target_date: string | null  // ISO date "YYYY-MM-DD"
   sort_order: number
+  content: Record<string, unknown> | null  // flexible JSONB: notes, links, etc.
   created_at: string
   updated_at: string
 }
