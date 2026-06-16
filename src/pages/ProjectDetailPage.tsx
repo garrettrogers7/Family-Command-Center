@@ -63,6 +63,7 @@ export default function ProjectDetailPage() {
   const [renamingTabId,       setRenamingTabId]       = useState<string | null>(null)
   const [tabRenameDraft,      setTabRenameDraft]       = useState('')
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [confirmDeleteSectionId, setConfirmDeleteSectionId] = useState<string | null>(null)
   const renameInputRef = useRef<HTMLInputElement>(null)
 
   const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
@@ -326,7 +327,7 @@ export default function ProjectDetailPage() {
         >
           {/* Tasks tab */}
           <button
-            onClick={() => setActiveTab('tasks')}
+            onClick={() => { setActiveTab('tasks'); setConfirmDeleteSectionId(null) }}
             className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors border-l-2 flex items-center justify-between group ${
               activeTab === 'tasks'
                 ? 'border-l-[#1a6db5] bg-white text-slate-800'
@@ -362,7 +363,7 @@ export default function ProjectDetailPage() {
                 />
               ) : (
                 <button
-                  onClick={() => setActiveTab(section.id)}
+                  onClick={() => { setActiveTab(section.id); setConfirmDeleteSectionId(null) }}
                   onDoubleClick={() => { setRenamingTabId(section.id); setTabRenameDraft(section.title) }}
                   className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors border-l-2 ${
                     activeTab === section.id
@@ -384,9 +385,24 @@ export default function ProjectDetailPage() {
                   >
                     <Pencil size={10} />
                   </button>
-                  {sections.length > 1 && (
+                  {confirmDeleteSectionId === section.id ? (
+                    <span className="flex items-center gap-1">
+                      <button
+                        onClick={() => { deleteSection(section.id); setConfirmDeleteSectionId(null) }}
+                        className="text-[10px] font-medium text-red-500 hover:text-red-600 px-0.5"
+                      >
+                        Delete
+                      </button>
+                      <button
+                        onClick={() => setConfirmDeleteSectionId(null)}
+                        className="text-[10px] text-slate-400 hover:text-slate-600 px-0.5"
+                      >
+                        Cancel
+                      </button>
+                    </span>
+                  ) : (
                     <button
-                      onClick={() => deleteSection(section.id)}
+                      onClick={() => setConfirmDeleteSectionId(section.id)}
                       className="w-5 h-5 flex items-center justify-center rounded text-slate-300 hover:text-red-400 hover:bg-red-50 transition-colors"
                       title="Delete page"
                     >
