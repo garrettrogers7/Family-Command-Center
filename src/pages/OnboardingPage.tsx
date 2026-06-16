@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react'
+import { useState, FormEvent, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
@@ -14,8 +14,15 @@ const COLOR_OPTIONS: { value: UserColor; label: string; classes: string }[] = [
 
 export default function OnboardingPage() {
   const { user } = useAuth()
-  const { refetch } = useFamily()
+  const { family, loading: familyLoading, refetch } = useFamily()
   const navigate = useNavigate()
+
+  // If the user already belongs to a family, skip onboarding entirely
+  useEffect(() => {
+    if (!familyLoading && family) {
+      navigate('/today', { replace: true })
+    }
+  }, [family, familyLoading])
 
   const [step, setStep] = useState<Step>('choose')
   const [displayName, setDisplayName] = useState('')
