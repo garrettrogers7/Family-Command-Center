@@ -463,7 +463,7 @@ function SortableFunRow({
 export default function WeekPage() {
   const { user } = useAuth()
   const { family, members } = useFamily()
-  const { weekEvents, refreshEvents } = useGoogleCalendar()
+  const { weekEvents, refreshEvents, needsReauth, connect } = useGoogleCalendar()
 
   // Week navigation
   const [weekOffset, setWeekOffset] = useState(0)
@@ -905,6 +905,25 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
           </div>
         }
       />
+
+      {/* ── Calendar reconnect banner ── */}
+      {needsReauth && (
+        <div className="flex items-center justify-between gap-3 px-4 py-3 md:px-8" style={{ backgroundColor: '#fff7ed', borderBottom: '1px solid #fed7aa' }}>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="text-orange-500 flex-shrink-0">⚠</span>
+            <p className="text-sm text-orange-800 font-medium">
+              Google Calendar disconnected — your events may be out of date.
+            </p>
+          </div>
+          <button
+            onClick={connect}
+            className="flex-shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition-colors"
+            style={{ backgroundColor: '#ea580c' }}
+          >
+            Reconnect
+          </button>
+        </div>
+      )}
 
       <div className="px-4 py-3 md:px-8 md:py-5 space-y-5">
         {loading ? (

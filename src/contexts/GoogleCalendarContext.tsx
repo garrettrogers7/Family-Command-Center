@@ -29,6 +29,7 @@ interface StoredTokenRow {
 
 interface GoogleCalendarContextValue {
   connected: boolean
+  needsReauth: boolean   // token expired/revoked — user must reconnect
   loading: boolean
   todayEvents: StoredCalendarEvent[]
   weekEvents: StoredCalendarEvent[]
@@ -43,6 +44,7 @@ export function GoogleCalendarProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
   const { family } = useFamily()
   const [connected, setConnected] = useState(false)
+  const [needsReauth, setNeedsReauth] = useState(false)
   const [loading, setLoading] = useState(true)
   const [todayEvents, setTodayEvents] = useState<StoredCalendarEvent[]>([])
   const [weekEvents, setWeekEvents] = useState<StoredCalendarEvent[]>([])
@@ -83,8 +85,12 @@ export function GoogleCalendarProvider({ children }: { children: ReactNode }) {
       // token — the next sync attempt will retry automatically.
       const code = (err as Error & { code?: string }).code
       if (code === 'invalid_grant' || code === 'invalid_client') {
+        // Token is genuinely dead — clean it up but keep cached calendar_events
+        // visible so the user can still see their schedule while they reconnect.
+        console.warn('[CalSync] refresh token revoked by Google (code:', code, '). Prompting reauth.')
         await supabase.from('google_tokens').delete().eq('user_id', user.id)
         setConnected(false)
+        setNeedsReauth(true)
       }
       // For all other errors: keep the token, return null, try again next poll.
       return null
@@ -253,6 +259,7 @@ export function GoogleCalendarProvider({ children }: { children: ReactNode }) {
   // ── Public actions ───────────────────────────────────────────
 
   function connect() {
+    setNeedsReauth(false)
     window.location.href = getGoogleAuthUrl()
   }
 
@@ -280,7 +287,7 @@ export function GoogleCalendarProvider({ children }: { children: ReactNode }) {
 
   return (
     <GoogleCalendarContext.Provider
-      value={{ connected, loading, todayEvents, weekEvents, connect, disconnect, refreshEvents: loadEvents }}
+      value={{ connected, needsReauth, loading, todayEvents, weekEvents, connect, disconnect, refreshEvents: loadEvents }}
     >
       {children}
     </GoogleCalendarContext.Provider>

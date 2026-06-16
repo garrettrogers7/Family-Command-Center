@@ -17,7 +17,7 @@ export default function SettingsPage() {
   const { user, signOut } = useAuth()
   const { family, currentMember, otherMember, refetch } = useFamily()
 
-  const { connected, connecting, connect, disconnect } = useGoogleCalendar()
+  const { connected, needsReauth, connecting, connect, disconnect } = useGoogleCalendar()
   const [displayName, setDisplayName] = useState(currentMember?.display_name ?? '')
   const [color, setColor] = useState<UserColor>(currentMember?.color ?? 'blue')
   const [saving, setSaving] = useState(false)
@@ -268,14 +268,16 @@ export default function SettingsPage() {
           <div className="rounded-xl border border-blue-100 bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${connected ? 'bg-slate-400/10' : 'bg-blue-50'}`}>
-                  <Calendar size={20} className={connected ? 'text-slate-500' : 'text-blue-500'} />
+                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${connected ? 'bg-blue-50' : needsReauth ? 'bg-orange-50' : 'bg-slate-100'}`}>
+                  <Calendar size={20} className={connected ? 'text-blue-500' : needsReauth ? 'text-orange-500' : 'text-slate-400'} />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-slate-900">Google Calendar</p>
                   <p className="text-xs text-slate-400">
                     {connected
-                      ? 'Connected — events appear in Today and This Week'
+                      ? 'Connected — events sync automatically'
+                      : needsReauth
+                      ? 'Disconnected — tap Reconnect to restore'
                       : 'Sync your events to Today and This Week'}
                   </p>
                 </div>
@@ -293,18 +295,23 @@ export default function SettingsPage() {
                 <button
                   onClick={connect}
                   disabled={connecting}
-                  className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-slate-900 disabled:opacity-50"
+                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50 transition-colors ${needsReauth ? 'bg-orange-500 hover:bg-orange-600' : 'bg-blue-600 hover:bg-blue-700'}`}
                 >
                   {connecting
                     ? <><Loader2 size={12} className="animate-spin" /> Connecting…</>
-                    : 'Connect'}
+                    : needsReauth ? 'Reconnect' : 'Connect'}
                 </button>
               )}
             </div>
 
             {connected && (
-              <p className="mt-3 rounded-lg bg-slate-400/10 px-3 py-2 text-xs text-green-400">
-                ✓ Your Google Calendar is connected. Events refresh automatically each session.
+              <p className="mt-3 rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-700">
+                ✓ Connected. Events refresh every 5 minutes and on each visit.
+              </p>
+            )}
+            {needsReauth && !connected && (
+              <p className="mt-3 rounded-lg bg-orange-50 px-3 py-2 text-xs text-orange-700">
+                ⚠ Google revoked your calendar access (this happens every 7 days if the app is in testing mode). Tap Reconnect above to restore it.
               </p>
             )}
           </div>
