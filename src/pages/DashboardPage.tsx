@@ -9,7 +9,7 @@ import {
 } from 'date-fns'
 import { supabase } from '@/lib/supabase'
 import { useFamily } from '@/contexts/FamilyContext'
-import type { MaintenanceItem } from '@/lib/database.types'
+import type { MaintenanceItem, YearEvent, YearEventColor } from '@/lib/database.types'
 
 // ── Helpers ───────────────────────────────────────────────────────
 
@@ -39,6 +39,16 @@ function calcNextDue(item: MaintenanceItem): Date | null {
 
 function usd(n: number) {
   return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+}
+
+// ── Year event color map ──────────────────────────────────────────
+
+const YEAR_EVENT_COLORS: Record<YearEventColor, { dot: string; text: string }> = {
+  blue:   { dot: 'bg-blue-400',    text: 'text-blue-700' },
+  green:  { dot: 'bg-emerald-400', text: 'text-emerald-700' },
+  orange: { dot: 'bg-orange-400',  text: 'text-orange-700' },
+  purple: { dot: 'bg-purple-400',  text: 'text-purple-700' },
+  red:    { dot: 'bg-red-400',     text: 'text-red-700' },
 }
 
 // ── Section card — MidOcean style ─────────────────────────────────
@@ -95,6 +105,7 @@ export default function DashboardPage() {
   const [monthSpend,     setMonthSpend]     = useState<number | null>(null)
   const [lastMonthSpend, setLastMonthSpend] = useState<number>(0)
   const [activeProjects, setActiveProjects] = useState<number | null>(null)
+  const [upcomingEvents, setUpcomingEvents] = useState<YearEvent[]>([])
   const [loading,        setLoading]        = useState(true)
 
   useEffect(() => {
@@ -111,10 +122,12 @@ export default function DashboardPage() {
       supabase.from('budget_transactions').select('amount').eq('family_id', family.id).gte('date', ms).lte('date', me),
       supabase.from('budget_transactions').select('amount').eq('family_id', family.id).gte('date', lms).lte('date', lme),
       supabase.from('projects').select('id').eq('family_id', family.id).in('status', ['planning', 'active']),
-    ]).then(([tasks, maint, txns, lastTxns, projects]) => {
+      supabase.from('year_events').select('*').eq('family_id', family.id).gte('date', format(today, 'yyyy-MM-dd')).order('date').limit(5),
+    ]).then(([tasks, maint, txns, lastTxns, projects, yearEvts]) => {
       setWeekTaskCount((tasks.data ?? []).length)
       setMaintenance((maint.data as MaintenanceItem[]) ?? [])
       setActiveProjects((projects.data ?? []).length)
+      setUpcomingEvents((yearEvts.data as YearEvent[]) ?? [])
 
       const spend     = ((txns.data     ?? []) as { amount: number }[]).filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0)
       const lastSpend = ((lastTxns.data ?? []) as { amount: number }[]).filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0)
@@ -247,6 +260,42 @@ export default function DashboardPage() {
               sub={`${members.length} ${members.length === 1 ? 'member' : 'members'}`}
             />
 
+          </div>
+        )}
+
+        {/* ── Year Ahead: upcoming events ── */}
+        {!loading && upcomingEvents.length > 0 && (
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#7aafd4' }}>
+                Coming Up
+              </span>
+              <Link to="/year" className="text-[10px] font-medium hover:underline" style={{ color: '#7aafd4' }}>
+                View all →
+              </Link>
+            </div>
+            <div
+              className="rounded-lg overflow-hidden"
+              style={{ border: '1px solid #dde8f5', boxShadow: '0 1px 4px rgba(15,50,100,0.06)' }}
+            >
+              {upcomingEvents.map((evt, i) => {
+                const c = YEAR_EVENT_COLORS[evt.color]
+                return (
+                  <Link
+                    key={evt.id}
+                    to="/year"
+                    className="flex items-center gap-3 px-4 py-3 bg-white hover:bg-blue-50/50 transition-colors"
+                    style={i > 0 ? { borderTop: '1px solid #f0f5fb' } : {}}
+                  >
+                    <span className={`flex-shrink-0 h-2 w-2 rounded-full ${c.dot}`} />
+                    <span className="flex-1 text-sm font-medium text-slate-700 truncate">{evt.title}</span>
+                    <span className="flex-shrink-0 text-xs text-slate-400">
+                      {format(parseISO(evt.date), 'MMM d')}
+                    </span>
+                  </Link>
+                )
+              })}
+            </div>
           </div>
         )}
       </div>
