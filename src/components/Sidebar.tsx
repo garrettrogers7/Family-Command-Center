@@ -1,14 +1,15 @@
 import { NavLink } from 'react-router-dom'
 import {
-  LayoutDashboard, CalendarDays, Home, Wallet, FolderKanban, Compass, Settings,
+  LayoutDashboard, CalendarDays, Home, Wallet, FolderKanban, Compass, Settings, CalendarRange,
 } from 'lucide-react'
 import { useFamily } from '@/contexts/FamilyContext'
 import { UserAvatar } from '@/components/UserAvatar'
 
 const navItems = [
   { to: '/today',     label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/week',      label: 'This Week', icon: CalendarDays },
-  { to: '/household', label: 'Household', icon: Home },
+  { to: '/week',      label: 'This Week',  icon: CalendarDays },
+  { to: '/year',      label: 'Year Ahead', icon: CalendarRange },
+  { to: '/household', label: 'Household',  icon: Home },
   { to: '/budget',    label: 'Spending',  icon: Wallet },
   { to: '/projects',  label: 'Projects',  icon: FolderKanban },
   { to: '/vision',    label: 'Vision',    icon: Compass },

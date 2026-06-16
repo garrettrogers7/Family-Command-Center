@@ -198,6 +198,17 @@ export interface FunItem {
   created_at: string
 }
 
+export type YearEventColor = 'blue' | 'green' | 'orange' | 'purple' | 'red'
+
+export interface YearEvent {
+  id: string
+  family_id: string
+  title: string
+  date: string  // ISO "YYYY-MM-DD"
+  color: YearEventColor
+  created_at: string
+}
+
 export interface WeeklyPlanContent {
   monday?: string
   tuesday?: string
