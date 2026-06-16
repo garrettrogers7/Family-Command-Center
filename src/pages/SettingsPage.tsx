@@ -70,6 +70,8 @@ export default function SettingsPage() {
         { data: weeklyPlans },
         { data: vaultEntries },
         { data: familyMembers },
+        { data: funItems },
+        { data: projects },
       ] = await Promise.all([
         supabase.from('tasks').select('*').eq('family_id', fid),
         supabase.from('maintenance_items').select('*').eq('family_id', fid),
@@ -78,6 +80,8 @@ export default function SettingsPage() {
         supabase.from('weekly_plans').select('*').eq('family_id', fid),
         supabase.from('vault_entries').select('*').eq('family_id', fid),
         supabase.from('family_members').select('*').eq('family_id', fid),
+        supabase.from('fun_items').select('*').eq('family_id', fid),
+        supabase.from('projects').select('*').eq('family_id', fid),
       ])
 
       const backup = {
@@ -92,6 +96,8 @@ export default function SettingsPage() {
           equipment: equipment ?? [],
           weeklyPlans: weeklyPlans ?? [],
           vaultEntries: vaultEntries ?? [],
+          funItems: funItems ?? [],
+          projects: projects ?? [],
         },
       }
 
