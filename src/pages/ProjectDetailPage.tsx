@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Plus, Check, X, Trash2, Calendar, Tag, Pencil } from 'lucide-react'
+import { ArrowLeft, Plus, Check, X, Trash2, Calendar, Tag, Pencil, PanelLeft } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { supabase } from '@/lib/supabase'
 import { useFamily } from '@/contexts/FamilyContext'
@@ -56,6 +56,8 @@ export default function ProjectDetailPage() {
   const [newTask,    setNewTask]    = useState('')
   const [addingTask, setAddingTask] = useState(false)
   const taskInputRef = useRef<HTMLInputElement>(null)
+
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   // Rename state
   const [editingProjectTitle, setEditingProjectTitle] = useState(false)
@@ -253,6 +255,14 @@ export default function ProjectDetailPage() {
             <ArrowLeft size={16} />
           </button>
 
+          <button
+            onClick={() => setSidebarOpen(prev => !prev)}
+            className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
+            title="Toggle pages"
+          >
+            <PanelLeft size={16} />
+          </button>
+
           <div className="flex-1 min-w-0">
             {project.category && (
               <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: 'rgba(122,175,212,0.85)' }}>
@@ -314,11 +324,22 @@ export default function ProjectDetailPage() {
       </div>
 
       {/* ── Notebook layout: sidebar tabs + content ── */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
+
+        {/* Mobile backdrop */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/20 z-10 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
 
         {/* Sidebar tab strip */}
         <div
-          className="flex flex-col flex-shrink-0 overflow-y-auto"
+          className={`flex flex-col flex-shrink-0 overflow-y-auto z-20 transition-transform duration-200
+            absolute inset-y-0 left-0 md:relative md:translate-x-0
+            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+          `}
           style={{
             width: 160,
             borderRight: '1px solid #dde8f5',
@@ -327,7 +348,7 @@ export default function ProjectDetailPage() {
         >
           {/* Tasks tab */}
           <button
-            onClick={() => { setActiveTab('tasks'); setConfirmDeleteSectionId(null) }}
+            onClick={() => { setActiveTab('tasks'); setConfirmDeleteSectionId(null); setSidebarOpen(false) }}
             className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors border-l-2 flex items-center justify-between group ${
               activeTab === 'tasks'
                 ? 'border-l-[#1a6db5] bg-white text-slate-800'
@@ -363,7 +384,7 @@ export default function ProjectDetailPage() {
                 />
               ) : (
                 <button
-                  onClick={() => { setActiveTab(section.id); setConfirmDeleteSectionId(null) }}
+                  onClick={() => { setActiveTab(section.id); setConfirmDeleteSectionId(null); setSidebarOpen(false) }}
                   onDoubleClick={() => { setRenamingTabId(section.id); setTabRenameDraft(section.title) }}
                   className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors border-l-2 ${
                     activeTab === section.id
