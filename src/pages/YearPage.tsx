@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Plus, X, Pencil } from 'lucide-react'
-import { format, parseISO, isSameMonth } from 'date-fns'
+import { format, parseISO, isSameMonth, getMonth } from 'date-fns'
 import { supabase } from '@/lib/supabase'
 import { useFamily } from '@/contexts/FamilyContext'
 import { PageHeader } from '@/components/PageHeader'
@@ -9,7 +9,7 @@ import type { YearEvent, YearEventColor } from '@/lib/database.types'
 // ── Color config ──────────────────────────────────────────────────
 
 const COLORS: { value: YearEventColor; dot: string; chip: string }[] = [
-  { value: 'blue',   dot: 'bg-blue-400',   chip: 'bg-blue-50 text-blue-700' },
+  { value: 'blue',   dot: 'bg-blue-400',    chip: 'bg-blue-50 text-blue-700' },
   { value: 'green',  dot: 'bg-emerald-400', chip: 'bg-emerald-50 text-emerald-700' },
   { value: 'orange', dot: 'bg-orange-400',  chip: 'bg-orange-50 text-orange-700' },
   { value: 'purple', dot: 'bg-purple-400',  chip: 'bg-purple-50 text-purple-700' },
@@ -21,6 +21,101 @@ function colorChip(color: YearEventColor) {
 }
 function colorDot(color: YearEventColor) {
   return COLORS.find(c => c.value === color)?.dot ?? 'bg-blue-400'
+}
+
+// ── Season config ─────────────────────────────────────────────────
+
+type SeasonName = 'spring' | 'summer' | 'fall' | 'winter'
+
+interface SeasonConfig {
+  name: string
+  description: string
+  gradient: string
+  headerTextColor: string
+  headerSubColor: string
+  cardBorder: string
+  cardHeaderBg: string
+  cardHeaderText: string
+  activeCardGradient: string
+  activeCardText: string
+}
+
+const SEASONS: Record<SeasonName, SeasonConfig> = {
+  summer: {
+    name: 'Summer',
+    description: 'Long days, warm evenings, and open skies',
+    gradient: 'linear-gradient(135deg, #b45309 0%, #d97706 35%, #fbbf24 65%, #7dd3fc 100%)',
+    headerTextColor: '#fff',
+    headerSubColor: 'rgba(255,255,255,0.65)',
+    cardBorder: '#fde68a',
+    cardHeaderBg: '#fffbeb',
+    cardHeaderText: '#92400e',
+    activeCardGradient: 'linear-gradient(135deg, #d97706, #f59e0b)',
+    activeCardText: '#fff',
+  },
+  fall: {
+    name: 'Fall',
+    description: 'Crisp air, golden light, and changing leaves',
+    gradient: 'linear-gradient(135deg, #7c2d12 0%, #9a3412 30%, #c2410c 65%, #d97706 100%)',
+    headerTextColor: '#fff',
+    headerSubColor: 'rgba(255,255,255,0.60)',
+    cardBorder: '#fed7aa',
+    cardHeaderBg: '#fff7ed',
+    cardHeaderText: '#9a3412',
+    activeCardGradient: 'linear-gradient(135deg, #c2410c, #ea580c)',
+    activeCardText: '#fff',
+  },
+  winter: {
+    name: 'Winter',
+    description: 'Cozy moments, quiet reflection, and holiday magic',
+    gradient: 'linear-gradient(135deg, #0c2340 0%, #1e3a8a 45%, #1d4ed8 75%, #93c5fd 100%)',
+    headerTextColor: '#fff',
+    headerSubColor: 'rgba(255,255,255,0.55)',
+    cardBorder: '#bfdbfe',
+    cardHeaderBg: '#eff6ff',
+    cardHeaderText: '#1e3a8a',
+    activeCardGradient: 'linear-gradient(135deg, #1e40af, #2563eb)',
+    activeCardText: '#fff',
+  },
+  spring: {
+    name: 'Spring',
+    description: 'Fresh starts, new blooms, and longer mornings',
+    gradient: 'linear-gradient(135deg, #9d174d 0%, #a855f7 40%, #6d28d9 70%, #34d399 100%)',
+    headerTextColor: '#fff',
+    headerSubColor: 'rgba(255,255,255,0.60)',
+    cardBorder: '#e9d5ff',
+    cardHeaderBg: '#faf5ff',
+    cardHeaderText: '#6b21a8',
+    activeCardGradient: 'linear-gradient(135deg, #7c3aed, #a855f7)',
+    activeCardText: '#fff',
+  },
+}
+
+function getSeason(month: Date): SeasonName {
+  const m = getMonth(month)
+  if (m >= 2 && m <= 4) return 'spring'
+  if (m >= 5 && m <= 7) return 'summer'
+  if (m >= 8 && m <= 10) return 'fall'
+  return 'winter'
+}
+
+interface SeasonGroup {
+  season: SeasonName
+  months: Date[]
+}
+
+function groupMonthsBySeason(months: Date[]): SeasonGroup[] {
+  const groups: SeasonGroup[] = []
+  for (const month of months) {
+    const season = getSeason(month)
+    const last = groups[groups.length - 1]
+    if (last && last.season === season) {
+      last.months.push(month)
+    } else {
+      groups.push({ season, months: [month] })
+    }
+  }
+  return groups
 }
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -37,8 +132,8 @@ function getNext12Months(): Date[] {
 // ── Modal ─────────────────────────────────────────────────────────
 
 interface ModalProps {
-  initialDate: string   // YYYY-MM-DD
-  event?: YearEvent     // set when editing
+  initialDate: string
+  event?: YearEvent
   onSave: (title: string, date: string, color: YearEventColor) => void
   onDelete?: () => void
   onClose: () => void
@@ -56,7 +151,7 @@ function EventModal({ initialDate, event, onSave, onDelete, onClose }: ModalProp
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(12,35,64,0.4)' }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(12,35,64,0.45)' }}>
       <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl">
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
           <h2 className="text-sm font-semibold text-slate-800">{event ? 'Edit event' : 'Add event'}</h2>
@@ -103,20 +198,12 @@ function EventModal({ initialDate, event, onSave, onDelete, onClose }: ModalProp
 
           <div className="flex items-center justify-between pt-1">
             {onDelete ? (
-              <button
-                type="button"
-                onClick={onDelete}
-                className="text-xs text-slate-300 hover:text-red-500 transition-colors"
-              >
+              <button type="button" onClick={onDelete} className="text-xs text-slate-300 hover:text-red-500 transition-colors">
                 Delete
               </button>
             ) : <span />}
             <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-lg px-3 py-1.5 text-xs text-slate-400 hover:text-slate-700 transition-colors"
-              >
+              <button type="button" onClick={onClose} className="rounded-lg px-3 py-1.5 text-xs text-slate-400 hover:text-slate-700 transition-colors">
                 Cancel
               </button>
               <button
@@ -141,11 +228,12 @@ interface MonthCardProps {
   month: Date
   events: YearEvent[]
   isCurrent: boolean
+  season: SeasonConfig
   onAdd: (defaultDate: string) => void
   onEdit: (event: YearEvent) => void
 }
 
-function MonthCard({ month, events, isCurrent, onAdd, onEdit }: MonthCardProps) {
+function MonthCard({ month, events, isCurrent, season, onAdd, onEdit }: MonthCardProps) {
   const monthEvents = events
     .filter(e => isSameMonth(parseISO(e.date), month))
     .sort((a, b) => a.date.localeCompare(b.date))
@@ -154,27 +242,33 @@ function MonthCard({ month, events, isCurrent, onAdd, onEdit }: MonthCardProps) 
 
   return (
     <div
-      className={`rounded-xl border bg-white flex flex-col ${isCurrent ? 'border-blue-200 shadow-md' : 'border-blue-50 shadow-sm'}`}
+      className="rounded-xl flex flex-col overflow-hidden"
+      style={{
+        border: `1px solid ${season.cardBorder}`,
+        boxShadow: isCurrent ? '0 4px 16px rgba(0,0,0,0.10)' : '0 1px 4px rgba(0,0,0,0.06)',
+        transform: isCurrent ? 'scale(1.02)' : 'scale(1)',
+      }}
     >
       {/* Month header */}
       <div
-        className={`px-4 py-3 rounded-t-xl flex items-center justify-between ${isCurrent ? 'bg-[#1a6db5]' : 'bg-[#f6f9fd]'}`}
+        className="px-4 py-3 flex items-center justify-between"
+        style={
+          isCurrent
+            ? { background: season.activeCardGradient, color: season.activeCardText }
+            : { backgroundColor: season.cardHeaderBg, color: season.cardHeaderText }
+        }
       >
         <div>
-          <p className={`text-xs font-bold uppercase tracking-widest ${isCurrent ? 'text-white' : 'text-slate-500'}`}>
-            {format(month, 'MMM')}
-          </p>
-          <p className={`text-[10px] ${isCurrent ? 'text-blue-200' : 'text-slate-300'}`}>
-            {format(month, 'yyyy')}
-          </p>
+          <p className="text-xs font-bold uppercase tracking-widest">{format(month, 'MMM')}</p>
+          <p className="text-[10px] opacity-60">{format(month, 'yyyy')}</p>
         </div>
         {isCurrent && (
-          <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold text-white">Now</span>
+          <span className="rounded-full bg-white/25 px-2 py-0.5 text-[10px] font-semibold">Now</span>
         )}
       </div>
 
       {/* Events */}
-      <div className="flex-1 px-3 py-2 space-y-1.5 min-h-[64px]">
+      <div className="flex-1 px-3 py-2 space-y-1.5 min-h-[64px] bg-white">
         {monthEvents.length === 0 && (
           <p className="text-[11px] text-slate-200 pt-1">Nothing yet</p>
         )}
@@ -193,7 +287,7 @@ function MonthCard({ month, events, isCurrent, onAdd, onEdit }: MonthCardProps) 
       </div>
 
       {/* Add button */}
-      <div className="px-3 pb-3">
+      <div className="px-3 pb-3 bg-white">
         <button
           onClick={() => onAdd(defaultDate)}
           className="flex items-center gap-1 text-[11px] text-slate-300 hover:text-slate-500 transition-colors"
@@ -201,6 +295,52 @@ function MonthCard({ month, events, isCurrent, onAdd, onEdit }: MonthCardProps) 
           <Plus size={11} /> Add
         </button>
       </div>
+    </div>
+  )
+}
+
+// ── Season header ─────────────────────────────────────────────────
+
+interface SeasonHeaderProps {
+  season: SeasonName
+  config: SeasonConfig
+  months: Date[]
+}
+
+function SeasonHeader({ season, config, months }: SeasonHeaderProps) {
+  const firstMonth = months[0]
+  const lastMonth  = months[months.length - 1]
+  const monthRange = months.length === 1
+    ? format(firstMonth, 'MMMM yyyy')
+    : `${format(firstMonth, 'MMM')} – ${format(lastMonth, 'MMM yyyy')}`
+
+  const icons: Record<SeasonName, string> = {
+    summer: '☀',
+    fall:   '◈',
+    winter: '❄',
+    spring: '✿',
+  }
+
+  return (
+    <div
+      className="relative overflow-hidden rounded-2xl px-8 py-9 mb-4"
+      style={{ background: config.gradient }}
+    >
+      {/* Decorative orbs */}
+      <div style={{ position: 'absolute', top: '-50px', right: '-30px',  width: '220px', height: '220px', borderRadius: '50%', background: 'rgba(255,255,255,0.07)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: '-70px', right: '80px', width: '280px', height: '280px', borderRadius: '50%', background: 'rgba(255,255,255,0.04)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', top: '10px', left: '-60px',    width: '160px', height: '160px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', pointerEvents: 'none' }} />
+
+      <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: config.headerSubColor }}>
+        {monthRange}
+      </p>
+      <div className="flex items-center gap-3">
+        <span className="text-3xl" style={{ color: config.headerTextColor, opacity: 0.9 }}>{icons[season]}</span>
+        <h2 className="text-3xl font-bold tracking-tight" style={{ color: config.headerTextColor }}>
+          {config.name}
+        </h2>
+      </div>
+      <p className="mt-2 text-sm" style={{ color: config.headerSubColor }}>{config.description}</p>
     </div>
   )
 }
@@ -216,6 +356,7 @@ export default function YearPage() {
   const [editingEvent, setEditingEvent] = useState<YearEvent | null>(null)
 
   const months = getNext12Months()
+  const seasonGroups = groupMonthsBySeason(months)
   const now = new Date()
 
   async function loadEvents() {
@@ -272,24 +413,33 @@ export default function YearPage() {
     <div>
       <PageHeader title="Year Ahead" />
 
-      <div className="mx-auto max-w-5xl px-4 py-4 md:px-8 md:py-6">
+      <div className="mx-auto max-w-4xl px-4 py-4 md:px-8 md:py-6 space-y-10">
         {loading ? (
           <div className="flex justify-center py-20">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-100 border-t-blue-400" />
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            {months.map(month => (
-              <MonthCard
-                key={month.toISOString()}
-                month={month}
-                events={events}
-                isCurrent={isSameMonth(month, now)}
-                onAdd={openAdd}
-                onEdit={openEdit}
-              />
-            ))}
-          </div>
+          seasonGroups.map(({ season, months: seasonMonths }) => {
+            const config = SEASONS[season]
+            return (
+              <section key={`${season}-${seasonMonths[0].toISOString()}`}>
+                <SeasonHeader season={season} config={config} months={seasonMonths} />
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {seasonMonths.map(month => (
+                    <MonthCard
+                      key={month.toISOString()}
+                      month={month}
+                      events={events}
+                      isCurrent={isSameMonth(month, now)}
+                      season={config}
+                      onAdd={openAdd}
+                      onEdit={openEdit}
+                    />
+                  ))}
+                </div>
+              </section>
+            )
+          })
         )}
       </div>
 
