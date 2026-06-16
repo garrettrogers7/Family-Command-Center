@@ -37,12 +37,7 @@ function uid() {
   return Math.random().toString(36).slice(2, 10)
 }
 
-const DEFAULT_SECTIONS: NotebookSection[] = [
-  { id: uid(), title: 'Overview',   content: '' },
-  { id: uid(), title: 'Research',   content: '' },
-  { id: uid(), title: 'Budget',     content: '' },
-  { id: uid(), title: 'Timeline',   content: '' },
-]
+const DEFAULT_SECTIONS: NotebookSection[] = []
 
 // ── Page ──────────────────────────────────────────────────────────
 
@@ -67,9 +62,11 @@ export default function ProjectDetailPage() {
   const [projectTitleDraft,   setProjectTitleDraft]   = useState('')
   const [renamingTabId,       setRenamingTabId]       = useState<string | null>(null)
   const [tabRenameDraft,      setTabRenameDraft]       = useState('')
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const renameInputRef = useRef<HTMLInputElement>(null)
 
   const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // ── Data loading ─────────────────────────────────────────────
 
@@ -101,11 +98,18 @@ export default function ProjectDetailPage() {
   function persistSections(updated: NotebookSection[], debounceKey?: string) {
     const doSave = async () => {
       if (!id) return
-      try {
-        await supabase.from('projects')
-          .update({ content: { sections: updated }, updated_at: new Date().toISOString() })
-          .eq('id', id)
-      } catch { /* content column not yet migrated */ }
+      setSaveStatus('saving')
+      const { error } = await supabase.from('projects')
+        .update({ content: { sections: updated }, updated_at: new Date().toISOString() })
+        .eq('id', id)
+      if (error) {
+        console.error('Save failed:', error.message)
+        setSaveStatus('error')
+      } else {
+        setSaveStatus('saved')
+        if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
+        savedTimerRef.current = setTimeout(() => setSaveStatus('idle'), 2000)
+      }
     }
     if (debounceKey) {
       clearTimeout(saveTimers.current[debounceKey])
@@ -275,6 +279,16 @@ export default function ProjectDetailPage() {
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Save indicator */}
+            {saveStatus === 'saving' && (
+              <span className="text-[10px] text-white/40">Saving…</span>
+            )}
+            {saveStatus === 'saved' && (
+              <span className="text-[10px] text-white/50">Saved</span>
+            )}
+            {saveStatus === 'error' && (
+              <span className="text-[10px] text-red-300" title="Check browser console for details">Save failed — run the DB migration</span>
+            )}
             {tasks.length > 0 && (
               <span className="text-[10px] text-white/40 hidden sm:block">{doneTasks.length}/{tasks.length}</span>
             )}
@@ -480,6 +494,21 @@ export default function ProjectDetailPage() {
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Empty notebook state */}
+          {activeTab !== 'tasks' && !activeSection && (
+            <div className="flex flex-col items-center justify-center flex-1 text-center px-8 py-20">
+              <p className="text-sm font-medium text-slate-400">No pages yet</p>
+              <p className="text-xs text-slate-300 mt-1 mb-4">Add a page in the sidebar to start taking notes</p>
+              <button
+                onClick={addSection}
+                className="flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-medium text-white transition-colors"
+                style={{ backgroundColor: '#1a6db5' }}
+              >
+                <Plus size={13} /> Add first page
+              </button>
             </div>
           )}
 

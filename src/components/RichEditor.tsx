@@ -4,7 +4,6 @@ import Underline from '@tiptap/extension-underline'
 import TaskList from '@tiptap/extension-task-list'
 import TaskItem from '@tiptap/extension-task-item'
 import Placeholder from '@tiptap/extension-placeholder'
-import { useEffect } from 'react'
 import {
   Bold, Italic, Underline as UnderlineIcon,
   List, ListOrdered, CheckSquare, Minus,
@@ -52,15 +51,6 @@ export function RichEditor({ content, onChange, placeholder }: Props) {
     content,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
   })
-
-  // Sync content when switching sections
-  useEffect(() => {
-    if (!editor) return
-    const current = editor.getHTML()
-    if (current !== content) {
-      editor.commands.setContent(content || '', false)
-    }
-  }, [content]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!editor) return null
 
