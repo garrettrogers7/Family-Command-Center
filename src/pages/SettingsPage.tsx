@@ -46,10 +46,14 @@ export default function SettingsPage() {
       .from('backups')
       .createSignedUrl(`${family.id}/${fileName}`, 60)
     if (data?.signedUrl) {
+      const res = await fetch(data.signedUrl)
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
-      a.href = data.signedUrl
+      a.href = url
       a.download = `home-base-backup-${fileName}`
       a.click()
+      URL.revokeObjectURL(url)
     }
   }
 
