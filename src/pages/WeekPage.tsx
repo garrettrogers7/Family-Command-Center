@@ -549,6 +549,12 @@ function SortableFunRow({
       <div className="flex-1 min-w-0 rounded-lg border border-blue-100 bg-white group">
         <div className="flex items-center gap-3 px-4 py-3">
           <span className="flex-1 text-sm text-slate-700">{item.text}</span>
+          {item.year_event && item.year_event_date && (
+            <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-amber-50 border border-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-600">
+              <Star size={8} fill="currentColor" />
+              {format(parseISO(item.year_event_date), 'MMM yyyy')}
+            </span>
+          )}
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             {confirmDeleteId === item.id ? (
               <span className="flex items-center gap-1.5 text-xs">
@@ -575,14 +581,6 @@ function SortableFunRow({
             )}
           </div>
         </div>
-        {item.year_event && item.year_event_date && (
-          <div className="px-4 pb-2 -mt-1">
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-600">
-              <Star size={8} fill="currentColor" />
-              {format(parseISO(item.year_event_date), 'MMM yyyy')} · Year Ahead
-            </span>
-          </div>
-        )}
         {item.notes && (
           <div className="border-t border-gray-50 px-4 py-2">
             <p className="text-xs text-slate-400 leading-relaxed">{item.notes}</p>
