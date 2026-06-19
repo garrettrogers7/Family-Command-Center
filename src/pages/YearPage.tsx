@@ -329,12 +329,11 @@ function SeasonHeader({ season, config, months }: SeasonHeaderProps) {
       {/* Decorative orb */}
       <div style={{ position: 'absolute', top: '-30px', right: '-20px', width: '120px', height: '120px', borderRadius: '50%', background: 'rgba(255,255,255,0.07)', pointerEvents: 'none' }} />
 
-      <span className="text-2xl flex-shrink-0" style={{ opacity: 0.9 }}>{icons[season]}</span>
+      <span className="text-2xl flex-shrink-0 text-white" style={{ opacity: 0.9 }}>{icons[season]}</span>
       <div className="flex-1 min-w-0">
         <h2 className="text-base font-bold tracking-tight leading-tight" style={{ color: config.headerTextColor }}>
-          {config.name}
+          {config.name} <span className="text-sm font-normal" style={{ color: config.headerSubColor }}>{monthRange}</span>
         </h2>
-        <p className="text-[11px]" style={{ color: config.headerSubColor }}>{monthRange} · {config.description}</p>
       </div>
     </div>
   )
