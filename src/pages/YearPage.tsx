@@ -258,10 +258,9 @@ function MonthCard({ month, events, isCurrent, season, onAdd, onEdit }: MonthCar
             : { backgroundColor: season.cardHeaderBg, color: season.cardHeaderText }
         }
       >
-        <div>
-          <p className="text-xs font-bold uppercase tracking-widest">{format(month, 'MMM')}</p>
-          <p className="text-[10px] opacity-60">{format(month, 'yyyy')}</p>
-        </div>
+        <p className="text-xs font-bold uppercase tracking-widest">
+          {format(month, 'MMM')} <span className="font-normal opacity-60">{format(month, 'yyyy')}</span>
+        </p>
         {isCurrent && (
           <span className="rounded-full bg-white/25 px-2 py-0.5 text-[10px] font-semibold">Now</span>
         )}
@@ -323,7 +322,7 @@ function SeasonHeader({ season, config, months }: SeasonHeaderProps) {
 
   return (
     <div
-      className="relative overflow-hidden rounded-xl px-5 py-4 mb-3 flex items-center gap-4"
+      className="relative overflow-hidden rounded-xl px-4 py-2.5 mb-3 flex items-center gap-3"
       style={{ background: config.gradient }}
     >
       {/* Decorative orb */}
