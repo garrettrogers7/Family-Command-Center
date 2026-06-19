@@ -323,24 +323,19 @@ function SeasonHeader({ season, config, months }: SeasonHeaderProps) {
 
   return (
     <div
-      className="relative overflow-hidden rounded-2xl px-8 py-9 mb-4"
+      className="relative overflow-hidden rounded-xl px-5 py-4 mb-3 flex items-center gap-4"
       style={{ background: config.gradient }}
     >
-      {/* Decorative orbs */}
-      <div style={{ position: 'absolute', top: '-50px', right: '-30px',  width: '220px', height: '220px', borderRadius: '50%', background: 'rgba(255,255,255,0.07)', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', bottom: '-70px', right: '80px', width: '280px', height: '280px', borderRadius: '50%', background: 'rgba(255,255,255,0.04)', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', top: '10px', left: '-60px',    width: '160px', height: '160px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', pointerEvents: 'none' }} />
+      {/* Decorative orb */}
+      <div style={{ position: 'absolute', top: '-30px', right: '-20px', width: '120px', height: '120px', borderRadius: '50%', background: 'rgba(255,255,255,0.07)', pointerEvents: 'none' }} />
 
-      <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: config.headerSubColor }}>
-        {monthRange}
-      </p>
-      <div className="flex items-center gap-3">
-        <span className="text-3xl" style={{ color: config.headerTextColor, opacity: 0.9 }}>{icons[season]}</span>
-        <h2 className="text-3xl font-bold tracking-tight" style={{ color: config.headerTextColor }}>
+      <span className="text-2xl flex-shrink-0" style={{ opacity: 0.9 }}>{icons[season]}</span>
+      <div className="flex-1 min-w-0">
+        <h2 className="text-base font-bold tracking-tight leading-tight" style={{ color: config.headerTextColor }}>
           {config.name}
         </h2>
+        <p className="text-[11px]" style={{ color: config.headerSubColor }}>{monthRange} · {config.description}</p>
       </div>
-      <p className="mt-2 text-sm" style={{ color: config.headerSubColor }}>{config.description}</p>
     </div>
   )
 }
