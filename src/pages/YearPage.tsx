@@ -4,7 +4,7 @@ import { format, parseISO, isSameMonth, getMonth } from 'date-fns'
 import { supabase } from '@/lib/supabase'
 import { useFamily } from '@/contexts/FamilyContext'
 import { PageHeader } from '@/components/PageHeader'
-import type { YearEvent, YearEventColor } from '@/lib/database.types'
+import type { YearEvent, YearEventColor, FunItem } from '@/lib/database.types'
 
 // ── Color config ──────────────────────────────────────────────────
 
@@ -227,16 +227,20 @@ function EventModal({ initialDate, event, onSave, onDelete, onClose }: ModalProp
 interface MonthCardProps {
   month: Date
   events: YearEvent[]
+  funEvents: FunItem[]
   isCurrent: boolean
   season: SeasonConfig
   onAdd: (defaultDate: string) => void
   onEdit: (event: YearEvent) => void
 }
 
-function MonthCard({ month, events, isCurrent, season, onAdd, onEdit }: MonthCardProps) {
+function MonthCard({ month, events, funEvents, isCurrent, season, onAdd, onEdit }: MonthCardProps) {
   const monthEvents = events
     .filter(e => isSameMonth(parseISO(e.date), month))
     .sort((a, b) => a.date.localeCompare(b.date))
+
+  const monthFunEvents = funEvents
+    .filter(e => e.year_event_date && isSameMonth(parseISO(e.year_event_date), month))
 
   const defaultDate = format(month, 'yyyy-MM') + '-01'
 
@@ -268,9 +272,18 @@ function MonthCard({ month, events, isCurrent, season, onAdd, onEdit }: MonthCar
 
       {/* Events */}
       <div className="flex-1 px-3 py-2 space-y-1.5 min-h-[64px] bg-white">
-        {monthEvents.length === 0 && (
+        {monthEvents.length === 0 && monthFunEvents.length === 0 && (
           <p className="text-[11px] text-slate-200 pt-1">Nothing yet</p>
         )}
+        {monthFunEvents.map(fi => (
+          <div
+            key={fi.id}
+            className="flex items-center gap-2 w-full rounded-lg px-2 py-1 bg-amber-50 border border-amber-100"
+          >
+            <span className="flex-shrink-0 text-[9px] text-amber-400">★</span>
+            <span className="flex-1 text-[11px] font-medium leading-tight truncate text-amber-700">{fi.text}</span>
+          </div>
+        ))}
         {monthEvents.map(event => (
           <button
             key={event.id}
@@ -343,6 +356,7 @@ function SeasonHeader({ season, config, months }: SeasonHeaderProps) {
 export default function YearPage() {
   const { family } = useFamily()
   const [events, setEvents] = useState<YearEvent[]>([])
+  const [funEvents, setFunEvents] = useState<FunItem[]>([])
   const [loading, setLoading] = useState(true)
 
   const [modalDefaultDate, setModalDefaultDate] = useState<string | null>(null)
@@ -354,12 +368,12 @@ export default function YearPage() {
 
   async function loadEvents() {
     if (!family) return
-    const { data } = await supabase
-      .from('year_events')
-      .select('*')
-      .eq('family_id', family.id)
-      .order('date')
-    setEvents((data as YearEvent[]) ?? [])
+    const [{ data: yearData }, { data: funData }] = await Promise.all([
+      supabase.from('year_events').select('*').eq('family_id', family.id).order('date'),
+      supabase.from('fun_items').select('*').eq('family_id', family.id).eq('year_event', true).not('year_event_date', 'is', null),
+    ])
+    setEvents((yearData as YearEvent[]) ?? [])
+    setFunEvents((funData as FunItem[]) ?? [])
     setLoading(false)
   }
 
@@ -423,6 +437,7 @@ export default function YearPage() {
                       key={month.toISOString()}
                       month={month}
                       events={events}
+                      funEvents={funEvents}
                       isCurrent={isSameMonth(month, now)}
                       season={config}
                       onAdd={openAdd}

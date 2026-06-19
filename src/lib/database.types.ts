@@ -195,6 +195,8 @@ export interface FunItem {
   text: string
   notes?: string | null
   sort_order: number
+  year_event: boolean
+  year_event_date: string | null  // ISO "YYYY-MM-DD", always the 1st of the month
   created_at: string
 }
 

@@ -55,6 +55,8 @@ import {
   Trash2,
   GripVertical,
   Pencil,
+  Star,
+  X,
 } from 'lucide-react'
 import type { MaintenanceItem, Equipment } from '@/lib/database.types'
 
@@ -339,6 +341,122 @@ function SortableTaskRow({ task, onUpdate }: { task: Task; onUpdate: () => void 
   )
 }
 
+// ── Year Event Picker ─────────────────────────────────────────────────────────
+
+const SEASON_OPTIONS = [
+  { name: 'Summer', icon: '☀', startMonth: 5 },
+  { name: 'Fall',   icon: '◈', startMonth: 8 },
+  { name: 'Winter', icon: '❄', startMonth: 11 },
+  { name: 'Spring', icon: '✿', startMonth: 2 },
+]
+
+function getSeasonDate(startMonth: number): string {
+  const now = new Date()
+  let year = now.getFullYear()
+  // If this season's start month is already past this year, push to next year
+  if (startMonth < now.getMonth() || (startMonth === now.getMonth() && now.getDate() > 1)) {
+    if (startMonth <= now.getMonth()) year += 1
+  }
+  return `${year}-${String(startMonth + 1).padStart(2, '0')}-01`
+}
+
+function getNext12Months(): Date[] {
+  const months: Date[] = []
+  const now = new Date()
+  for (let i = 0; i < 12; i++) {
+    months.push(new Date(now.getFullYear(), now.getMonth() + i, 1))
+  }
+  return months
+}
+
+function YearEventPicker({ item, onSave, onClose }: {
+  item: FunItem
+  onSave: (date: string | null) => void
+  onClose: () => void
+}) {
+  const months = getNext12Months()
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(12,35,64,0.45)' }}>
+      <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl">
+        <div className="flex items-center justify-between px-5 pt-5 pb-3">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-800">Add to Year Ahead</h2>
+            <p className="text-xs text-slate-400 mt-0.5 truncate max-w-[220px]">{item.text}</p>
+          </div>
+          <button onClick={onClose} className="text-slate-300 hover:text-slate-500 transition-colors">
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="px-5 pb-5 space-y-4">
+          {/* Season shortcuts */}
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Season</p>
+            <div className="grid grid-cols-2 gap-2">
+              {SEASON_OPTIONS.map(s => {
+                const date = getSeasonDate(s.startMonth)
+                const year = date.slice(0, 4)
+                const isSelected = item.year_event && item.year_event_date === date
+                return (
+                  <button
+                    key={s.name}
+                    onClick={() => onSave(date)}
+                    className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-left transition-colors border ${
+                      isSelected
+                        ? 'border-blue-400 bg-blue-50 text-blue-700'
+                        : 'border-blue-100 text-slate-600 hover:bg-blue-50 hover:border-blue-200'
+                    }`}
+                  >
+                    <span>{s.icon}</span>
+                    <span>{s.name} <span className="font-normal text-slate-400">{year}</span></span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Month picker */}
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Specific month</p>
+            <div className="grid grid-cols-3 gap-1.5">
+              {months.map(month => {
+                const date = format(month, 'yyyy-MM') + '-01'
+                const isSelected = item.year_event && item.year_event_date === date
+                return (
+                  <button
+                    key={date}
+                    onClick={() => onSave(date)}
+                    className={`rounded-lg px-2 py-1.5 text-xs font-medium transition-colors border ${
+                      isSelected
+                        ? 'border-blue-400 bg-blue-50 text-blue-700'
+                        : 'border-blue-100 text-slate-600 hover:bg-blue-50 hover:border-blue-200'
+                    }`}
+                  >
+                    {format(month, 'MMM yy')}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Remove option */}
+          {item.year_event && (
+            <button
+              onClick={() => onSave(null)}
+              className="text-xs text-slate-300 hover:text-red-500 transition-colors"
+            >
+              Remove from Year Ahead
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Sortable fun row ──────────────────────────────────────────────────────────
+
 function SortableFunRow({
   item,
   confirmDeleteId,
@@ -346,6 +464,7 @@ function SortableFunRow({
   onConfirmDelete,
   onCancelDelete,
   onSave,
+  onOpenYearPicker,
 }: {
   item: FunItem
   confirmDeleteId: string | null
@@ -353,6 +472,7 @@ function SortableFunRow({
   onConfirmDelete: (id: string) => void
   onCancelDelete: () => void
   onSave: (updated: FunItem) => void
+  onOpenYearPicker: (item: FunItem) => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id })
   const [editing, setEditing] = useState(false)
@@ -438,6 +558,13 @@ function SortableFunRow({
               </span>
             ) : (
               <>
+                <button
+                  onClick={() => onOpenYearPicker(item)}
+                  className={`p-0.5 transition-colors ${item.year_event ? 'text-amber-400 hover:text-amber-500' : 'text-slate-300 hover:text-amber-400'}`}
+                  title={item.year_event ? 'Edit Year Ahead slot' : 'Add to Year Ahead'}
+                >
+                  <Star size={13} fill={item.year_event ? 'currentColor' : 'none'} />
+                </button>
                 <button onClick={openEdit} className="text-slate-300 hover:text-slate-400 p-0.5" title="Edit">
                   <Pencil size={13} />
                 </button>
@@ -448,6 +575,14 @@ function SortableFunRow({
             )}
           </div>
         </div>
+        {item.year_event && item.year_event_date && (
+          <div className="px-4 pb-2 -mt-1">
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-600">
+              <Star size={8} fill="currentColor" />
+              {format(parseISO(item.year_event_date), 'MMM yyyy')} · Year Ahead
+            </span>
+          </div>
+        )}
         {item.notes && (
           <div className="border-t border-gray-50 px-4 py-2">
             <p className="text-xs text-slate-400 leading-relaxed">{item.notes}</p>
@@ -489,6 +624,7 @@ export default function WeekPage() {
   // Fun items — permanent, stored in their own table
   const [funItems, setFunItems] = useState<FunItem[]>([])
   const [confirmDeleteFunId, setConfirmDeleteFunId] = useState<string | null>(null)
+  const [yearPickerFunItem, setYearPickerFunItem] = useState<FunItem | null>(null)
   const funItemsMigratingRef = useRef(false)
 
   // DnD sensors (pointer for mouse, touch for mobile)
@@ -657,6 +793,14 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
 
   async function updateFunItem(updated: FunItem) {
     await supabase.from('fun_items').update({ text: updated.text, notes: updated.notes ?? null }).eq('id', updated.id)
+    loadFunItems()
+  }
+
+  async function setFunItemYearEvent(item: FunItem, date: string | null) {
+    await supabase.from('fun_items')
+      .update({ year_event: date !== null, year_event_date: date })
+      .eq('id', item.id)
+    setYearPickerFunItem(null)
     loadFunItems()
   }
 
@@ -1093,6 +1237,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
                         onConfirmDelete={setConfirmDeleteFunId}
                         onCancelDelete={() => setConfirmDeleteFunId(null)}
                         onSave={updateFunItem}
+                        onOpenYearPicker={setYearPickerFunItem}
                       />
                     ))}
                   </div>
@@ -1269,6 +1414,14 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
           </>
         )}
       </div>
+
+      {yearPickerFunItem && (
+        <YearEventPicker
+          item={yearPickerFunItem}
+          onSave={(date) => setFunItemYearEvent(yearPickerFunItem, date)}
+          onClose={() => setYearPickerFunItem(null)}
+        />
+      )}
     </div>
   )
 }
