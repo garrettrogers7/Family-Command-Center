@@ -232,7 +232,7 @@ export default function ProjectsPage() {
         }
       />
 
-      <div className="mx-auto max-w-2xl px-4 py-6 md:px-8 space-y-4">
+      <div className="px-4 py-6 md:px-8 space-y-4">
 
         {/* Filter tabs */}
         <div className="flex items-center gap-1 rounded-md border border-blue-100 p-1 w-fit">

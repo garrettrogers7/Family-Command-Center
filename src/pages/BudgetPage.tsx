@@ -286,7 +286,7 @@ export default function BudgetPage() {
     <div>
       <PageHeader title="Spending" subtitle="Spending analytics" />
 
-      <div className="mx-auto max-w-5xl px-4 py-3 md:px-8 md:py-5 space-y-6">
+      <div className="px-4 py-3 md:px-8 md:py-5 space-y-6">
 
         {/* Debug: data summary */}
         {!loading && transactions.length > 0 && (() => {

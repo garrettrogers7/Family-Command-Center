@@ -193,7 +193,7 @@ export default function VisionPage() {
     <div>
       <PageHeader title="Vision" subtitle="Values, goals & traditions" />
 
-      <div className="mx-auto max-w-2xl px-4 py-6 md:px-8 space-y-5">
+      <div className="px-4 py-6 md:px-8 space-y-5">
 
         {/* ── Mission Statement ── */}
         <Section
