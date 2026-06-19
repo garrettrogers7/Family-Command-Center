@@ -371,7 +371,7 @@ function getNext12Months(): Date[] {
 
 function YearEventPicker({ item, onSave, onClose }: {
   item: FunItem
-  onSave: (date: string | null) => void
+  onSave: (date: string | null, type: 'month' | 'season' | null) => void
   onClose: () => void
 }) {
   const months = getNext12Months()
@@ -401,7 +401,7 @@ function YearEventPicker({ item, onSave, onClose }: {
                 return (
                   <button
                     key={s.name}
-                    onClick={() => onSave(date)}
+                    onClick={() => onSave(date, 'season')}
                     className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-left transition-colors border ${
                       isSelected
                         ? 'border-blue-400 bg-blue-50 text-blue-700'
@@ -426,7 +426,7 @@ function YearEventPicker({ item, onSave, onClose }: {
                 return (
                   <button
                     key={date}
-                    onClick={() => onSave(date)}
+                    onClick={() => onSave(date, 'month')}
                     className={`rounded-lg px-2 py-1.5 text-xs font-medium transition-colors border ${
                       isSelected
                         ? 'border-blue-400 bg-blue-50 text-blue-700'
@@ -443,7 +443,7 @@ function YearEventPicker({ item, onSave, onClose }: {
           {/* Remove option */}
           {item.year_event && (
             <button
-              onClick={() => onSave(null)}
+              onClick={() => onSave(null, null)}
               className="text-xs text-slate-300 hover:text-red-500 transition-colors"
             >
               Remove from Year Ahead
@@ -796,9 +796,9 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
     loadFunItems()
   }
 
-  async function setFunItemYearEvent(item: FunItem, date: string | null) {
+  async function setFunItemYearEvent(item: FunItem, date: string | null, type: 'month' | 'season' | null = 'month') {
     await supabase.from('fun_items')
-      .update({ year_event: date !== null, year_event_date: date })
+      .update({ year_event: date !== null, year_event_date: date, year_event_type: date !== null ? type : null })
       .eq('id', item.id)
     setYearPickerFunItem(null)
     loadFunItems()
@@ -1418,7 +1418,7 @@ const memberNames = useMemo(() => members.map((m) => m.display_name), [members])
       {yearPickerFunItem && (
         <YearEventPicker
           item={yearPickerFunItem}
-          onSave={(date) => setFunItemYearEvent(yearPickerFunItem, date)}
+          onSave={(date, type) => setFunItemYearEvent(yearPickerFunItem, date, type)}
           onClose={() => setYearPickerFunItem(null)}
         />
       )}

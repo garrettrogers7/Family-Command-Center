@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Plus, X, Pencil } from 'lucide-react'
-import { format, parseISO, isSameMonth, getMonth } from 'date-fns'
+import { format, parseISO, isSameMonth, getMonth, getYear } from 'date-fns'
 import { supabase } from '@/lib/supabase'
 import { useFamily } from '@/contexts/FamilyContext'
 import { PageHeader } from '@/components/PageHeader'
@@ -239,8 +239,21 @@ function MonthCard({ month, events, funEvents, isCurrent, season, onAdd, onEdit 
     .filter(e => isSameMonth(parseISO(e.date), month))
     .sort((a, b) => a.date.localeCompare(b.date))
 
-  const monthFunEvents = funEvents
-    .filter(e => e.year_event_date && isSameMonth(parseISO(e.year_event_date), month))
+  const monthFunEvents = funEvents.filter(e => {
+    if (!e.year_event_date) return false
+    if (e.year_event_type === 'season') {
+      // Show in all 3 months of the season
+      const start = parseISO(e.year_event_date)
+      const startM = getMonth(start)
+      const startY = getYear(start)
+      return [0, 1, 2].some(offset => {
+        const m = (startM + offset) % 12
+        const y = startY + Math.floor((startM + offset) / 12)
+        return getMonth(month) === m && getYear(month) === y
+      })
+    }
+    return isSameMonth(parseISO(e.year_event_date), month)
+  })
 
   const defaultDate = format(month, 'yyyy-MM') + '-01'
 

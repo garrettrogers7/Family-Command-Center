@@ -197,6 +197,7 @@ export interface FunItem {
   sort_order: number
   year_event: boolean
   year_event_date: string | null  // ISO "YYYY-MM-DD", always the 1st of the month
+  year_event_type: 'month' | 'season' | null
   created_at: string
 }
 
