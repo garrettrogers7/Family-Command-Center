@@ -406,7 +406,7 @@ export default function YearPage() {
     <div>
       <PageHeader title="Year Ahead" />
 
-      <div className="mx-auto max-w-4xl px-4 py-4 md:px-8 md:py-6 space-y-10">
+      <div className="px-4 py-4 md:px-8 md:py-6 space-y-10">
         {loading ? (
           <div className="flex justify-center py-20">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-100 border-t-blue-400" />
