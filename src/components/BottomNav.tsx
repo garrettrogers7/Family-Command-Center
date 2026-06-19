@@ -1,10 +1,10 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, CalendarDays, Home, Wallet, FolderKanban, CalendarRange } from 'lucide-react'
+import { LayoutDashboard, CalendarDays, Home, Wallet, FolderKanban, Telescope } from 'lucide-react'
 
 const navItems = [
   { to: '/today',     label: 'Home',      icon: LayoutDashboard },
   { to: '/week',      label: 'Week',      icon: CalendarDays },
-  { to: '/year',      label: 'Year',      icon: CalendarRange },
+  { to: '/year',      label: 'Year',      icon: Telescope },
   { to: '/household', label: 'Household', icon: Home },
   { to: '/projects',  label: 'Projects',  icon: FolderKanban },
 ]
