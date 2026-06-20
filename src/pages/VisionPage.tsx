@@ -33,15 +33,71 @@ const VALUE_COLORS = [
 
 // ── Section wrapper ───────────────────────────────────────────────
 
+function InlineAdd({ placeholder, onAdd, extra }: {
+  placeholder: string
+  onAdd: (text: string) => void
+  extra?: React.ReactNode
+}) {
+  const [value, setValue] = useState('')
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Enter' && value.trim()) {
+      onAdd(value.trim())
+      setValue('')
+    }
+  }
+  return (
+    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-blue-50">
+      <Plus size={13} className="flex-shrink-0 text-slate-300" />
+      <input
+        value={value}
+        onChange={e => setValue(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholder}
+        className="flex-1 bg-transparent text-sm text-slate-600 placeholder:text-slate-300 outline-none"
+      />
+      {extra}
+    </div>
+  )
+}
+
+function GoalInlineAdd({ onAdd }: { onAdd: (text: string, tf: GoalTimeframe) => void }) {
+  const [value, setValue] = useState('')
+  const [timeframe, setTimeframe] = useState<GoalTimeframe>('1year')
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Enter' && value.trim()) {
+      onAdd(value.trim(), timeframe)
+      setValue('')
+    }
+  }
+  return (
+    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-blue-50">
+      <Plus size={13} className="flex-shrink-0 text-slate-300" />
+      <input
+        value={value}
+        onChange={e => setValue(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder="Add a goal…"
+        className="flex-1 bg-transparent text-sm text-slate-600 placeholder:text-slate-300 outline-none"
+      />
+      <select
+        value={timeframe}
+        onChange={e => setTimeframe(e.target.value as GoalTimeframe)}
+        className="text-xs text-slate-400 bg-transparent outline-none cursor-pointer"
+      >
+        {TIMEFRAMES.map(tf => <option key={tf.key} value={tf.key}>{tf.label}</option>)}
+      </select>
+    </div>
+  )
+}
+
 function Section({
-  title, subtitle, icon, accent = 'blue', onEdit, onAdd, editing, children,
+  title, subtitle, icon, accent = 'blue', onEdit, editing, children,
 }: {
   title: string
   subtitle?: string
   icon: React.ReactNode
   accent?: string
   onEdit?: () => void
-  onAdd?: () => void
   editing?: boolean
   children: React.ReactNode
 }) {
@@ -68,21 +124,11 @@ function Section({
               {subtitle && <p className="mt-0.5 text-xs text-slate-400">{subtitle}</p>}
             </div>
           </div>
-          {!editing && (
-            <div className="flex items-center gap-1">
-              {onAdd && (
-                <button onClick={onAdd}
-                  className="flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-colors flex-shrink-0">
-                  <Plus size={14} />
-                </button>
-              )}
-              {onEdit && (
-                <button onClick={onEdit}
-                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs text-slate-400 hover:bg-blue-50 hover:text-slate-600 transition-colors flex-shrink-0">
-                  <Pencil size={12} /> Edit
-                </button>
-              )}
-            </div>
+          {!editing && onEdit && (
+            <button onClick={onEdit}
+              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs text-slate-400 hover:bg-blue-50 hover:text-slate-600 transition-colors flex-shrink-0">
+              <Pencil size={12} /> Edit
+            </button>
           )}
         </div>
         {children}
@@ -151,7 +197,7 @@ export default function VisionPage() {
   // ── Values ───────────────────────────────────────────────────────
 
   function startEditValues() { setDraftValues(content.values ? [...content.values] : []); setEditValues(true) }
-  function quickAddValue() { setDraftValues([...(content.values ?? []), { id: uid(), name: '', description: '' }]); setEditValues(true) }
+  async function inlineAddValue(name: string) { await save({ values: [...(content.values ?? []), { id: uid(), name, description: '' }] }) }
   function addDraftValue() { setDraftValues(v => [...v, { id: uid(), name: '', description: '' }]) }
   function updateDraftValue(id: string, field: keyof VisionValue, val: string) {
     setDraftValues(v => v.map(x => x.id === id ? { ...x, [field]: val } : x))
@@ -162,7 +208,7 @@ export default function VisionPage() {
   // ── Goals ────────────────────────────────────────────────────────
 
   function startEditGoals() { setDraftGoals(content.goals ? [...content.goals] : []); setEditGoals(true) }
-  function quickAddGoal() { setDraftGoals([...(content.goals ?? []), { id: uid(), text: '', timeframe: '1year', done: false }]); setEditGoals(true) }
+  async function inlineAddGoal(text: string, timeframe: GoalTimeframe) { await save({ goals: [...(content.goals ?? []), { id: uid(), text, timeframe, done: false }] }) }
   function addDraftGoal(timeframe: GoalTimeframe) {
     setDraftGoals(g => [...g, { id: uid(), text: '', timeframe, done: false }])
   }
@@ -179,7 +225,7 @@ export default function VisionPage() {
   // ── Traditions ───────────────────────────────────────────────────
 
   function startEditTraditions() { setDraftTraditions(content.traditions ? [...content.traditions] : []); setEditTraditions(true) }
-  function quickAddTradition() { setDraftTraditions([...(content.traditions ?? []), { id: uid(), text: '' }]); setEditTraditions(true) }
+  async function inlineAddTradition(text: string) { await save({ traditions: [...(content.traditions ?? []), { id: uid(), text }] }) }
   function addDraftTradition() { setDraftTraditions(t => [...t, { id: uid(), text: '' }]) }
   function updateDraftTradition(id: string, text: string) {
     setDraftTraditions(t => t.map(x => x.id === id ? { ...x, text } : x))
@@ -256,7 +302,6 @@ export default function VisionPage() {
           icon={<Heart size={18} />}
           accent="violet"
           onEdit={startEditValues}
-          onAdd={quickAddValue}
           editing={editValues}
         >
           {editValues ? (
@@ -293,30 +338,31 @@ export default function VisionPage() {
                 <button onClick={saveValues} className="btn-sm">Save</button>
               </div>
             </div>
-          ) : (content.values?.length ?? 0) > 0 ? (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {content.values!.map((v, i) => {
-                const colors = VALUE_COLORS[i % VALUE_COLORS.length]
-                return (
-                  <div key={v.id}
-                    className={`rounded-xl border px-4 py-3.5 ${colors.card}`}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`h-2 w-2 rounded-full flex-shrink-0 ${colors.dot}`} />
-                      <p className={`font-bold text-sm ${colors.text}`}>{v.name}</p>
-                    </div>
-                    {v.description && (
-                      <p className="text-xs text-slate-400 leading-snug">{v.description}</p>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
           ) : (
-            <button onClick={startEditValues}
-              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-blue-100 py-10 text-slate-400 hover:border-blue-200 hover:text-blue-600 transition-colors">
-              <Heart size={20} />
-              <span className="text-sm font-medium">Add your family values</span>
-            </button>
+            <>
+              {(content.values?.length ?? 0) > 0 ? (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {content.values!.map((v, i) => {
+                    const colors = VALUE_COLORS[i % VALUE_COLORS.length]
+                    return (
+                      <div key={v.id}
+                        className={`rounded-xl border px-4 py-3.5 ${colors.card}`}>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`h-2 w-2 rounded-full flex-shrink-0 ${colors.dot}`} />
+                          <p className={`font-bold text-sm ${colors.text}`}>{v.name}</p>
+                        </div>
+                        {v.description && (
+                          <p className="text-xs text-slate-400 leading-snug">{v.description}</p>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-slate-300 italic">No values added yet</p>
+              )}
+              <InlineAdd placeholder="Add a value…" onAdd={inlineAddValue} />
+            </>
           )}
         </Section>
 
@@ -327,7 +373,6 @@ export default function VisionPage() {
           icon={<Target size={18} />}
           accent="rose"
           onEdit={startEditGoals}
-          onAdd={quickAddGoal}
           editing={editGoals}
         >
           {editGoals ? (
@@ -366,43 +411,44 @@ export default function VisionPage() {
                 <button onClick={saveGoals} className="btn-sm">Save</button>
               </div>
             </div>
-          ) : (content.goals?.length ?? 0) > 0 ? (
-            <div className="space-y-6">
-              {TIMEFRAMES.map(tf => {
-                const tfGoals = (content.goals ?? []).filter(g => g.timeframe === tf.key)
-                if (tfGoals.length === 0) return null
-                return (
-                  <div key={tf.key}>
-                    <div className={`mb-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider ${tf.bg} ${tf.color}`}>
-                      {tf.label}
-                    </div>
-                    <ul className="space-y-2">
-                      {tfGoals.map(g => (
-                        <li key={g.id} className="flex items-start gap-3 group">
-                          <button
-                            onClick={() => toggleGoalDone(g.id)}
-                            className={`mt-0.5 flex-shrink-0 flex items-center justify-center rounded-full border-2 transition-colors
-                              ${g.done ? 'bg-blue-500 border-blue-500' : 'border-blue-100 hover:border-indigo-400'}`}
-                            style={{ width: 18, height: 18 }}
-                          >
-                            {g.done && <Check size={11} strokeWidth={3} className="text-slate-900" />}
-                          </button>
-                          <span className={`text-sm leading-snug ${g.done ? 'line-through text-slate-400' : 'text-slate-700'}`}>
-                            {g.text}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )
-              })}
-            </div>
           ) : (
-            <button onClick={startEditGoals}
-              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-blue-100 py-10 text-slate-400 hover:border-orange-200 hover:text-orange-600 transition-colors">
-              <Target size={20} />
-              <span className="text-sm font-medium">Add your family goals</span>
-            </button>
+            <>
+              {(content.goals?.length ?? 0) > 0 ? (
+                <div className="space-y-6">
+                  {TIMEFRAMES.map(tf => {
+                    const tfGoals = (content.goals ?? []).filter(g => g.timeframe === tf.key)
+                    if (tfGoals.length === 0) return null
+                    return (
+                      <div key={tf.key}>
+                        <div className={`mb-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider ${tf.bg} ${tf.color}`}>
+                          {tf.label}
+                        </div>
+                        <ul className="space-y-2">
+                          {tfGoals.map(g => (
+                            <li key={g.id} className="flex items-start gap-3 group">
+                              <button
+                                onClick={() => toggleGoalDone(g.id)}
+                                className={`mt-0.5 flex-shrink-0 flex items-center justify-center rounded-full border-2 transition-colors
+                                  ${g.done ? 'bg-blue-500 border-blue-500' : 'border-blue-100 hover:border-indigo-400'}`}
+                                style={{ width: 18, height: 18 }}
+                              >
+                                {g.done && <Check size={11} strokeWidth={3} className="text-slate-900" />}
+                              </button>
+                              <span className={`text-sm leading-snug ${g.done ? 'line-through text-slate-400' : 'text-slate-700'}`}>
+                                {g.text}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-slate-300 italic">No goals added yet</p>
+              )}
+              <GoalInlineAdd onAdd={inlineAddGoal} />
+            </>
           )}
         </Section>
 
@@ -413,7 +459,6 @@ export default function VisionPage() {
           icon={<Sparkles size={18} />}
           accent="amber"
           onEdit={startEditTraditions}
-          onAdd={quickAddTradition}
           editing={editTraditions}
         >
           {editTraditions ? (
@@ -442,21 +487,22 @@ export default function VisionPage() {
                 <button onClick={saveTraditions} className="btn-sm">Save</button>
               </div>
             </div>
-          ) : (content.traditions?.length ?? 0) > 0 ? (
-            <ul className="space-y-3">
-              {content.traditions!.map((t, i) => (
-                <li key={t.id} className="flex items-start gap-3">
-                  <span className={`mt-1.5 h-2 w-2 flex-shrink-0 rounded-full ${VALUE_COLORS[i % VALUE_COLORS.length].dot}`} />
-                  <span className="text-sm text-slate-700 leading-relaxed">{t.text}</span>
-                </li>
-              ))}
-            </ul>
           ) : (
-            <button onClick={startEditTraditions}
-              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-blue-100 py-10 text-slate-400 hover:border-amber-200 hover:text-orange-500 transition-colors">
-              <Sparkles size={20} />
-              <span className="text-sm font-medium">Add your family traditions</span>
-            </button>
+            <>
+              {(content.traditions?.length ?? 0) > 0 ? (
+                <ul className="space-y-3">
+                  {content.traditions!.map((t, i) => (
+                    <li key={t.id} className="flex items-start gap-3">
+                      <span className={`mt-1.5 h-2 w-2 flex-shrink-0 rounded-full ${VALUE_COLORS[i % VALUE_COLORS.length].dot}`} />
+                      <span className="text-sm text-slate-700 leading-relaxed">{t.text}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-slate-300 italic">No traditions added yet</p>
+              )}
+              <InlineAdd placeholder="Add a tradition…" onAdd={inlineAddTradition} />
+            </>
           )}
         </Section>
 
