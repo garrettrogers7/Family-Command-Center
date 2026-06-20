@@ -34,13 +34,14 @@ const VALUE_COLORS = [
 // ── Section wrapper ───────────────────────────────────────────────
 
 function Section({
-  title, subtitle, icon, accent = 'blue', onEdit, editing, children,
+  title, subtitle, icon, accent = 'blue', onEdit, onAdd, editing, children,
 }: {
   title: string
   subtitle?: string
   icon: React.ReactNode
   accent?: string
   onEdit?: () => void
+  onAdd?: () => void
   editing?: boolean
   children: React.ReactNode
 }) {
@@ -67,11 +68,21 @@ function Section({
               {subtitle && <p className="mt-0.5 text-xs text-slate-400">{subtitle}</p>}
             </div>
           </div>
-          {onEdit && !editing && (
-            <button onClick={onEdit}
-              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs text-slate-400 hover:bg-blue-50 hover:text-slate-600 transition-colors flex-shrink-0">
-              <Pencil size={12} /> Edit
-            </button>
+          {!editing && (
+            <div className="flex items-center gap-1">
+              {onAdd && (
+                <button onClick={onAdd}
+                  className="flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-colors flex-shrink-0">
+                  <Plus size={14} />
+                </button>
+              )}
+              {onEdit && (
+                <button onClick={onEdit}
+                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs text-slate-400 hover:bg-blue-50 hover:text-slate-600 transition-colors flex-shrink-0">
+                  <Pencil size={12} /> Edit
+                </button>
+              )}
+            </div>
           )}
         </div>
         {children}
@@ -140,6 +151,7 @@ export default function VisionPage() {
   // ── Values ───────────────────────────────────────────────────────
 
   function startEditValues() { setDraftValues(content.values ? [...content.values] : []); setEditValues(true) }
+  function quickAddValue() { setDraftValues([...(content.values ?? []), { id: uid(), name: '', description: '' }]); setEditValues(true) }
   function addDraftValue() { setDraftValues(v => [...v, { id: uid(), name: '', description: '' }]) }
   function updateDraftValue(id: string, field: keyof VisionValue, val: string) {
     setDraftValues(v => v.map(x => x.id === id ? { ...x, [field]: val } : x))
@@ -150,6 +162,7 @@ export default function VisionPage() {
   // ── Goals ────────────────────────────────────────────────────────
 
   function startEditGoals() { setDraftGoals(content.goals ? [...content.goals] : []); setEditGoals(true) }
+  function quickAddGoal() { setDraftGoals([...(content.goals ?? []), { id: uid(), text: '', timeframe: '1year', done: false }]); setEditGoals(true) }
   function addDraftGoal(timeframe: GoalTimeframe) {
     setDraftGoals(g => [...g, { id: uid(), text: '', timeframe, done: false }])
   }
@@ -166,6 +179,7 @@ export default function VisionPage() {
   // ── Traditions ───────────────────────────────────────────────────
 
   function startEditTraditions() { setDraftTraditions(content.traditions ? [...content.traditions] : []); setEditTraditions(true) }
+  function quickAddTradition() { setDraftTraditions([...(content.traditions ?? []), { id: uid(), text: '' }]); setEditTraditions(true) }
   function addDraftTradition() { setDraftTraditions(t => [...t, { id: uid(), text: '' }]) }
   function updateDraftTradition(id: string, text: string) {
     setDraftTraditions(t => t.map(x => x.id === id ? { ...x, text } : x))
@@ -242,6 +256,7 @@ export default function VisionPage() {
           icon={<Heart size={18} />}
           accent="violet"
           onEdit={startEditValues}
+          onAdd={quickAddValue}
           editing={editValues}
         >
           {editValues ? (
@@ -312,6 +327,7 @@ export default function VisionPage() {
           icon={<Target size={18} />}
           accent="rose"
           onEdit={startEditGoals}
+          onAdd={quickAddGoal}
           editing={editGoals}
         >
           {editGoals ? (
@@ -397,6 +413,7 @@ export default function VisionPage() {
           icon={<Sparkles size={18} />}
           accent="amber"
           onEdit={startEditTraditions}
+          onAdd={quickAddTradition}
           editing={editTraditions}
         >
           {editTraditions ? (
