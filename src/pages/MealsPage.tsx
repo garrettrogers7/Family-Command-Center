@@ -89,6 +89,7 @@ Respond with ONLY valid JSON, no markdown fences, no other text, in exactly this
 Rules:
 - The week starts on Sunday and ends on Saturday
 - Prioritize using up any noted leftovers within the first few days
+- If a meal incorporates a leftover or ingredient called out in THIS WEEK'S NOTES, say so directly in the meal name itself (e.g. "Taco Soup with Smoked Brisket", not just "Taco Soup"), so it's obvious at a glance without reading the notes
 - Reuse our saved recipes where they fit; you may suggest a few new simple meals if helpful
 - Any dinner recipe that serves 4 or more people should be scheduled for two consecutive nights (e.g. Sunday and Monday both get "Recipe Name"), since the leftovers cover the second night. Only count its ingredients once in the grocery list.
 - Consolidate the grocery list — no duplicates, no quantities needed
