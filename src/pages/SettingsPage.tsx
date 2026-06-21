@@ -72,6 +72,12 @@ export default function SettingsPage() {
         { data: familyMembers },
         { data: funItems },
         { data: projects },
+        { data: projectTasks },
+        { data: householdItems },
+        { data: budgetCategories },
+        { data: budgetTransactions },
+        { data: yearEvents },
+        { data: familyVision },
       ] = await Promise.all([
         supabase.from('tasks').select('*').eq('family_id', fid),
         supabase.from('maintenance_items').select('*').eq('family_id', fid),
@@ -82,6 +88,12 @@ export default function SettingsPage() {
         supabase.from('family_members').select('*').eq('family_id', fid),
         supabase.from('fun_items').select('*').eq('family_id', fid),
         supabase.from('projects').select('*').eq('family_id', fid),
+        supabase.from('project_tasks').select('*').eq('family_id', fid),
+        supabase.from('household_items').select('*').eq('family_id', fid),
+        supabase.from('budget_categories').select('*').eq('family_id', fid),
+        supabase.from('budget_transactions').select('*').eq('family_id', fid),
+        supabase.from('year_events').select('*').eq('family_id', fid),
+        supabase.from('family_vision').select('*').eq('family_id', fid).maybeSingle(),
       ])
 
       const backup = {
@@ -98,6 +110,12 @@ export default function SettingsPage() {
           vaultEntries: vaultEntries ?? [],
           funItems: funItems ?? [],
           projects: projects ?? [],
+          projectTasks: projectTasks ?? [],
+          householdItems: householdItems ?? [],
+          budgetCategories: budgetCategories ?? [],
+          budgetTransactions: budgetTransactions ?? [],
+          yearEvents: yearEvents ?? [],
+          familyVision: familyVision ?? null,
         },
       }
 

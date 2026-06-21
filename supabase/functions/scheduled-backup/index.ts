@@ -30,6 +30,13 @@ Deno.serve(async (req) => {
         { data: vaultEntries },
         { data: weeklyPlans },
         { data: funItems },
+        { data: projects },
+        { data: projectTasks },
+        { data: householdItems },
+        { data: budgetCategories },
+        { data: budgetTransactions },
+        { data: yearEvents },
+        { data: familyVision },
       ] = await Promise.all([
         supabase.from('family_members').select('*').eq('family_id', family.id),
         supabase.from('tasks').select('*').eq('family_id', family.id),
@@ -39,6 +46,13 @@ Deno.serve(async (req) => {
         supabase.from('vault_entries').select('*').eq('family_id', family.id),
         supabase.from('weekly_plans').select('*').eq('family_id', family.id),
         supabase.from('fun_items').select('*').eq('family_id', family.id),
+        supabase.from('projects').select('*').eq('family_id', family.id),
+        supabase.from('project_tasks').select('*').eq('family_id', family.id),
+        supabase.from('household_items').select('*').eq('family_id', family.id),
+        supabase.from('budget_categories').select('*').eq('family_id', family.id),
+        supabase.from('budget_transactions').select('*').eq('family_id', family.id),
+        supabase.from('year_events').select('*').eq('family_id', family.id),
+        supabase.from('family_vision').select('*').eq('family_id', family.id).maybeSingle(),
       ])
 
       const backup = {
@@ -54,6 +68,13 @@ Deno.serve(async (req) => {
           vaultEntries: vaultEntries ?? [],
           weeklyPlans: weeklyPlans ?? [],
           funItems: funItems ?? [],
+          projects: projects ?? [],
+          projectTasks: projectTasks ?? [],
+          householdItems: householdItems ?? [],
+          budgetCategories: budgetCategories ?? [],
+          budgetTransactions: budgetTransactions ?? [],
+          yearEvents: yearEvents ?? [],
+          familyVision: familyVision ?? null,
         },
       }
 
