@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import {
   Pencil, Check, X, Plus, ChefHat, NotebookPen, CalendarRange,
-  ShoppingCart, Sparkles, Loader2, Heart,
+  ShoppingCart, Sparkles, Loader2, Heart, ChevronDown, ChevronUp,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useFamily } from '@/contexts/FamilyContext'
@@ -195,6 +195,26 @@ function Card({
   )
 }
 
+function RecipeCard({ recipe, onClick }: { recipe: Recipe; onClick: () => void }) {
+  return (
+    <button onClick={onClick}
+      className="text-left rounded-xl border border-blue-100 bg-blue-50/40 px-4 py-3.5 hover:border-blue-200 transition-colors">
+      <p className="font-bold text-sm text-slate-800 mb-1">{recipe.title}</p>
+      {recipe.servings && (
+        <p className="text-[10px] font-medium text-slate-400 mb-1">Serves {recipe.servings}</p>
+      )}
+      {recipe.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-1.5">
+          {recipe.tags.map(t => (
+            <span key={t} className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700">{t}</span>
+          ))}
+        </div>
+      )}
+      <p className="text-xs text-slate-400 leading-snug line-clamp-2">{recipe.ingredients.join(', ')}</p>
+    </button>
+  )
+}
+
 interface RecipeFields {
   title: string
   ingredients: string[]
@@ -332,12 +352,28 @@ export default function MealsPage() {
 
   const [recipeModalOpen, setRecipeModalOpen] = useState(false)
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null)
+  const [recipesExpanded, setRecipesExpanded] = useState(false)
 
   const [generating, setGenerating] = useState(false)
   const [genError, setGenError] = useState('')
 
   const weekStart = useMemo(() => startOfWeek(new Date(), { weekStartsOn: 0 }), [])
   const weekStartStr = format(weekStart, 'yyyy-MM-dd')
+
+  const usedRecipeTitles = useMemo(() => {
+    const titles = new Set<string>()
+    if (!mealPlan) return titles
+    for (const d of DAYS) {
+      const val = mealPlan.content[d.key]
+      if (!val) continue
+      const clean = val.startsWith('Leftovers: ') ? val.slice('Leftovers: '.length) : val
+      titles.add(clean.toLowerCase().trim())
+    }
+    return titles
+  }, [mealPlan])
+
+  const usedRecipes = mealPlan ? recipes.filter(r => usedRecipeTitles.has(r.title.toLowerCase().trim())) : recipes
+  const otherRecipes = mealPlan ? recipes.filter(r => !usedRecipeTitles.has(r.title.toLowerCase().trim())) : []
 
   const fetchAll = useCallback(async () => {
     if (!family) return
@@ -568,24 +604,34 @@ export default function MealsPage() {
           }
         >
           {recipes.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-              {recipes.map(r => (
-                <button key={r.id} onClick={() => openEditRecipe(r)}
-                  className="text-left rounded-xl border border-blue-100 bg-blue-50/40 px-4 py-3.5 hover:border-blue-200 transition-colors">
-                  <p className="font-bold text-sm text-slate-800 mb-1">{r.title}</p>
-                  {r.servings && (
-                    <p className="text-[10px] font-medium text-slate-400 mb-1">Serves {r.servings}</p>
-                  )}
-                  {r.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-1.5">
-                      {r.tags.map(t => (
-                        <span key={t} className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700">{t}</span>
-                      ))}
+            <div className="space-y-4">
+              {mealPlan && (
+                <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                  {usedRecipes.length > 0 ? "This week's plan" : 'Not in this week\'s plan yet'}
+                </p>
+              )}
+              {usedRecipes.length > 0 ? (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                  {usedRecipes.map(r => <RecipeCard key={r.id} recipe={r} onClick={() => openEditRecipe(r)} />)}
+                </div>
+              ) : mealPlan ? (
+                <p className="text-sm text-slate-300 italic">None of your saved recipes match this week's plan</p>
+              ) : null}
+
+              {mealPlan && otherRecipes.length > 0 && (
+                <div className="pt-2 border-t border-blue-50">
+                  <button onClick={() => setRecipesExpanded(e => !e)}
+                    className="flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-blue-600 transition-colors mb-3">
+                    {recipesExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                    {recipesExpanded ? 'Hide' : 'Show'} {otherRecipes.length} other recipe{otherRecipes.length === 1 ? '' : 's'}
+                  </button>
+                  {recipesExpanded && (
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                      {otherRecipes.map(r => <RecipeCard key={r.id} recipe={r} onClick={() => openEditRecipe(r)} />)}
                     </div>
                   )}
-                  <p className="text-xs text-slate-400 leading-snug line-clamp-2">{r.ingredients.join(', ')}</p>
-                </button>
-              ))}
+                </div>
+              )}
             </div>
           ) : (
             <button onClick={openAddRecipe}
