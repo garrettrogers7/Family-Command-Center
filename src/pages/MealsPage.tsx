@@ -89,6 +89,7 @@ Respond with ONLY valid JSON, no markdown fences, no other text, in exactly this
 Rules:
 - Prioritize using up any noted leftovers within the first few days
 - Reuse our saved recipes where they fit; you may suggest a few new simple meals if helpful
+- Any dinner recipe that serves 4 or more people should be scheduled for two consecutive nights (e.g. Monday and Tuesday both get "Recipe Name"), since the leftovers cover the second night. Only count its ingredients once in the grocery list.
 - Consolidate the grocery list — no duplicates, no quantities needed
 - Don't include pantry staples (salt, oil, etc.) unless specifically relevant`
 }
