@@ -95,14 +95,44 @@ Rules:
 - Don't include pantry staples (salt, oil, etc.) unless specifically relevant`
 }
 
-function parseMealPlanResponse(raw: string): { content: MealPlanContent; groceryList: GroceryItem[] } {
+function parseServingsCount(servings: string | null): number | null {
+  if (!servings) return null
+  const match = servings.match(/\d+/)
+  return match ? parseInt(match[0], 10) : null
+}
+
+function applyLeftoverNights(content: MealPlanContent, recipes: Recipe[]): MealPlanContent {
+  const byTitle = new Map(recipes.map(r => [r.title.toLowerCase().trim(), r]))
+  const result: MealPlanContent = { ...content }
+  let leftoverOf: string | null = null
+
+  for (let i = 0; i < DAYS.length; i++) {
+    const key = DAYS[i].key
+    if (leftoverOf) {
+      result[key] = `Leftovers: ${leftoverOf}`
+      leftoverOf = null
+      continue
+    }
+    const mealName = result[key]
+    if (!mealName) continue
+    const recipe = byTitle.get(mealName.toLowerCase().trim())
+    const servingsCount = recipe ? parseServingsCount(recipe.servings) : null
+    if (servingsCount !== null && servingsCount >= 4 && i < DAYS.length - 1) {
+      leftoverOf = mealName
+    }
+  }
+  return result
+}
+
+function parseMealPlanResponse(raw: string, recipes: Recipe[]): { content: MealPlanContent; groceryList: GroceryItem[] } {
   const cleaned = raw.trim().replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/, '')
   const parsed = JSON.parse(cleaned)
-  const content: MealPlanContent = {
+  let content: MealPlanContent = {
     monday: parsed.monday, tuesday: parsed.tuesday, wednesday: parsed.wednesday,
     thursday: parsed.thursday, friday: parsed.friday, saturday: parsed.saturday,
     sunday: parsed.sunday, notes: parsed.notes,
   }
+  content = applyLeftoverNights(content, recipes)
   const groceryList: GroceryItem[] = (parsed.groceryList ?? []).map((item: string) => ({ id: uid(), item, checked: false }))
   return { content, groceryList }
 }
@@ -391,7 +421,7 @@ export default function MealsPage() {
         'You are a precise meal-planning assistant. You always respond with strictly valid JSON and nothing else.',
         prompt
       )
-      const { content, groceryList } = parseMealPlanResponse(raw)
+      const { content, groceryList } = parseMealPlanResponse(raw, recipes)
 
       if (mealPlan) {
         await supabase.from('meal_plans')
