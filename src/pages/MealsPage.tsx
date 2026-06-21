@@ -83,7 +83,7 @@ Respond with ONLY valid JSON, no markdown fences, no other text, in exactly this
   "friday": "Meal name",
   "saturday": "Meal name",
   "notes": "1-2 sentences on how leftovers/notes were incorporated and how this fits the nutrition goals",
-  "groceryList": ["ingredient 1", "ingredient 2"]
+  "groceryList": ["2 lbs chicken breast", "1 bag shredded cheddar", "3 limes"]
 }
 
 Rules:
@@ -92,7 +92,8 @@ Rules:
 - If a meal incorporates a leftover or ingredient called out in THIS WEEK'S NOTES, say so directly in the meal name itself (e.g. "Taco Soup with Smoked Brisket", not just "Taco Soup"), so it's obvious at a glance without reading the notes
 - Reuse our saved recipes where they fit; you may suggest a few new simple meals if helpful
 - Any dinner recipe that serves 4 or more people should be scheduled for two consecutive nights (e.g. Sunday and Monday both get "Recipe Name"), since the leftovers cover the second night. Only count its ingredients once in the grocery list.
-- Consolidate the grocery list — no duplicates, no quantities needed
+- Every grocery list item must include a specific measurement or quantity (e.g. "2 lbs ground beef", "1 dozen eggs", "3 bell peppers"), not just the ingredient name
+- Consolidate the grocery list — no duplicate entries for the same ingredient; add up quantities across recipes into a single combined amount (e.g. two recipes each needing 1 onion becomes "2 onions")
 - Don't include pantry staples (salt, oil, etc.) unless specifically relevant`
 }
 
@@ -652,7 +653,7 @@ export default function MealsPage() {
                 ) : (
                   <p className="text-sm text-slate-300 italic">No items yet</p>
                 )}
-                <InlineAdd placeholder="Add an item…" onAdd={addGroceryItem} />
+                <InlineAdd placeholder="Add an item… (e.g. 2 lbs ground beef)" onAdd={addGroceryItem} />
               </div>
             </div>
           ) : (
