@@ -78,6 +78,10 @@ export default function SettingsPage() {
         { data: budgetTransactions },
         { data: yearEvents },
         { data: familyVision },
+        { data: mealSettings },
+        { data: recipes },
+        { data: mealNotes },
+        { data: mealPlans },
       ] = await Promise.all([
         supabase.from('tasks').select('*').eq('family_id', fid),
         supabase.from('maintenance_items').select('*').eq('family_id', fid),
@@ -94,6 +98,10 @@ export default function SettingsPage() {
         supabase.from('budget_transactions').select('*').eq('family_id', fid),
         supabase.from('year_events').select('*').eq('family_id', fid),
         supabase.from('family_vision').select('*').eq('family_id', fid).maybeSingle(),
+        supabase.from('meal_settings').select('*').eq('family_id', fid).maybeSingle(),
+        supabase.from('recipes').select('*').eq('family_id', fid),
+        supabase.from('meal_notes').select('*').eq('family_id', fid),
+        supabase.from('meal_plans').select('*').eq('family_id', fid),
       ])
 
       const backup = {
@@ -116,6 +124,10 @@ export default function SettingsPage() {
           budgetTransactions: budgetTransactions ?? [],
           yearEvents: yearEvents ?? [],
           familyVision: familyVision ?? null,
+          mealSettings: mealSettings ?? null,
+          recipes: recipes ?? [],
+          mealNotes: mealNotes ?? [],
+          mealPlans: mealPlans ?? [],
         },
       }
 

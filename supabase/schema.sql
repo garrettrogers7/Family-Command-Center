@@ -90,6 +90,56 @@ create table if not exists weekly_plans (
 );
 
 -- ──────────────────────────────────────────────
+-- meal_settings (one row per family — nutrition goals)
+-- ──────────────────────────────────────────────
+create table if not exists meal_settings (
+  id              uuid primary key default gen_random_uuid(),
+  family_id       uuid not null references families(id) on delete cascade unique,
+  nutrition_goals text not null default '',
+  updated_by      uuid references auth.users(id) on delete set null,
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now()
+);
+
+-- ──────────────────────────────────────────────
+-- recipes
+-- ──────────────────────────────────────────────
+create table if not exists recipes (
+  id           uuid primary key default gen_random_uuid(),
+  family_id    uuid not null references families(id) on delete cascade,
+  title        text not null,
+  ingredients  text[] not null default '{}',
+  instructions text not null default '',
+  tags         text[] not null default '{}',
+  created_at   timestamptz not null default now()
+);
+
+-- ──────────────────────────────────────────────
+-- meal_notes (misc context — e.g. "smoking a brisket Saturday")
+-- ──────────────────────────────────────────────
+create table if not exists meal_notes (
+  id         uuid primary key default gen_random_uuid(),
+  family_id  uuid not null references families(id) on delete cascade,
+  text       text not null,
+  created_at timestamptz not null default now()
+);
+
+-- ──────────────────────────────────────────────
+-- meal_plans (one row per family per week)
+-- ──────────────────────────────────────────────
+create table if not exists meal_plans (
+  id           uuid primary key default gen_random_uuid(),
+  family_id    uuid not null references families(id) on delete cascade,
+  week_start   date not null,
+  content      jsonb not null default '{}',
+  grocery_list jsonb not null default '[]',
+  generated_by uuid references auth.users(id) on delete set null,
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now(),
+  unique (family_id, week_start)
+);
+
+-- ──────────────────────────────────────────────
 -- updated_at triggers
 -- ──────────────────────────────────────────────
 create or replace function update_updated_at()
@@ -116,6 +166,14 @@ create trigger weekly_plans_updated_at
   before update on weekly_plans
   for each row execute function update_updated_at();
 
+create trigger meal_settings_updated_at
+  before update on meal_settings
+  for each row execute function update_updated_at();
+
+create trigger meal_plans_updated_at
+  before update on meal_plans
+  for each row execute function update_updated_at();
+
 -- ──────────────────────────────────────────────
 -- Row-Level Security
 -- ──────────────────────────────────────────────
@@ -125,6 +183,10 @@ alter table tasks enable row level security;
 alter table vault_entries enable row level security;
 alter table household_items enable row level security;
 alter table weekly_plans enable row level security;
+alter table meal_settings enable row level security;
+alter table recipes enable row level security;
+alter table meal_notes enable row level security;
+alter table meal_plans enable row level security;
 
 -- Helper: is the current user a member of a given family?
 create or replace function is_family_member(fid uuid)
@@ -209,6 +271,49 @@ create policy "family members can insert weekly_plans"
 
 create policy "family members can update weekly_plans"
   on weekly_plans for update using (is_family_member(family_id));
+
+-- meal_settings
+create policy "family members can read meal_settings"
+  on meal_settings for select using (is_family_member(family_id));
+
+create policy "family members can insert meal_settings"
+  on meal_settings for insert with check (is_family_member(family_id));
+
+create policy "family members can update meal_settings"
+  on meal_settings for update using (is_family_member(family_id));
+
+-- recipes
+create policy "family members can read recipes"
+  on recipes for select using (is_family_member(family_id));
+
+create policy "family members can insert recipes"
+  on recipes for insert with check (is_family_member(family_id));
+
+create policy "family members can update recipes"
+  on recipes for update using (is_family_member(family_id));
+
+create policy "family members can delete recipes"
+  on recipes for delete using (is_family_member(family_id));
+
+-- meal_notes
+create policy "family members can read meal_notes"
+  on meal_notes for select using (is_family_member(family_id));
+
+create policy "family members can insert meal_notes"
+  on meal_notes for insert with check (is_family_member(family_id));
+
+create policy "family members can delete meal_notes"
+  on meal_notes for delete using (is_family_member(family_id));
+
+-- meal_plans
+create policy "family members can read meal_plans"
+  on meal_plans for select using (is_family_member(family_id));
+
+create policy "family members can insert meal_plans"
+  on meal_plans for insert with check (is_family_member(family_id));
+
+create policy "family members can update meal_plans"
+  on meal_plans for update using (is_family_member(family_id));
 
 -- ──────────────────────────────────────────────
 -- Realtime publications

@@ -212,6 +212,60 @@ export interface YearEvent {
   created_at: string
 }
 
+export interface MealSettings {
+  id: string
+  family_id: string
+  nutrition_goals: string
+  updated_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface Recipe {
+  id: string
+  family_id: string
+  title: string
+  ingredients: string[]
+  instructions: string
+  tags: string[]
+  created_at: string
+}
+
+export interface MealNote {
+  id: string
+  family_id: string
+  text: string
+  created_at: string
+}
+
+export interface GroceryItem {
+  id: string
+  item: string
+  checked: boolean
+}
+
+export interface MealPlanContent {
+  monday?: string
+  tuesday?: string
+  wednesday?: string
+  thursday?: string
+  friday?: string
+  saturday?: string
+  sunday?: string
+  notes?: string
+}
+
+export interface MealPlan {
+  id: string
+  family_id: string
+  week_start: string
+  content: MealPlanContent
+  grocery_list: GroceryItem[]
+  generated_by: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface WeeklyPlanContent {
   monday?: string
   tuesday?: string

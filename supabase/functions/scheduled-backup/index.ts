@@ -37,6 +37,10 @@ Deno.serve(async (req) => {
         { data: budgetTransactions },
         { data: yearEvents },
         { data: familyVision },
+        { data: mealSettings },
+        { data: recipes },
+        { data: mealNotes },
+        { data: mealPlans },
       ] = await Promise.all([
         supabase.from('family_members').select('*').eq('family_id', family.id),
         supabase.from('tasks').select('*').eq('family_id', family.id),
@@ -53,6 +57,10 @@ Deno.serve(async (req) => {
         supabase.from('budget_transactions').select('*').eq('family_id', family.id),
         supabase.from('year_events').select('*').eq('family_id', family.id),
         supabase.from('family_vision').select('*').eq('family_id', family.id).maybeSingle(),
+        supabase.from('meal_settings').select('*').eq('family_id', family.id).maybeSingle(),
+        supabase.from('recipes').select('*').eq('family_id', family.id),
+        supabase.from('meal_notes').select('*').eq('family_id', family.id),
+        supabase.from('meal_plans').select('*').eq('family_id', family.id),
       ])
 
       const backup = {
@@ -75,6 +83,10 @@ Deno.serve(async (req) => {
           budgetTransactions: budgetTransactions ?? [],
           yearEvents: yearEvents ?? [],
           familyVision: familyVision ?? null,
+          mealSettings: mealSettings ?? null,
+          recipes: recipes ?? [],
+          mealNotes: mealNotes ?? [],
+          mealPlans: mealPlans ?? [],
         },
       }
 
