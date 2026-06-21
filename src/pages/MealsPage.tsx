@@ -83,7 +83,8 @@ Respond with ONLY valid JSON, no markdown fences, no other text, in exactly this
   "friday": "Meal name",
   "saturday": "Meal name",
   "notes": "1-2 sentences on how leftovers/notes were incorporated and how this fits the nutrition goals",
-  "groceryList": ["2 lbs chicken breast", "1 bag shredded cheddar", "3 limes"]
+  "groceryList": ["2 lbs chicken breast", "1 bag shredded cheddar", "3 limes"],
+  "usedRecipes": ["Exact title of every saved recipe from RECIPES WE LIKE that you used as the base for any meal this week, even if you renamed it in the meal name to mention a leftover (e.g. include \"Taco Soup (crockpot)\" even though the meal is named \"Taco Soup with Smoked Brisket\")"]
 }
 
 Rules:
@@ -91,6 +92,7 @@ Rules:
 - Prioritize using up any noted leftovers within the first few days
 - If a meal incorporates a leftover or ingredient called out in THIS WEEK'S NOTES, say so directly in the meal name itself (e.g. "Taco Soup with Smoked Brisket", not just "Taco Soup"), so it's obvious at a glance without reading the notes
 - Reuse our saved recipes where they fit; you may suggest a few new simple meals if helpful
+- "usedRecipes" must use the exact title spelling from RECIPES WE LIKE, and must list every saved recipe used as a base, even when its meal name was changed to call out a leftover
 - Any dinner recipe that serves 4 or more people should be scheduled for two consecutive nights (e.g. Sunday and Monday both get "Recipe Name"), since the leftovers cover the second night. Only count its ingredients once in the grocery list.
 - Every grocery list item must include a specific measurement or quantity (e.g. "2 lbs ground beef", "1 dozen eggs", "3 bell peppers"), not just the ingredient name
 - Consolidate the grocery list — no duplicate entries for the same ingredient; add up quantities across recipes into a single combined amount (e.g. two recipes each needing 1 onion becomes "2 onions")
@@ -129,10 +131,16 @@ function applyLeftoverNights(content: MealPlanContent, recipes: Recipe[]): MealP
 function parseMealPlanResponse(raw: string, recipes: Recipe[]): { content: MealPlanContent; groceryList: GroceryItem[] } {
   const cleaned = raw.trim().replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/, '')
   const parsed = JSON.parse(cleaned)
+  const usedRecipes: string[] = Array.isArray(parsed.usedRecipes)
+    ? recipes
+        .filter(r => parsed.usedRecipes.some((t: string) => typeof t === 'string' && t.toLowerCase().trim() === r.title.toLowerCase().trim()))
+        .map(r => r.title)
+    : []
+
   let content: MealPlanContent = {
     monday: parsed.monday, tuesday: parsed.tuesday, wednesday: parsed.wednesday,
     thursday: parsed.thursday, friday: parsed.friday, saturday: parsed.saturday,
-    sunday: parsed.sunday, notes: parsed.notes,
+    sunday: parsed.sunday, notes: parsed.notes, usedRecipes,
   }
   content = applyLeftoverNights(content, recipes)
   const groceryList: GroceryItem[] = (parsed.groceryList ?? []).map((item: string) => ({ id: uid(), item, checked: false }))
@@ -368,6 +376,9 @@ export default function MealsPage() {
       if (!val) continue
       const clean = val.startsWith('Leftovers: ') ? val.slice('Leftovers: '.length) : val
       titles.add(clean.toLowerCase().trim())
+    }
+    for (const t of mealPlan.content.usedRecipes ?? []) {
+      titles.add(t.toLowerCase().trim())
     }
     return titles
   }, [mealPlan])

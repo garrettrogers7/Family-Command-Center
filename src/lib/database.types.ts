@@ -254,6 +254,7 @@ export interface MealPlanContent {
   saturday?: string
   sunday?: string
   notes?: string
+  usedRecipes?: string[]
 }
 
 export interface MealPlan {
