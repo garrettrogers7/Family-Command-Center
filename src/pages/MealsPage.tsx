@@ -19,13 +19,13 @@ function uid() {
 }
 
 const DAYS: { key: keyof MealPlanContent; label: string }[] = [
+  { key: 'sunday',    label: 'Sun' },
   { key: 'monday',    label: 'Mon' },
   { key: 'tuesday',   label: 'Tue' },
   { key: 'wednesday', label: 'Wed' },
   { key: 'thursday',  label: 'Thu' },
   { key: 'friday',    label: 'Fri' },
   { key: 'saturday',  label: 'Sat' },
-  { key: 'sunday',    label: 'Sun' },
 ]
 
 async function callClaude(systemPrompt: string, userMessage: string): Promise<string> {
@@ -62,7 +62,7 @@ function buildMealPrompt(nutritionGoals: string, recipes: Recipe[], notes: MealN
     ? notes.map(n => `- ${n.text}`).join('\n')
     : 'Nothing noted.'
 
-  return `Plan dinners for the upcoming week (Monday through Sunday) for our family.
+  return `Plan dinners for the upcoming week (Sunday through Saturday) for our family.
 
 NUTRITION GOALS:
 ${nutritionGoals.trim() || 'No specific goals provided — keep it balanced and reasonably healthy.'}
@@ -75,21 +75,22 @@ ${notesText}
 
 Respond with ONLY valid JSON, no markdown fences, no other text, in exactly this shape:
 {
+  "sunday": "Meal name",
   "monday": "Meal name",
   "tuesday": "Meal name",
   "wednesday": "Meal name",
   "thursday": "Meal name",
   "friday": "Meal name",
   "saturday": "Meal name",
-  "sunday": "Meal name",
   "notes": "1-2 sentences on how leftovers/notes were incorporated and how this fits the nutrition goals",
   "groceryList": ["ingredient 1", "ingredient 2"]
 }
 
 Rules:
+- The week starts on Sunday and ends on Saturday
 - Prioritize using up any noted leftovers within the first few days
 - Reuse our saved recipes where they fit; you may suggest a few new simple meals if helpful
-- Any dinner recipe that serves 4 or more people should be scheduled for two consecutive nights (e.g. Monday and Tuesday both get "Recipe Name"), since the leftovers cover the second night. Only count its ingredients once in the grocery list.
+- Any dinner recipe that serves 4 or more people should be scheduled for two consecutive nights (e.g. Sunday and Monday both get "Recipe Name"), since the leftovers cover the second night. Only count its ingredients once in the grocery list.
 - Consolidate the grocery list — no duplicates, no quantities needed
 - Don't include pantry staples (salt, oil, etc.) unless specifically relevant`
 }
