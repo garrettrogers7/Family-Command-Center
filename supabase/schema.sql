@@ -111,6 +111,7 @@ create table if not exists recipes (
   ingredients  text[] not null default '{}',
   instructions text not null default '',
   tags         text[] not null default '{}',
+  servings     text,
   created_at   timestamptz not null default now()
 );
 

@@ -55,7 +55,7 @@ async function callClaude(systemPrompt: string, userMessage: string): Promise<st
 
 function buildMealPrompt(nutritionGoals: string, recipes: Recipe[], notes: MealNote[]): string {
   const recipesText = recipes.length > 0
-    ? recipes.map(r => `- ${r.title}${r.tags.length ? ` (${r.tags.join(', ')})` : ''}: ${r.ingredients.join(', ')}`).join('\n')
+    ? recipes.map(r => `- ${r.title}${r.tags.length ? ` (${r.tags.join(', ')})` : ''}${r.servings ? ` [serves ${r.servings}]` : ''}: ${r.ingredients.join(', ')}`).join('\n')
     : 'No saved recipes yet — feel free to suggest simple, healthy meals.'
 
   const notesText = notes.length > 0
@@ -166,6 +166,7 @@ interface RecipeFields {
   ingredients: string[]
   instructions: string
   tags: string[]
+  servings: string | null
 }
 
 function RecipeModal({
@@ -180,6 +181,7 @@ function RecipeModal({
   const [ingredientsText, setIngredientsText] = useState(recipe?.ingredients.join('\n') ?? '')
   const [instructions, setInstructions] = useState(recipe?.instructions ?? '')
   const [tagsText, setTagsText] = useState(recipe?.tags.join(', ') ?? '')
+  const [servings, setServings] = useState(recipe?.servings ?? '')
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -189,6 +191,7 @@ function RecipeModal({
       ingredients: ingredientsText.split('\n').map(s => s.trim()).filter(Boolean),
       instructions: instructions.trim(),
       tags: tagsText.split(',').map(s => s.trim()).filter(Boolean),
+      servings: servings.trim() || null,
     })
   }
 
@@ -210,6 +213,15 @@ function RecipeModal({
               value={title}
               onChange={e => setTitle(e.target.value)}
               placeholder="e.g. Honey garlic salmon"
+              className="w-full rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-300"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-slate-600">Servings (optional)</label>
+            <input
+              value={servings}
+              onChange={e => setServings(e.target.value)}
+              placeholder="e.g. 4, or 24 muffins"
               className="w-full rounded-lg border border-blue-100 px-3 py-2 text-sm outline-none focus:border-blue-300"
             />
           </div>
@@ -527,6 +539,9 @@ export default function MealsPage() {
                 <button key={r.id} onClick={() => openEditRecipe(r)}
                   className="text-left rounded-xl border border-blue-100 bg-blue-50/40 px-4 py-3.5 hover:border-blue-200 transition-colors">
                   <p className="font-bold text-sm text-slate-800 mb-1">{r.title}</p>
+                  {r.servings && (
+                    <p className="text-[10px] font-medium text-slate-400 mb-1">Serves {r.servings}</p>
+                  )}
                   {r.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1 mb-1.5">
                       {r.tags.map(t => (

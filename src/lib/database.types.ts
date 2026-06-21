@@ -228,6 +228,7 @@ export interface Recipe {
   ingredients: string[]
   instructions: string
   tags: string[]
+  servings: string | null
   created_at: string
 }
 
