@@ -93,6 +93,7 @@ Rules:
 - If a meal incorporates a leftover or ingredient called out in THIS WEEK'S NOTES, say so directly in the meal name itself (e.g. "Taco Soup with Smoked Brisket", not just "Taco Soup"), so it's obvious at a glance without reading the notes
 - Reuse our saved recipes where they fit; you may suggest a few new simple meals if helpful
 - "usedRecipes" must use the exact title spelling from RECIPES WE LIKE, and must list every saved recipe used as a base, even when its meal name was changed to call out a leftover
+- This includes swapping the protein in a saved recipe for a noted leftover while keeping the same dish format (e.g. if you turn "Beef Tacos" into "Smoked Brisket Tacos" by swapping the protein, list "Beef Tacos" in usedRecipes; same for "Quesadilla" becoming "Smoked Brisket Quesadillas")
 - Any dinner recipe that serves 4 or more people should be scheduled for two consecutive nights (e.g. Sunday and Monday both get "Recipe Name"), since the leftovers cover the second night. Only count its ingredients once in the grocery list.
 - Every grocery list item must include a specific measurement or quantity (e.g. "2 lbs ground beef", "1 dozen eggs", "3 bell peppers"), not just the ingredient name
 - Consolidate the grocery list — no duplicate entries for the same ingredient; add up quantities across recipes into a single combined amount (e.g. two recipes each needing 1 onion becomes "2 onions")
@@ -103,6 +104,28 @@ function parseServingsCount(servings: string | null): number | null {
   if (!servings) return null
   const match = servings.match(/\d+/)
   return match ? parseInt(match[0], 10) : null
+}
+
+// Words that describe a protein/leftover rather than the dish itself — stripped out so
+// "Beef Tacos" and "Smoked Brisket Tacos" reduce to the same dish-identifying word set.
+const PROTEIN_STOPWORDS = new Set([
+  'beef', 'chicken', 'turkey', 'pork', 'brisket', 'smoked', 'pulled', 'shredded', 'ground',
+  'roasted', 'grilled', 'rotisserie', 'sausage', 'ham', 'bacon', 'steak', 'salmon', 'shrimp',
+  'fish', 'tofu', 'lamb', 'leftover', 'leftovers',
+])
+const GENERIC_STOPWORDS = new Set(['with', 'and', 'the', 'a', 'an', 'of', 'for', 'in', 'on', 'our', 'my'])
+
+function dishWords(title: string): Set<string> {
+  const withoutParens = title.replace(/\([^)]*\)/g, ' ')
+  const words = withoutParens.toLowerCase().match(/[a-z]+/g) ?? []
+  const singularized = words.map(w => (w.endsWith('s') && w.length > 3 ? w.slice(0, -1) : w))
+  return new Set(singularized.filter(w => !PROTEIN_STOPWORDS.has(w) && !GENERIC_STOPWORDS.has(w)))
+}
+
+function setsEqual(a: Set<string>, b: Set<string>): boolean {
+  if (a.size === 0 || a.size !== b.size) return false
+  for (const x of a) if (!b.has(x)) return false
+  return true
 }
 
 function applyLeftoverNights(content: MealPlanContent, recipes: Recipe[]): MealPlanContent {
@@ -383,8 +406,22 @@ export default function MealsPage() {
     return titles
   }, [mealPlan])
 
-  const usedRecipes = mealPlan ? recipes.filter(r => usedRecipeTitles.has(r.title.toLowerCase().trim())) : recipes
-  const otherRecipes = mealPlan ? recipes.filter(r => !usedRecipeTitles.has(r.title.toLowerCase().trim())) : []
+  const mealDishWordSets = useMemo(() => {
+    if (!mealPlan) return [] as Set<string>[]
+    return DAYS
+      .map(d => mealPlan.content[d.key])
+      .filter((val): val is string => !!val)
+      .map(val => dishWords(val.startsWith('Leftovers: ') ? val.slice('Leftovers: '.length) : val))
+  }, [mealPlan])
+
+  const isUsedRecipe = (r: Recipe) => {
+    if (usedRecipeTitles.has(r.title.toLowerCase().trim())) return true
+    const recipeWords = dishWords(r.title)
+    return mealDishWordSets.some(mealWords => setsEqual(recipeWords, mealWords))
+  }
+
+  const usedRecipes = mealPlan ? recipes.filter(isUsedRecipe) : recipes
+  const otherRecipes = mealPlan ? recipes.filter(r => !isUsedRecipe(r)) : []
 
   const fetchAll = useCallback(async () => {
     if (!family) return
