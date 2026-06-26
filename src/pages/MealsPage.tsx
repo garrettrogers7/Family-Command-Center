@@ -455,17 +455,25 @@ export default function MealsPage() {
     const titles = new Set<string>()
     if (!mealPlan) return titles
 
-    for (const d of DAYS) {
-      const val = mealPlan.content[d.key]
-      if (!val) continue
-      const mealName = val.startsWith('Leftovers: ') ? val.slice('Leftovers: '.length) : val
+    const mealNames = DAYS
+      .map(d => mealPlan.content[d.key])
+      .filter((val): val is string => !!val)
+      .map(val => val.startsWith('Leftovers: ') ? val.slice('Leftovers: '.length) : val)
+
+    for (const mealName of mealNames) {
       const match = pickBestMatch(mealName, dinnerRecipes)
       if (match) titles.add(match.title.toLowerCase().trim())
     }
+
+    // The AI's self-reported "usedRecipes" list isn't always accurate (it can list a
+    // recipe that isn't actually scheduled any day). Only trust an entry here if it
+    // shares at least one dish word with something the plan actually scheduled.
     for (const t of mealPlan.content.usedRecipes ?? []) {
-      if (dinnerRecipes.some(r => r.title.toLowerCase().trim() === t.toLowerCase().trim())) {
-        titles.add(t.toLowerCase().trim())
-      }
+      const recipe = dinnerRecipes.find(r => r.title.toLowerCase().trim() === t.toLowerCase().trim())
+      if (!recipe) continue
+      const recipeDish = dishWords(recipe.title)
+      const corroborated = mealNames.some(mealName => overlapCount(recipeDish, dishWords(mealName)) > 0)
+      if (corroborated) titles.add(t.toLowerCase().trim())
     }
     return titles
   }, [mealPlan, dinnerRecipes])
