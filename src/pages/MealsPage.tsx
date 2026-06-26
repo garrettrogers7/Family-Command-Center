@@ -128,6 +128,45 @@ function setsEqual(a: Set<string>, b: Set<string>): boolean {
   return true
 }
 
+// Like dishWords, but keeps protein words — used only to break ties between
+// multiple recipes that reduce to the same dish words (e.g. "Chicken & Broccoli"
+// vs "Beef & Broccoli" both reduce to {broccoli}).
+function fullWords(title: string): Set<string> {
+  const withoutParens = title.replace(/\([^)]*\)/g, ' ')
+  const words = withoutParens.toLowerCase().match(/[a-z]+/g) ?? []
+  const singularized = words.map(w => (w.endsWith('s') && w.length > 3 ? w.slice(0, -1) : w))
+  return new Set(singularized.filter(w => !GENERIC_STOPWORDS.has(w)))
+}
+
+function overlapCount(a: Set<string>, b: Set<string>): number {
+  let n = 0
+  for (const x of a) if (b.has(x)) n++
+  return n
+}
+
+// Finds the single closest recipe match for a meal name: exact title match first,
+// then the fuzzy dish-word match with the most overlapping words (so "Chicken &
+// Broccoli" wins over "Beef & Broccoli" when the meal name actually says chicken).
+function pickBestMatch(mealName: string, candidates: Recipe[]): Recipe | null {
+  const normalized = mealName.toLowerCase().trim()
+  const exact = candidates.find(r => r.title.toLowerCase().trim() === normalized)
+  if (exact) return exact
+
+  const mealDish = dishWords(mealName)
+  const fuzzyMatches = candidates.filter(r => setsEqual(dishWords(r.title), mealDish))
+  if (fuzzyMatches.length === 0) return null
+  if (fuzzyMatches.length === 1) return fuzzyMatches[0]
+
+  const mealFull = fullWords(mealName)
+  let best = fuzzyMatches[0]
+  let bestScore = -1
+  for (const r of fuzzyMatches) {
+    const score = overlapCount(fullWords(r.title), mealFull)
+    if (score > bestScore) { bestScore = score; best = r }
+  }
+  return best
+}
+
 function applyLeftoverNights(content: MealPlanContent, recipes: Recipe[]): MealPlanContent {
   const byTitle = new Map(recipes.map(r => [r.title.toLowerCase().trim(), r]))
   const result: MealPlanContent = { ...content }
@@ -391,37 +430,32 @@ export default function MealsPage() {
   const weekStart = useMemo(() => startOfWeek(new Date(), { weekStartsOn: 0 }), [])
   const weekStartStr = format(weekStart, 'yyyy-MM-dd')
 
+  const dinnerRecipes = useMemo(
+    () => recipes.filter(r => r.tags.some(t => t.toLowerCase() === 'dinner')),
+    [recipes]
+  )
+
   const usedRecipeTitles = useMemo(() => {
     const titles = new Set<string>()
     if (!mealPlan) return titles
+
     for (const d of DAYS) {
       const val = mealPlan.content[d.key]
       if (!val) continue
-      const clean = val.startsWith('Leftovers: ') ? val.slice('Leftovers: '.length) : val
-      titles.add(clean.toLowerCase().trim())
+      const mealName = val.startsWith('Leftovers: ') ? val.slice('Leftovers: '.length) : val
+      const match = pickBestMatch(mealName, dinnerRecipes)
+      if (match) titles.add(match.title.toLowerCase().trim())
     }
     for (const t of mealPlan.content.usedRecipes ?? []) {
-      titles.add(t.toLowerCase().trim())
+      if (dinnerRecipes.some(r => r.title.toLowerCase().trim() === t.toLowerCase().trim())) {
+        titles.add(t.toLowerCase().trim())
+      }
     }
     return titles
-  }, [mealPlan])
+  }, [mealPlan, dinnerRecipes])
 
-  const mealDishWordSets = useMemo(() => {
-    if (!mealPlan) return [] as Set<string>[]
-    return DAYS
-      .map(d => mealPlan.content[d.key])
-      .filter((val): val is string => !!val)
-      .map(val => dishWords(val.startsWith('Leftovers: ') ? val.slice('Leftovers: '.length) : val))
-  }, [mealPlan])
-
-  const isUsedRecipe = (r: Recipe) => {
-    if (usedRecipeTitles.has(r.title.toLowerCase().trim())) return true
-    const recipeWords = dishWords(r.title)
-    return mealDishWordSets.some(mealWords => setsEqual(recipeWords, mealWords))
-  }
-
-  const usedRecipes = mealPlan ? recipes.filter(isUsedRecipe) : recipes
-  const otherRecipes = mealPlan ? recipes.filter(r => !isUsedRecipe(r)) : []
+  const usedRecipes = mealPlan ? recipes.filter(r => usedRecipeTitles.has(r.title.toLowerCase().trim())) : recipes
+  const otherRecipes = mealPlan ? recipes.filter(r => !usedRecipeTitles.has(r.title.toLowerCase().trim())) : []
 
   const fetchAll = useCallback(async () => {
     if (!family) return
@@ -502,12 +536,12 @@ export default function MealsPage() {
     setGenerating(true)
     setGenError('')
     try {
-      const prompt = buildMealPrompt(mealSettings?.nutrition_goals ?? '', recipes, notes)
+      const prompt = buildMealPrompt(mealSettings?.nutrition_goals ?? '', dinnerRecipes, notes)
       const raw = await callClaude(
         'You are a precise meal-planning assistant. You always respond with strictly valid JSON and nothing else.',
         prompt
       )
-      const { content, groceryList } = parseMealPlanResponse(raw, recipes)
+      const { content, groceryList } = parseMealPlanResponse(raw, dinnerRecipes)
 
       if (mealPlan) {
         await supabase.from('meal_plans')
