@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { PageHeader } from '@/components/PageHeader'
 import { format, startOfWeek } from 'date-fns'
 import type {
-  MealSettings, Recipe, MealNote, MealPlan, MealPlanContent, GroceryItem,
+  MealSettings, Recipe, MealNote, MealPlan, MealPlanContent, GroceryItem, GroceryCategory,
 } from '@/lib/database.types'
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -17,6 +17,10 @@ import type {
 function uid() {
   return Math.random().toString(36).slice(2)
 }
+
+const GROCERY_CATEGORIES: GroceryCategory[] = [
+  'Produce', 'Meat & Seafood', 'Dairy & Eggs', 'Bakery & Grains', 'Pantry & Spices', 'Frozen', 'Other',
+]
 
 const DAYS: { key: keyof MealPlanContent; label: string }[] = [
   { key: 'sunday',    label: 'Sun' },
@@ -83,7 +87,11 @@ Respond with ONLY valid JSON, no markdown fences, no other text, in exactly this
   "friday": "Meal name",
   "saturday": "Meal name",
   "notes": "1-2 sentences on how leftovers/notes were incorporated and how this fits the nutrition goals",
-  "groceryList": ["2 lbs chicken breast", "1 bag shredded cheddar", "3 limes"],
+  "groceryList": [
+    { "item": "2 lbs chicken breast", "category": "Meat & Seafood" },
+    { "item": "1 bag shredded cheddar", "category": "Dairy & Eggs" },
+    { "item": "3 limes", "category": "Produce" }
+  ],
   "usedRecipes": ["Exact title of every saved recipe from RECIPES WE LIKE that you used as the base for any meal this week, even if you renamed it in the meal name to mention a leftover (e.g. include \"Taco Soup (crockpot)\" even though the meal is named \"Taco Soup with Smoked Brisket\")"]
 }
 
@@ -97,6 +105,7 @@ Rules:
 - Any dinner recipe that serves 4 or more people should be scheduled for two consecutive nights (e.g. Sunday and Monday both get "Recipe Name"), since the leftovers cover the second night. Only count its ingredients once in the grocery list.
 - Every grocery list item must include a specific measurement or quantity (e.g. "2 lbs ground beef", "1 dozen eggs", "3 bell peppers"), not just the ingredient name
 - Consolidate the grocery list — no duplicate entries for the same ingredient; add up quantities across recipes into a single combined amount (e.g. two recipes each needing 1 onion becomes "2 onions")
+- Each grocery item's "category" must be exactly one of: "Produce", "Meat & Seafood", "Dairy & Eggs", "Bakery & Grains", "Pantry & Spices", "Frozen", "Other"
 - Don't include pantry staples (salt, oil, etc.) unless specifically relevant`
 }
 
@@ -205,7 +214,14 @@ function parseMealPlanResponse(raw: string, recipes: Recipe[]): { content: MealP
     sunday: parsed.sunday, notes: parsed.notes, usedRecipes,
   }
   content = applyLeftoverNights(content, recipes)
-  const groceryList: GroceryItem[] = (parsed.groceryList ?? []).map((item: string) => ({ id: uid(), item, checked: false }))
+  const groceryList: GroceryItem[] = (parsed.groceryList ?? []).map((entry: unknown) => {
+    if (typeof entry === 'string') {
+      return { id: uid(), item: entry, checked: false, category: 'Other' as GroceryCategory }
+    }
+    const e = entry as { item?: string; category?: string }
+    const category = GROCERY_CATEGORIES.includes(e.category as GroceryCategory) ? (e.category as GroceryCategory) : 'Other'
+    return { id: uid(), item: e.item ?? '', checked: false, category }
+  })
   return { content, groceryList }
 }
 
@@ -572,7 +588,7 @@ export default function MealsPage() {
 
   async function addGroceryItem(text: string) {
     if (!mealPlan) return
-    const next = [...mealPlan.grocery_list, { id: uid(), item: text, checked: false }]
+    const next = [...mealPlan.grocery_list, { id: uid(), item: text, checked: false, category: 'Other' as GroceryCategory }]
     setMealPlan({ ...mealPlan, grocery_list: next })
     await supabase.from('meal_plans').update({ grocery_list: next }).eq('id', mealPlan.id)
   }
@@ -762,22 +778,33 @@ export default function MealsPage() {
                   <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Grocery List</p>
                 </div>
                 {mealPlan.grocery_list.length > 0 ? (
-                  <ul className="space-y-1.5 columns-1 sm:columns-2 lg:columns-3">
-                    {mealPlan.grocery_list.map(g => (
-                      <li key={g.id} className="flex items-center gap-2 group break-inside-avoid">
-                        <button onClick={() => toggleGroceryItem(g.id)}
-                          className={`flex-shrink-0 flex items-center justify-center rounded border-2 transition-colors ${g.checked ? 'bg-blue-500 border-blue-500' : 'border-blue-100 hover:border-blue-400'}`}
-                          style={{ width: 16, height: 16 }}>
-                          {g.checked && <Check size={10} strokeWidth={3} className="text-slate-900" />}
-                        </button>
-                        <span className={`text-sm flex-1 ${g.checked ? 'line-through text-slate-300' : 'text-slate-700'}`}>{g.item}</span>
-                        <button onClick={() => removeGroceryItem(g.id)}
-                          className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-opacity flex-shrink-0">
-                          <X size={12} />
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="columns-1 sm:columns-2 lg:columns-3 gap-6">
+                    {GROCERY_CATEGORIES.map(category => {
+                      const items = mealPlan.grocery_list.filter(g => (g.category ?? 'Other') === category)
+                      if (items.length === 0) return null
+                      return (
+                        <div key={category} className="mb-4 break-inside-avoid">
+                          <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-blue-700">{category}</p>
+                          <ul className="space-y-1.5">
+                            {items.map(g => (
+                              <li key={g.id} className="flex items-center gap-2 group">
+                                <button onClick={() => toggleGroceryItem(g.id)}
+                                  className={`flex-shrink-0 flex items-center justify-center rounded border-2 transition-colors ${g.checked ? 'bg-blue-500 border-blue-500' : 'border-blue-100 hover:border-blue-400'}`}
+                                  style={{ width: 16, height: 16 }}>
+                                  {g.checked && <Check size={10} strokeWidth={3} className="text-slate-900" />}
+                                </button>
+                                <span className={`text-sm flex-1 ${g.checked ? 'line-through text-slate-300' : 'text-slate-700'}`}>{g.item}</span>
+                                <button onClick={() => removeGroceryItem(g.id)}
+                                  className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-opacity flex-shrink-0">
+                                  <X size={12} />
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )
+                    })}
+                  </div>
                 ) : (
                   <p className="text-sm text-slate-300 italic">No items yet</p>
                 )}

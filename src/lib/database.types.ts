@@ -239,10 +239,20 @@ export interface MealNote {
   created_at: string
 }
 
+export type GroceryCategory =
+  | 'Produce'
+  | 'Meat & Seafood'
+  | 'Dairy & Eggs'
+  | 'Bakery & Grains'
+  | 'Pantry & Spices'
+  | 'Frozen'
+  | 'Other'
+
 export interface GroceryItem {
   id: string
   item: string
   checked: boolean
+  category: GroceryCategory
 }
 
 export interface MealPlanContent {
