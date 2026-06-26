@@ -1,12 +1,22 @@
 // Flat, blue-palette illustrations for the Dashboard section cards.
 // Hand-authored SVG so no external image assets are needed.
 
+import { Telescope, ChefHat, Settings as SettingsIcon } from 'lucide-react'
+
 function Base({ bg, children }: { bg: string; children: React.ReactNode }) {
   return (
     <svg viewBox="0 0 100 100" className="h-16 w-16">
       <circle cx="50" cy="50" r="50" fill={bg} />
       {children}
     </svg>
+  )
+}
+
+function IconBase({ bg, icon: Icon }: { bg: string; icon: React.ComponentType<{ size?: number; color?: string; strokeWidth?: number }> }) {
+  return (
+    <div className="flex h-16 w-16 items-center justify-center rounded-full" style={{ backgroundColor: bg }}>
+      <Icon size={32} color="#1a6db5" strokeWidth={1.75} />
+    </div>
   )
 }
 
@@ -23,26 +33,11 @@ export function WeekIllustration() {
 }
 
 export function YearAheadIllustration() {
-  return (
-    <Base bg="#e3eefb">
-      <line x1="42" y1="62" x2="58" y2="62" stroke="#1a6db5" strokeWidth="3" strokeLinecap="round" />
-      <line x1="50" y1="62" x2="50" y2="50" stroke="#1a6db5" strokeWidth="3" strokeLinecap="round" />
-      <rect x="30" y="32" width="34" height="18" rx="9" fill="#1a6db5" transform="rotate(-18 47 41)" />
-      <circle cx="68" cy="26" r="2" fill="#7aafd4" />
-      <circle cx="74" cy="36" r="1.6" fill="#7aafd4" />
-      <circle cx="63" cy="18" r="1.4" fill="#7aafd4" />
-    </Base>
-  )
+  return <IconBase bg="#e3eefb" icon={Telescope} />
 }
 
 export function MealsIllustration() {
-  return (
-    <Base bg="#e3eefb">
-      <circle cx="50" cy="54" r="20" fill="#ffffff" stroke="#1a6db5" strokeWidth="2" />
-      <ellipse cx="50" cy="54" rx="13" ry="6" fill="#dde8f5" />
-      <path d="M38 30c0 6 4 10 4 16M50 28v18M62 30c0 6-4 10-4 16" stroke="#1a6db5" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-    </Base>
-  )
+  return <IconBase bg="#e3eefb" icon={ChefHat} />
 }
 
 export function HouseholdIllustration() {
@@ -88,19 +83,5 @@ export function VisionIllustration() {
 }
 
 export function SettingsIllustration() {
-  return (
-    <Base bg="#e3eefb">
-      <circle cx="50" cy="50" r="10" fill="#ffffff" stroke="#1a6db5" strokeWidth="2.5" />
-      <g fill="#1a6db5">
-        <rect x="46" y="26" width="8" height="10" rx="2" />
-        <rect x="46" y="64" width="8" height="10" rx="2" />
-        <rect x="26" y="46" width="10" height="8" rx="2" />
-        <rect x="64" y="46" width="10" height="8" rx="2" />
-        <rect x="32" y="32" width="8" height="10" rx="2" transform="rotate(-45 36 37)" />
-        <rect x="60" y="32" width="8" height="10" rx="2" transform="rotate(45 64 37)" />
-        <rect x="32" y="58" width="8" height="10" rx="2" transform="rotate(45 36 63)" />
-        <rect x="60" y="58" width="8" height="10" rx="2" transform="rotate(-45 64 63)" />
-      </g>
-    </Base>
-  )
+  return <IconBase bg="#e3eefb" icon={SettingsIcon} />
 }
