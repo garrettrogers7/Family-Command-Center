@@ -444,11 +444,8 @@ export function AIAssistant() {
     )
   }, [user, family, memberNames, todayStr])
 
-  // Auto-load once, on first mount
   useEffect(() => {
-    loadInsights()
     return () => abortRef.current?.abort()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function sendMessage() {
@@ -521,7 +518,17 @@ export function AIAssistant() {
                   </button>
                 )}
               </div>
-              <InsightBlock text={insightText} loading={insightLoading} />
+              {!insightText && !insightLoading ? (
+                <button
+                  onClick={loadInsights}
+                  className="flex items-center gap-2 rounded-lg border border-dashed border-blue-100 px-4 py-3 text-sm text-slate-400 hover:text-slate-600 hover:border-blue-200 transition-colors w-full justify-center"
+                >
+                  <Sparkles size={13} />
+                  Generate insights
+                </button>
+              ) : (
+                <InsightBlock text={insightText} loading={insightLoading} />
+              )}
             </div>
 
             {messages.length > 0 && (
