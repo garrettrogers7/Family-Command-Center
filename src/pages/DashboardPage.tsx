@@ -9,6 +9,7 @@ import {
 } from 'date-fns'
 import { supabase } from '@/lib/supabase'
 import { useFamily } from '@/contexts/FamilyContext'
+import { AIAssistant } from '@/components/AIAssistant'
 import type { MaintenanceItem, YearEvent } from '@/lib/database.types'
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -173,7 +174,10 @@ export default function DashboardPage() {
         )}
       </div>
 
-      <div className="px-6 py-5 md:px-8">
+      <div className="px-6 py-5 md:px-8 space-y-5">
+        {/* ── AI Assistant ── */}
+        <AIAssistant />
+
         {/* ── Section grid ── */}
         {loading ? (
           <div className="flex flex-col items-center justify-center gap-3 py-20" style={{ color: '#7aafd4' }}>
