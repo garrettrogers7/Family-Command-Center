@@ -4,13 +4,13 @@ import {
   ShieldCheck, ChevronRight,
 } from 'lucide-react'
 import {
-  format, startOfMonth, endOfMonth, subMonths,
+  format, startOfMonth, endOfMonth, subMonths, startOfWeek,
   parseISO, addDays, addWeeks, addMonths, addYears,
 } from 'date-fns'
 import { supabase } from '@/lib/supabase'
 import { useFamily } from '@/contexts/FamilyContext'
 import { AIAssistant } from '@/components/AIAssistant'
-import type { MaintenanceItem, YearEvent } from '@/lib/database.types'
+import type { MaintenanceItem, YearEvent, MealPlan } from '@/lib/database.types'
 
 // ── Helpers ───────────────────────────────────────────────────────
 
@@ -97,6 +97,7 @@ export default function DashboardPage() {
   const [lastMonthSpend, setLastMonthSpend] = useState<number>(0)
   const [activeProjects, setActiveProjects] = useState<number | null>(null)
   const [upcomingEvents, setUpcomingEvents] = useState<YearEvent[]>([])
+  const [mealPlan,       setMealPlan]       = useState<MealPlan | null>(null)
   const [loading,        setLoading]        = useState(true)
 
   useEffect(() => {
@@ -106,6 +107,7 @@ export default function DashboardPage() {
     const me  = format(endOfMonth(today),                 'yyyy-MM-dd')
     const lms = format(startOfMonth(subMonths(today, 1)), 'yyyy-MM-dd')
     const lme = format(endOfMonth(subMonths(today, 1)),   'yyyy-MM-dd')
+    const weekStartStr = format(startOfWeek(today, { weekStartsOn: 0 }), 'yyyy-MM-dd')
 
     Promise.all([
       supabase.from('tasks').select('id').eq('family_id', family.id).eq('module', 'weekly').eq('completed', false),
@@ -114,11 +116,13 @@ export default function DashboardPage() {
       supabase.from('budget_transactions').select('amount').eq('family_id', family.id).gte('date', lms).lte('date', lme),
       supabase.from('projects').select('id').eq('family_id', family.id).in('status', ['planning', 'active']),
       supabase.from('year_events').select('*').eq('family_id', family.id).gte('date', format(today, 'yyyy-MM-dd')).order('date').limit(1),
-    ]).then(([tasks, maint, txns, lastTxns, projects, yearEvts]) => {
+      supabase.from('meal_plans').select('*').eq('family_id', family.id).eq('week_start', weekStartStr).maybeSingle(),
+    ]).then(([tasks, maint, txns, lastTxns, projects, yearEvts, mealPlanRow]) => {
       setWeekTaskCount((tasks.data ?? []).length)
       setMaintenance((maint.data as MaintenanceItem[]) ?? [])
       setActiveProjects((projects.data ?? []).length)
       setUpcomingEvents((yearEvts.data as YearEvent[]) ?? [])
+      setMealPlan((mealPlanRow.data as MealPlan | null) ?? null)
 
       const spend     = ((txns.data     ?? []) as { amount: number }[]).filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0)
       const lastSpend = ((lastTxns.data ?? []) as { amount: number }[]).filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0)
@@ -136,6 +140,8 @@ export default function DashboardPage() {
     if (!due) return false
     return Math.ceil((due.getTime() - today.getTime()) / 86400000) <= 14
   })
+
+  const groceryRemaining = (mealPlan?.grocery_list ?? []).filter(g => !g.checked).length
 
   const spendDelta = lastMonthSpend > 0 && monthSpend !== null
     ? Math.round(((monthSpend - lastMonthSpend) / lastMonthSpend) * 100)
@@ -175,9 +181,6 @@ export default function DashboardPage() {
       </div>
 
       <div className="px-6 py-5 md:px-8 space-y-5">
-        {/* ── AI Assistant ── */}
-        <AIAssistant />
-
         {/* ── Section grid ── */}
         {loading ? (
           <div className="flex flex-col items-center justify-center gap-3 py-20" style={{ color: '#7aafd4' }}>
@@ -245,6 +248,22 @@ export default function DashboardPage() {
               sub={upcomingEvents[0] ? format(parseISO(upcomingEvents[0].date), 'MMM d') : 'next 12 months'}
             />
 
+            {/* Meals */}
+            <SectionCard
+              to="/meals"
+              label="Meals"
+              accentColor="#1a6db5"
+              kpi={
+                !mealPlan
+                  ? 'Plan your week'
+                  : groceryRemaining > 0
+                    ? `${groceryRemaining} to buy`
+                    : <span className="flex items-center gap-2 text-blue-700"><ShieldCheck size={18} strokeWidth={2} />All set</span>
+              }
+              sub={mealPlan ? 'grocery list' : 'no plan yet'}
+              badge={groceryRemaining > 0 ? groceryRemaining : undefined}
+            />
+
             {/* Vision */}
             <SectionCard
               to="/vision"
@@ -265,6 +284,9 @@ export default function DashboardPage() {
 
           </div>
         )}
+
+        {/* ── AI Assistant ── */}
+        <AIAssistant />
 
       </div>
     </div>
