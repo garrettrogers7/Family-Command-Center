@@ -1,7 +1,7 @@
 // Flat, blue-palette illustrations for the Dashboard section cards.
 // Hand-authored SVG so no external image assets are needed.
 
-import { Telescope, ChefHat, Settings as SettingsIcon } from 'lucide-react'
+import { Telescope, ChefHat, Settings as SettingsIcon, PartyPopper } from 'lucide-react'
 
 function Base({ bg, children }: { bg: string; children: React.ReactNode }) {
   return (
@@ -34,6 +34,10 @@ export function WeekIllustration() {
 
 export function YearAheadIllustration() {
   return <IconBase bg="#e3eefb" icon={Telescope} />
+}
+
+export function GoodTimesIllustration() {
+  return <IconBase bg="#e3eefb" icon={PartyPopper} />
 }
 
 export function MealsIllustration() {

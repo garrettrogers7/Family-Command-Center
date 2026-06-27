@@ -9,7 +9,7 @@ const navItems = [
   { to: '/today',     label: 'Dashboard', icon: LayoutDashboard },
   { to: '/week',      label: 'This Week',  icon: CalendarDays },
   { to: '/year',      label: 'Year Ahead', icon: Telescope },
-  { to: '/fun',       label: 'Fun & Upcoming', icon: PartyPopper },
+  { to: '/good-times', label: 'Good Times', icon: PartyPopper },
   { to: '/meals',     label: 'Meals',      icon: ChefHat },
   { to: '/household', label: 'Household',  icon: Home },
   { to: '/budget',    label: 'Spending',  icon: Wallet },

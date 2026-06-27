@@ -274,7 +274,7 @@ function SortableFunRow({
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
-export default function FunPage() {
+export default function GoodTimesPage() {
   const { family } = useFamily()
 
   const [funItems, setFunItems] = useState<FunItem[]>([])
@@ -417,7 +417,7 @@ export default function FunPage() {
 
   return (
     <div>
-      <PageHeader title="Fun & Upcoming" subtitle="Birthdays, vacations, holidays & ideas" />
+      <PageHeader title="Good Times" subtitle="Birthdays, vacations, holidays & ideas" />
 
       <div className="px-4 py-3 md:px-8 md:py-5">
         {loading ? (

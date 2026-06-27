@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { useFamily } from '@/contexts/FamilyContext'
 import { AIAssistant } from '@/components/AIAssistant'
 import {
-  WeekIllustration, YearAheadIllustration, MealsIllustration, HouseholdIllustration,
+  WeekIllustration, YearAheadIllustration, GoodTimesIllustration, MealsIllustration, HouseholdIllustration,
   SpendingIllustration, ProjectsIllustration, VisionIllustration, SettingsIllustration,
 } from '@/components/dashboard-illustrations'
 import { ChevronRight } from 'lucide-react'
@@ -169,6 +169,14 @@ export default function DashboardPage() {
               label="Year Ahead"
               accentColor="#1a6db5"
               image={<YearAheadIllustration />}
+            />
+
+            {/* Good Times */}
+            <SectionCard
+              to="/good-times"
+              label="Good Times"
+              accentColor="#1a6db5"
+              image={<GoodTimesIllustration />}
             />
 
             {/* Meals */}
