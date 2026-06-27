@@ -13,6 +13,7 @@ import BudgetPage from '@/pages/BudgetPage'
 import ProjectsPage from '@/pages/ProjectsPage'
 import ProjectDetailPage from '@/pages/ProjectDetailPage'
 import YearPage from '@/pages/YearPage'
+import FunPage from '@/pages/FunPage'
 import MealsPage from '@/pages/MealsPage'
 import VisionPage from '@/pages/VisionPage'
 import SettingsPage from '@/pages/SettingsPage'
@@ -79,6 +80,7 @@ export default function App() {
         <Route path="today" element={<DashboardPage />} />
         <Route path="week" element={<WeekPage />} />
         <Route path="year" element={<YearPage />} />
+        <Route path="fun" element={<FunPage />} />
         <Route path="meals" element={<MealsPage />} />
         <Route path="household" element={<HouseholdPage />} />
         <Route path="vault" element={<VaultPage />} />
