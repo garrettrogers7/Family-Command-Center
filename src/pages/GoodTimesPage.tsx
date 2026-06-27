@@ -20,7 +20,7 @@ import { useFamily } from '@/contexts/FamilyContext'
 import { PageHeader } from '@/components/PageHeader'
 import type { FunItem, WeeklyPlanContent } from '@/lib/database.types'
 import { format, parseISO } from 'date-fns'
-import { GripVertical, Pencil, Star, Trash2, X } from 'lucide-react'
+import { GripVertical, Pencil, Star, Trash2, X, CalendarDays } from 'lucide-react'
 
 // ── Year Event Picker ─────────────────────────────────────────────────────────
 
@@ -50,9 +50,10 @@ function getNext12Months(): Date[] {
   return months
 }
 
-function YearEventPicker({ item, onSave, onClose }: {
+function MonthSeasonPicker({ item, onSetDate, onToggleYearEvent, onClose }: {
   item: FunItem
-  onSave: (date: string | null, type: 'month' | 'season' | null) => void
+  onSetDate: (date: string | null, type: 'month' | 'season' | null) => void
+  onToggleYearEvent: (flag: boolean) => void
   onClose: () => void
 }) {
   const months = getNext12Months()
@@ -62,7 +63,7 @@ function YearEventPicker({ item, onSave, onClose }: {
       <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl">
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
           <div>
-            <h2 className="text-sm font-semibold text-slate-800">Add to Year Ahead</h2>
+            <h2 className="text-sm font-semibold text-slate-800">Set month or season</h2>
             <p className="text-xs text-slate-400 mt-0.5 truncate max-w-[220px]">{item.text}</p>
           </div>
           <button onClick={onClose} className="text-slate-300 hover:text-slate-500 transition-colors">
@@ -78,11 +79,11 @@ function YearEventPicker({ item, onSave, onClose }: {
               {SEASON_OPTIONS.map(s => {
                 const date = getSeasonDate(s.startMonth)
                 const year = date.slice(0, 4)
-                const isSelected = item.year_event && item.year_event_date === date
+                const isSelected = item.year_event_date === date
                 return (
                   <button
                     key={s.name}
-                    onClick={() => onSave(date, 'season')}
+                    onClick={() => onSetDate(date, 'season')}
                     className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-left transition-colors border ${
                       isSelected
                         ? 'border-blue-400 bg-blue-50 text-blue-700'
@@ -103,11 +104,11 @@ function YearEventPicker({ item, onSave, onClose }: {
             <div className="grid grid-cols-3 gap-1.5">
               {months.map(month => {
                 const date = format(month, 'yyyy-MM') + '-01'
-                const isSelected = item.year_event && item.year_event_date === date
+                const isSelected = item.year_event_date === date
                 return (
                   <button
                     key={date}
-                    onClick={() => onSave(date, 'month')}
+                    onClick={() => onSetDate(date, 'month')}
                     className={`rounded-lg px-2 py-1.5 text-xs font-medium transition-colors border ${
                       isSelected
                         ? 'border-blue-400 bg-blue-50 text-blue-700'
@@ -121,15 +122,38 @@ function YearEventPicker({ item, onSave, onClose }: {
             </div>
           </div>
 
-          {/* Remove option */}
-          {item.year_event && (
+          {/* Remove month/season */}
+          {item.year_event_date && (
             <button
-              onClick={() => onSave(null, null)}
+              onClick={() => onSetDate(null, null)}
               className="text-xs text-slate-300 hover:text-red-500 transition-colors"
             >
-              Remove from Year Ahead
+              Remove month/season
             </button>
           )}
+
+          {/* Year Ahead toggle — independent of the month/season above */}
+          <div className="flex items-center justify-between border-t border-blue-50 pt-4">
+            <div>
+              <p className="text-sm font-medium text-slate-700">Show on Year Ahead</p>
+              <p className="text-xs text-slate-400">
+                {item.year_event_date ? 'Include this on the Year Ahead calendar' : 'Pick a month or season first'}
+              </p>
+            </div>
+            <button
+              onClick={() => onToggleYearEvent(!item.year_event)}
+              disabled={!item.year_event_date}
+              className={`relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
+                item.year_event ? 'bg-blue-600' : 'bg-slate-200'
+              }`}
+            >
+              <span
+                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
+                  item.year_event ? 'translate-x-[18px]' : 'translate-x-[2px]'
+                }`}
+              />
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -230,11 +254,18 @@ function SortableFunRow({
       <div className="flex-1 min-w-0 rounded-lg border border-blue-100 bg-white group">
         <div className="flex items-center gap-3 px-4 py-3">
           <span className="flex-1 text-sm text-slate-700">{item.text}</span>
-          {item.year_event && item.year_event_date && (
-            <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-amber-50 border border-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-600">
-              <Star size={8} fill="currentColor" />
-              {format(parseISO(item.year_event_date), 'MMM yyyy')}
-            </span>
+          {item.year_event_date && (
+            item.year_event ? (
+              <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-amber-50 border border-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-600">
+                <Star size={8} fill="currentColor" />
+                {format(parseISO(item.year_event_date), 'MMM yyyy')}
+              </span>
+            ) : (
+              <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-slate-50 border border-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">
+                <CalendarDays size={8} />
+                {format(parseISO(item.year_event_date), 'MMM yyyy')}
+              </span>
+            )
           )}
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             {confirmDeleteId === item.id ? (
@@ -248,7 +279,7 @@ function SortableFunRow({
                 <button
                   onClick={() => onOpenYearPicker(item)}
                   className={`p-0.5 transition-colors ${item.year_event ? 'text-amber-400 hover:text-amber-500' : 'text-slate-300 hover:text-amber-400'}`}
-                  title={item.year_event ? 'Edit Year Ahead slot' : 'Add to Year Ahead'}
+                  title="Set month/season & Year Ahead"
                 >
                   <Star size={13} fill={item.year_event ? 'currentColor' : 'none'} />
                 </button>
@@ -390,12 +421,27 @@ export default function GoodTimesPage() {
     loadFunItems()
   }
 
-  async function setFunItemYearEvent(item: FunItem, date: string | null, type: 'month' | 'season' | null = 'month') {
-    await supabase.from('fun_items')
-      .update({ year_event: date !== null, year_event_date: date, year_event_type: date !== null ? type : null })
-      .eq('id', item.id)
-    setYearPickerFunItem(null)
-    loadFunItems()
+  // Applies a fun_items update both optimistically (so the open picker modal reflects
+  // it immediately) and to the backing list, without a full refetch round-trip.
+  function applyFunItemFields(id: string, fields: Partial<FunItem>) {
+    setFunItems(items => items.map(fi => fi.id === id ? { ...fi, ...fields } : fi))
+    setYearPickerFunItem(prev => prev && prev.id === id ? { ...prev, ...fields } : prev)
+  }
+
+  async function setFunItemDate(item: FunItem, date: string | null, type: 'month' | 'season' | null) {
+    const fields: Partial<FunItem> = {
+      year_event_date: date,
+      year_event_type: date ? type : null,
+      // Clearing the date also drops it from Year Ahead, since there's nowhere to place it.
+      ...(date === null ? { year_event: false } : {}),
+    }
+    applyFunItemFields(item.id, fields)
+    await supabase.from('fun_items').update(fields).eq('id', item.id)
+  }
+
+  async function setFunItemYearEventFlag(item: FunItem, flag: boolean) {
+    applyFunItemFields(item.id, { year_event: flag })
+    await supabase.from('fun_items').update({ year_event: flag }).eq('id', item.id)
   }
 
   async function handleFunDragEnd(event: DragEndEvent) {
@@ -471,9 +517,10 @@ export default function GoodTimesPage() {
       </div>
 
       {yearPickerFunItem && (
-        <YearEventPicker
+        <MonthSeasonPicker
           item={yearPickerFunItem}
-          onSave={(date, type) => setFunItemYearEvent(yearPickerFunItem, date, type)}
+          onSetDate={(date, type) => setFunItemDate(yearPickerFunItem, date, type)}
+          onToggleYearEvent={(flag) => setFunItemYearEventFlag(yearPickerFunItem, flag)}
           onClose={() => setYearPickerFunItem(null)}
         />
       )}
